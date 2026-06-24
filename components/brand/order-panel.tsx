@@ -28,14 +28,12 @@ export function OrderPanel() {
     <section className="bg-ink px-5 py-10 text-paper md:px-8">
       <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_0.8fr]">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">WeChat Group Order</p>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">配送预订</p>
           <h2 className="mt-5 max-w-3xl text-5xl leading-none md:text-7xl">
-            Coffee first. Cashflow now.
+            简洁的产品预订
           </h2>
           <p className="mt-6 max-w-xl text-sm leading-7 text-paper/70">
-            The order form is intentionally short for WeChat traffic: product, quantity, delivery
-            date, contact, address, payment reservation. All deliveries are made in one fixed
-            morning window with eight preset delivery batches.
+            选择产品、数量、配送日期与时段，完成配送信息填写。早晨配送窗口为固定时段。
           </p>
         </div>
         <form className="grid gap-5 bg-paper p-5 text-ink md:p-6">
@@ -95,10 +93,10 @@ export function OrderPanel() {
             </select>
           </label>
           <div className="grid grid-cols-2 gap-3">
-            <input placeholder="Name" className="h-12 border border-ink/20 bg-paper px-3" />
-            <input placeholder="Phone" className="h-12 border border-ink/20 bg-paper px-3" />
+            <input placeholder="姓名" className="h-12 border border-ink/20 bg-paper px-3" />
+            <input placeholder="电话" className="h-12 border border-ink/20 bg-paper px-3" />
           </div>
-          <input placeholder="Delivery address" className="h-12 border border-ink/20 bg-paper px-3" />
+          <input placeholder="配送地址" className="h-12 border border-ink/20 bg-paper px-3" />
           <div className="border-t border-ink/15 pt-4 font-mono text-sm">
             <p>Order {orderNumber}</p>
             <p className="mt-2">Delivery {deliveryDate ? formatDeliveryDate(deliveryDate) : "Unavailable"}</p>

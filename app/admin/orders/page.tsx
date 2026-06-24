@@ -1,53 +1,113 @@
+import Link from "next/link";
 import { orders as sampleOrders } from "@/lib/data";
 import { runtimeOrders } from "@/lib/order-store";
-import { prisma } from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabase";
 
 type AdminOrder = {
+  id: string;
   number: string;
   customer: string;
-  item: string;
-  total: number;
+  phone: string;
+  address: string;
+  product: string;
+  quantity: number;
+  amount: number;
   status: string;
-  delivery: string;
-  paymentStatus: string;
+  createdAt: string;
+  notes?: string;
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "待付款",
+  RESERVED: "待发货",
+  PAID: "已付款",
+  FULFILLED: "已发货",
+  CANCELLED: "已完成"
 };
 
 async function getOrders() {
-  if (!process.env.DATABASE_URL) {
+  if (!supabaseAdmin) {
     return [
-      ...runtimeOrders,
-      ...sampleOrders.map((order) => ({ ...order, paymentStatus: "Pending" }))
+      ...runtimeOrders.map((order) => ({
+        id: order.number,
+        number: order.number,
+        customer: order.customer,
+        phone: order.phone,
+        address: order.address,
+        product: order.item,
+        quantity: 1,
+        amount: order.total,
+        status: order.status,
+        createdAt: new Date().toISOString(),
+        notes: order.notes
+      })),
+      ...sampleOrders.map((order, index) => ({
+        id: `sample-${index}`,
+        number: order.number,
+        customer: order.customer,
+        phone: "未知",
+        address: order.delivery,
+        product: order.item,
+        quantity: 1,
+        amount: order.total,
+        status: order.status,
+        createdAt: new Date().toISOString(),
+        notes: ""
+      }))
     ] satisfies AdminOrder[];
   }
 
   try {
-    const dbOrders = await prisma.order.findMany({
-      include: {
-        customer: true,
-        items: {
-          include: {
-            product: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: "desc"
-      }
-    });
+    const { data, error } = await supabaseAdmin
+      .from("orders")
+      .select("id, order_number, customer_name, phone, address, product_name, quantity, amount, status, created_at, notes")
+      .order("created_at", { ascending: false });
 
-    return dbOrders.map((order) => ({
-      number: order.orderNumber,
-      customer: order.customer.name,
-      item: order.items.map((item) => item.product.name).join(", ") || "CADENCE order",
-      total: Number(order.total),
-      status: order.status,
-      delivery: order.deliverySlot ?? "Made to order",
-      paymentStatus: order.paymentStatus === "PAID" ? "Paid" : "Pending"
+    if (error || !data) {
+      throw error ?? new Error("读取订单失败");
+    }
+
+    return data.map((order) => ({
+      id: order.id,
+      number: order.order_number,
+      customer: order.customer_name,
+      phone: order.phone,
+      address: order.address,
+      product: order.product_name,
+      quantity: order.quantity,
+      amount: Number(order.amount),
+      status: STATUS_LABELS[order.status] ?? order.status,
+      createdAt: order.created_at ? new Date(order.created_at).toISOString() : new Date().toISOString(),
+      notes: order.notes ?? ""
     })) satisfies AdminOrder[];
   } catch {
     return [
-      ...runtimeOrders,
-      ...sampleOrders.map((order) => ({ ...order, paymentStatus: "Pending" }))
+      ...runtimeOrders.map((order) => ({
+        id: order.number,
+        number: order.number,
+        customer: order.customer,
+        phone: order.phone,
+        address: order.address,
+        product: order.item,
+        quantity: 1,
+        amount: order.total,
+        status: order.status,
+        createdAt: new Date().toISOString(),
+        notes: order.notes
+      })),
+      ...sampleOrders.map((order, index) => ({
+        id: `sample-${index}`,
+        number: order.number,
+        customer: order.customer,
+        phone: "未知",
+        address: order.delivery,
+        product: order.item,
+        quantity: 1,
+        amount: order.total,
+        status: order.status,
+        createdAt: new Date().toISOString(),
+        notes: ""
+      }))
     ] satisfies AdminOrder[];
   }
 }
@@ -59,28 +119,33 @@ export default async function OrdersPage() {
     <main className="min-h-screen bg-paper px-5 py-12 text-ink md:px-8">
       <section className="mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Admin / Orders</p>
-        <h1 className="mt-6 text-5xl leading-none md:text-7xl">Orders</h1>
+        <h1 className="mt-6 text-5xl leading-none md:text-7xl">订单管理</h1>
         <div className="mt-10 overflow-hidden border border-ink/15">
-          <div className="grid grid-cols-[1.2fr_1fr_1.2fr_0.7fr_0.8fr_0.9fr] border-b border-ink/15 bg-bone px-4 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">
-            <span>Order</span>
-            <span>Customer</span>
-            <span>Item</span>
-            <span>Total</span>
-            <span>Status</span>
-            <span>Payment</span>
+          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/15 bg-bone px-4 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">
+            <span>订单号</span>
+            <span>姓名</span>
+            <span>电话</span>
+            <span>地址</span>
+            <span>商品</span>
+            <span>数量</span>
+            <span>金额</span>
+            <span>状态</span>
           </div>
           {orders.map((order) => (
-            <div
-              key={order.number}
-              className="grid grid-cols-[1.2fr_1fr_1.2fr_0.7fr_0.8fr_0.9fr] border-b border-ink/10 px-4 py-4 text-sm last:border-b-0"
+            <Link
+              key={order.id}
+              href={`/admin/orders/${order.id}`}
+              className="grid grid-cols-[1.2fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/10 px-4 py-4 text-sm text-left hover:bg-bone"
             >
               <span className="font-mono">{order.number}</span>
               <span>{order.customer}</span>
-              <span>{order.item}</span>
-              <span>RMB {order.total}</span>
+              <span>{order.phone}</span>
+              <span>{order.address}</span>
+              <span>{order.product}</span>
+              <span>{order.quantity}</span>
+              <span>RMB {order.amount}</span>
               <span>{order.status}</span>
-              <span>{order.paymentStatus}</span>
-            </div>
+            </Link>
           ))}
         </div>
       </section>

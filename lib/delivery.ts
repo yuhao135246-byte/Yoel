@@ -1,4 +1,20 @@
-export const DELIVERY_WINDOW = "07:30 - 11:00";
+export const DELIVERY_WINDOW = "07:00 - 12:00";
+export const AREA_DAILY_CAPACITY = 5;
+export const GLOBAL_DAILY_CAPACITY = 15;
+
+export const DELIVERY_AREA_SLOTS = {
+  "惠济区": "07:00-08:30",
+  "郑东新区": "08:30-10:30",
+  "金水区": "10:30-12:00"
+} as const;
+
+export type DeliveryArea = keyof typeof DELIVERY_AREA_SLOTS;
+
+export const DELIVERY_AREAS = Object.entries(DELIVERY_AREA_SLOTS).map(([area, slot]) => ({
+  area: area as DeliveryArea,
+  slot
+}));
+
 export const DELIVERY_SLOTS = [
   "07:30",
   "08:00",
@@ -44,4 +60,12 @@ export function formatDeliveryDate(value: string) {
     month: "short",
     day: "numeric"
   }).format(new Date(`${value}T00:00:00`));
+}
+
+export function isDeliveryArea(value: string): value is DeliveryArea {
+  return value in DELIVERY_AREA_SLOTS;
+}
+
+export function getDeliverySlotForArea(area: DeliveryArea) {
+  return DELIVERY_AREA_SLOTS[area];
 }

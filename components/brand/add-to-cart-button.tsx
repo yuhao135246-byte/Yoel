@@ -40,7 +40,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       onClick={addToCart}
       className="h-12 border border-ink px-5 text-sm uppercase tracking-[0.18em]"
     >
-      Add to cart
+      加入购物车
     </button>
   );
 }

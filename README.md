@@ -12,7 +12,6 @@ CADENCE is a design studio and lifestyle brand, not a coffee shop. The MVP is or
 - Next.js 15
 - TypeScript
 - Tailwind CSS
-- Prisma
 - Supabase Postgres
 - Vercel
 
@@ -64,7 +63,6 @@ Material intent:
 ```bash
 npm install
 cp .env.example .env
-npm run db:generate
 npm run dev
 ```
 
@@ -73,13 +71,8 @@ Open `http://localhost:3000`.
 ## Supabase Setup
 
 1. Create a Supabase project.
-2. Copy the Postgres connection string into `DATABASE_URL` and `DIRECT_URL`.
-3. Copy Supabase client values into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-4. Push the schema:
-
-```bash
-npm run db:push
-```
+2. Copy Supabase client values into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Ensure `SUPABASE_SERVICE_ROLE_KEY` is set for server-side writes.
 
 ## WeChat Pay
 

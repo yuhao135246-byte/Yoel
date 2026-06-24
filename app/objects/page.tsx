@@ -9,11 +9,10 @@ export default function ObjectsPage() {
     <main className="bg-paper text-ink">
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[0.85fr_1.15fr] md:px-8 md:py-16">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Layer 03 / High AOV</p>
-          <h1 className="mt-6 text-6xl leading-none md:text-8xl">Unit Series.</h1>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">UNIT 系列</p>
+          <h1 className="mt-6 text-6xl leading-none md:text-8xl">UNIT 系列</h1>
           <p className="mt-8 max-w-md text-sm leading-7 text-graphite">
-            Parametric objects for studios and interiors. Unit01 pairs a frosted amber resin upper
-            body with a white terrazzo printed lower body.
+            以参数化表达为基底，呈现可订制的工艺对象与练习性家具。
           </p>
         </div>
         <Image

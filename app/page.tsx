@@ -5,26 +5,25 @@ import { ProductCard } from "@/components/brand/product-card";
 import { products } from "@/lib/data";
 
 export default function HomePage() {
-  const coffee = products.find((product) => product.slug === "stitch-cold-brew")!;
-  const unit = products.find((product) => product.slug === "lamp-unit-series")!;
+  const coffee = products.find((product) => product.slug === "stitch-cold-brew");
+  const unit = products.find((product) => product.category === "OBJECT");
 
   return (
     <main className="bg-paper text-ink">
       <section className="mx-auto grid min-h-[78vh] max-w-7xl content-between px-5 py-12 md:px-8 md:py-16">
         <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Design studio / Lifestyle brand</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">冷萃研究 / 菜单</p>
             <h1 className="mt-8 max-w-5xl text-6xl leading-none md:text-8xl">
-              Weekly coffee. Parametric objects. Quiet studies.
+              每周冷萃与季节饮品
             </h1>
           </div>
           <p className="max-w-md text-sm leading-7 text-graphite">
-            CADENCE serves WeChat private traffic first: coffee orders for cashflow, Weekly Drop
-            for repeat purchase, Unit Series for high-value design objects, Journal for brand memory.
+            以冷萃为核心，记录不同产地、处理法与发酵实验带来的风味变化。
           </p>
         </div>
         <div className="mt-14 grid gap-4 border-t border-ink/15 pt-5 md:grid-cols-4">
-          {["01 Coffee cashflow", "02 Weekly Drop retention", "03 Unit Series AOV", "04 Journal brand"].map(
+          {["冷萃系列", "季节饮品", "UNIT 系列", "研究日志"].map(
             (item) => (
               <p key={item} className="font-mono text-xs uppercase tracking-[0.16em] text-graphite">
                 {item}
@@ -36,25 +35,25 @@ export default function HomePage() {
       <section className="border-y border-ink/10 bg-ink px-5 py-12 text-paper md:px-8">
         <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.7fr] md:items-end">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">Weekly Drop</p>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">本周菜单</p>
             <h2 className="mt-5 max-w-3xl text-5xl leading-none md:text-7xl">
-              本周冰滴开放预订
+              冷萃与季节饮品
             </h2>
           </div>
           <div className="grid gap-5">
-            <p className="font-mono text-3xl">18 / 30</p>
+            <p className="font-mono text-3xl">精选四款</p>
             <p className="text-sm leading-7 text-paper/70">
-              Remaining weekly cold brew capacity for the current WeChat private drop.
+              以冷萃与季节饮品为载体，呈现当周风味与实验性组合。
             </p>
             <div className="bg-paper text-ink">
-              <AddToCartButton product={coffee} />
+              {coffee ? <AddToCartButton product={coffee} /> : null}
             </div>
           </div>
         </div>
       </section>
       <section className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-2 md:px-8">
-        <ProductCard product={coffee} priority />
-        <ProductCard product={unit} />
+        {coffee ? <ProductCard product={coffee} priority /> : null}
+        {unit ? <ProductCard product={unit} /> : null}
       </section>
       <OrderPanel />
       <section className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-14 md:flex-row md:px-8">

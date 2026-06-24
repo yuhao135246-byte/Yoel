@@ -5,10 +5,10 @@ export default function JournalPage() {
   return (
     <main className="bg-paper text-ink">
       <section className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Layer 04 / Brand</p>
-        <h1 className="mt-6 max-w-4xl text-6xl leading-none md:text-8xl">Studies, not content.</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">研究项目</p>
+        <h1 className="mt-6 max-w-4xl text-6xl leading-none md:text-8xl">研究日志</h1>
         <p className="mt-8 max-w-2xl text-sm leading-7 text-graphite">
-          Coffee Studies, Object Studies, and Tokyo Notes document the thinking behind CADENCE.
+          冷萃实验、物件观察与风味记录。
         </p>
       </section>
       <section className="mx-auto grid max-w-7xl gap-8 px-5 pb-16 md:grid-cols-[0.9fr_1.1fr] md:px-8">

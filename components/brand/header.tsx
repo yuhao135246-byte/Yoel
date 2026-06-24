@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const nav = [
   ["本周冷萃", "/coffee"],
-  ["Unit系列", "/objects"],
+  ["UNIT 系列", "/objects"],
   ["研究日志", "/journal"],
   ["关于", "/about"]
 ];
@@ -23,7 +23,7 @@ export function Header() {
         </Link>
         <nav className="flex items-center gap-4 text-[11px] uppercase tracking-[0.18em] text-graphite md:gap-7">
           {nav.map(([label, href]) => (
-            <Link key={href} href={href} className="hover:text-ink">
+            <Link key={href + label} href={href} className="hover:text-ink">
               {label}
             </Link>
           ))}

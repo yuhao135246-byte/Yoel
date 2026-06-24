@@ -24,6 +24,11 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <p className="font-mono text-sm">RMB {product.price}</p>
         </div>
         <p className="text-sm leading-7 text-graphite">{product.description}</p>
+        <div className="grid gap-1 text-sm text-graphite">
+          {product.details.map((detail) => (
+            <p key={detail}>• {detail}</p>
+          ))}
+        </div>
         <p className="text-xs uppercase tracking-[0.18em] text-graphite">{product.availability}</p>
       </div>
     </article>

@@ -7,27 +7,23 @@ export function Footer() {
         <div>
           <p className="text-4xl italic">Cadence</p>
           <p className="mt-5 max-w-md text-sm leading-7 text-paper/70">
-            A design studio and lifestyle brand. Weekly coffee first, member retention second,
-            Unit objects third, journal as brand memory.
+            冷萃研究与味觉记录。关注产地、处理法、发酵与冷萃萃取之间的关系。
           </p>
         </div>
         <div className="text-sm leading-8 text-paper/70">
           <Link href="/coffee" className="block text-paper">
-            Weekly Drop
-          </Link>
-          <Link href="/objects" className="block">
-            Unit Series
+            本周菜单
           </Link>
           <Link href="/journal" className="block">
-            Studies
+            研究日志
+          </Link>
+          <Link href="/about" className="block">
+            关于
           </Link>
         </div>
         <div className="text-sm leading-8 text-paper/70">
-          <Link href="/admin" className="block text-paper">
-            Admin
-          </Link>
-          <p>WeChat private traffic ordering</p>
-          <p>Shanghai delivery windows</p>
+          <p>微信支付 / 支付宝</p>
+          <p>上海 | 早晨配送</p>
         </div>
       </div>
     </footer>

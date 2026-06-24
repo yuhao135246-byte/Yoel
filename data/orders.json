@@ -1,0 +1,94 @@
+[
+  {
+    "orderNumber": "CD-20260624-9710",
+    "createdAt": "2026-06-24T08:58:11.135Z",
+    "items": [
+      {
+        "slug": "stitch-cold-brew",
+        "name": "Stitch 冷萃冰滴",
+        "price": 55,
+        "quantity": 1
+      }
+    ],
+    "name": "客户",
+    "phone": "",
+    "address": "",
+    "total": 55
+  },
+  {
+    "orderNumber": "CD-20260624-5495",
+    "createdAt": "2026-06-24T08:48:22.594Z",
+    "items": [
+      {
+        "slug": "tanat-ombligon",
+        "name": "TANAT Ombligon 冰手冲",
+        "price": 43,
+        "quantity": 1
+      }
+    ],
+    "name": "客户",
+    "phone": "",
+    "address": "",
+    "total": 43
+  },
+  {
+    "orderNumber": "CD-20260624-1390",
+    "createdAt": "2026-06-24T08:46:45.630Z",
+    "items": [
+      {
+        "slug": "fruit-lemon-tea",
+        "name": "季节水果柠檬茶",
+        "price": 18,
+        "quantity": 1
+      }
+    ],
+    "name": "客户",
+    "phone": "",
+    "address": "",
+    "total": 18
+  },
+  {
+    "orderNumber": "CD-20260624-5584",
+    "createdAt": "2026-06-24T08:46:37.009Z",
+    "items": [
+      {
+        "slug": "stitch-cold-brew",
+        "name": "Stitch 冷萃冰滴",
+        "price": 55,
+        "quantity": 1
+      }
+    ],
+    "name": "客户",
+    "phone": "",
+    "address": "",
+    "total": 55
+  },
+  {
+    "orderNumber": "CD-20260624-5438",
+    "createdAt": "2026-06-24T08:45:45.137Z",
+    "items": [
+      {
+        "slug": "tanat-ombligon",
+        "name": "TANAT Ombligon 冰手冲",
+        "price": 43,
+        "quantity": 1
+      },
+      {
+        "slug": "tanat-peach",
+        "name": "TANAT 桃子联合发酵冷萃",
+        "price": 55,
+        "quantity": 1
+      },
+      {
+        "slug": "stitch-cold-brew",
+        "name": "Stitch 冷萃冰滴",
+        "price": 55,
+        "quantity": 1
+      }
+    ],
+    "name": "客户",
+    "phone": "",
+    "address": "",
+    "total": 153
+  }
+]
