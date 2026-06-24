@@ -1,0 +1,7 @@
+{
+  "/checkout/page": "app/checkout/page.js",
+  "/objects/page": "app/objects/page.js",
+  "/page": "app/page.js",
+  "/coffee/page": "app/coffee/page.js",
+  "/order-confirmation/page": "app/order-confirmation/page.js"
+}
