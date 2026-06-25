@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export function Footer() {
@@ -5,7 +6,14 @@ export function Footer() {
     <footer className="border-t border-ink/10 bg-ink text-paper">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[1.5fr_1fr_1fr] md:px-8">
         <div>
-          <p className="text-4xl italic">Cadence</p>
+          <Image
+            src="/assets/cadence-logo2.png"
+            alt="Cadence"
+            width={2399}
+            height={1095}
+            style={{ width: "170px", height: "auto" }}
+            priority
+          />
           <p className="mt-5 max-w-md text-sm leading-7 text-paper/70">
             冷萃研究与味觉记录。关注产地、处理法、发酵与冷萃萃取之间的关系。
           </p>
@@ -23,7 +31,7 @@ export function Footer() {
         </div>
         <div className="text-sm leading-8 text-paper/70">
           <p>微信支付 / 支付宝</p>
-          <p>上海 | 早晨配送</p>
+          <p>郑州 | 早晨配送</p>
         </div>
       </div>
     </footer>
