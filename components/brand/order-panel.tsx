@@ -66,18 +66,18 @@ export function OrderPanel() {
   }, []);
 
   return (
-    <section className="bg-ink px-5 py-10 text-paper md:px-8">
-      <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-[1fr_0.8fr]">
+    <section className="bg-ink px-4 py-8 text-paper md:px-8 md:py-10">
+      <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.8fr] md:gap-10">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">配送预订</p>
-          <h2 className="mt-5 max-w-3xl text-5xl leading-none md:text-7xl">
+          <h2 className="mt-3 max-w-3xl text-5xl leading-none md:mt-5 md:text-7xl">
             简洁的产品预订
           </h2>
-          <p className="mt-6 max-w-xl text-sm leading-7 text-paper/70">
+          <p className="mt-4 max-w-xl text-base leading-7 text-paper/70 md:mt-6">
             选择产品、数量、配送日期与时段，完成配送信息填写。早晨配送窗口为固定时段。
           </p>
         </div>
-        <form className="grid gap-5 bg-paper p-5 text-ink md:p-6">
+        <form className="grid gap-4 bg-paper p-4 text-ink md:gap-5 md:p-6">
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
             Product
             <select
@@ -116,7 +116,7 @@ export function OrderPanel() {
               ))}
             </select>
           </label>
-          <div className="border border-ink/15 px-3 py-3 font-mono text-xs uppercase tracking-[0.14em] text-graphite">
+          <div className="border border-ink/15 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-graphite">
             Morning delivery window: {DELIVERY_WINDOW}
           </div>
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
@@ -138,11 +138,11 @@ export function OrderPanel() {
             <input placeholder="电话" className="h-12 border border-ink/20 bg-paper px-3" />
           </div>
           <input placeholder="配送地址" className="h-12 border border-ink/20 bg-paper px-3" />
-          <div className="border-t border-ink/15 pt-4 font-mono text-sm">
+          <div className="border-t border-ink/15 pt-3 font-mono text-sm">
             <p>Order {orderNumber}</p>
             <p className="mt-2">Delivery {deliveryDate ? formatDeliveryDate(deliveryDate) : "Unavailable"}</p>
             <p className="mt-1">Slot {deliverySlot} / Window {DELIVERY_WINDOW}</p>
-            <p className="mt-2 text-2xl">RMB {total}</p>
+            <p className="mt-2 text-xl md:text-2xl">RMB {total}</p>
           </div>
           <button type="button" className="h-12 bg-ink text-sm uppercase tracking-[0.18em] text-paper">
             Reserve WeChat Pay

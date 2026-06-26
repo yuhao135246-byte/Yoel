@@ -36,14 +36,14 @@ export default async function CoffeePage() {
 
   return (
     <main className="bg-paper text-ink">
-      <section className="mx-auto max-w-7xl px-5 py-12 md:px-8 md:py-16">
+      <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-16">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">本周菜单</p>
-        <h1 className="mt-6 max-w-4xl text-6xl leading-none md:text-8xl">本周菜单</h1>
-        <p className="mt-8 max-w-2xl text-sm leading-7 text-graphite">
+        <h1 className="mt-4 max-w-4xl text-6xl leading-none md:mt-6 md:text-8xl">本周菜单</h1>
+        <p className="mt-4 max-w-2xl text-base leading-7 text-graphite md:mt-8">
           以冷萃为核心，记录不同产地、处理法与发酵实验带来的风味变化。
         </p>
       </section>
-      <section className="mx-auto grid max-w-7xl gap-8 px-5 pb-14 md:grid-cols-2 md:px-8">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-10 md:grid-cols-2 md:px-8 md:pb-14">
         {coffee.map((product, index) => (
           <div key={product.slug} className="grid gap-5">
             <ProductCard

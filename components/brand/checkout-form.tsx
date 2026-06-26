@@ -187,19 +187,19 @@ export function CheckoutForm() {
   }
 
   return (
-    <section className="mx-auto grid max-w-7xl gap-10 px-5 py-12 md:grid-cols-[0.8fr_1fr] md:px-8">
+    <section className="mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[0.8fr_1fr] md:px-8 md:py-12">
       <div>
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">结算</p>
-        <h1 className="mt-6 text-5xl leading-none md:text-7xl">早晨配送</h1>
-        <p className="mt-6 max-w-md text-sm leading-7 text-graphite">
+        <h1 className="mt-4 text-5xl leading-none md:mt-6 md:text-7xl">早晨配送</h1>
+        <p className="mt-4 max-w-md text-base leading-7 text-graphite md:mt-6">
           请填写姓名、电话、地址和备注，确认购物车后提交订单。
         </p>
         {availability?.message ? (
           <p className="mt-4 text-sm text-red-600">{availability.message}</p>
         ) : null}
       </div>
-      <form className="grid gap-5 border border-ink/15 p-5" onSubmit={submitOrder}>
-        <div className="grid grid-cols-2 gap-3">
+      <form className="grid gap-4 border border-ink/15 p-4 md:gap-5 md:p-5" onSubmit={submitOrder}>
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <input
             aria-label="姓名"
             placeholder="姓名"
@@ -273,11 +273,11 @@ export function CheckoutForm() {
           onChange={(event) => setNotes(event.target.value)}
           className="min-h-24 border border-ink/20 bg-paper px-3 py-3"
         />
-        <div className="border-t border-ink/15 pt-4 font-mono text-sm">
+        <div className="border-t border-ink/15 pt-3 font-mono text-sm">
           {items.map((item) => (
-            <p key={item.slug}>{item.name} x {item.quantity}</p>
+            <p key={item.slug} className="leading-6">{item.name} x {item.quantity}</p>
           ))}
-          <div className="mt-3 grid gap-2 text-sm text-graphite">
+          <div className="mt-2 grid gap-2 text-sm text-graphite">
             <p className="flex items-center justify-between">
               <span>商品金额</span>
               <span className="font-mono text-ink">RMB {subtotal}</span>
@@ -287,7 +287,7 @@ export function CheckoutForm() {
               <span className="font-mono text-ink">RMB {deliveryFee}</span>
             </p>
           </div>
-          <p className="mt-3 flex items-center justify-between text-2xl text-ink">
+          <p className="mt-3 flex items-center justify-between text-xl text-ink md:text-2xl">
             <span>订单总额</span>
             <span>RMB {total}</span>
           </p>

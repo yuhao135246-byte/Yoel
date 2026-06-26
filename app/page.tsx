@@ -38,19 +38,19 @@ export default async function HomePage() {
 
   return (
     <main className="bg-paper text-ink">
-      <section className="mx-auto grid min-h-[78vh] max-w-7xl content-between px-5 py-12 md:px-8 md:py-16">
-        <div className="grid gap-10 md:grid-cols-[1.1fr_0.9fr] md:items-end">
+      <section className="mx-auto grid min-h-[64vh] max-w-7xl content-between px-4 py-8 md:px-8 md:py-16">
+        <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-end md:gap-10">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">冷萃研究 / 菜单</p>
-            <h1 className="mt-8 max-w-5xl text-6xl leading-none md:text-8xl">
+            <h1 className="mt-4 max-w-5xl text-6xl leading-none md:mt-8 md:text-8xl">
               每周冷萃与季节饮品
             </h1>
           </div>
-          <p className="max-w-md text-sm leading-7 text-graphite">
+          <p className="max-w-md text-base leading-7 text-graphite">
             以冷萃为核心，记录不同产地、处理法与发酵实验带来的风味变化。
           </p>
         </div>
-        <div className="mt-14 grid gap-4 border-t border-ink/15 pt-5 md:grid-cols-4">
+        <div className="mt-8 grid gap-3 border-t border-ink/15 pt-4 md:mt-14 md:grid-cols-4 md:gap-4 md:pt-5">
           {["冷萃系列", "季节饮品", "UNIT 系列", "研究日志"].map(
             (item) => (
               <p key={item} className="font-mono text-xs uppercase tracking-[0.16em] text-graphite">
@@ -60,17 +60,17 @@ export default async function HomePage() {
           )}
         </div>
       </section>
-      <section className="border-y border-ink/10 bg-ink px-5 py-12 text-paper md:px-8">
-        <div className="mx-auto grid max-w-7xl gap-8 md:grid-cols-[1fr_0.7fr] md:items-end">
+      <section className="border-y border-ink/10 bg-ink px-4 py-8 text-paper md:px-8 md:py-12">
+        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-[1fr_0.7fr] md:items-end md:gap-8">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-paper/55">本周菜单</p>
-            <h2 className="mt-5 max-w-3xl text-5xl leading-none md:text-7xl">
+            <h2 className="mt-3 max-w-3xl text-5xl leading-none md:mt-5 md:text-7xl">
               冷萃与季节饮品
             </h2>
           </div>
-          <div className="grid gap-5">
-            <p className="font-mono text-3xl">精选四款</p>
-            <p className="text-sm leading-7 text-paper/70">
+          <div className="grid gap-4">
+            <p className="font-mono text-2xl md:text-3xl">精选四款</p>
+            <p className="text-base leading-7 text-paper/70">
               以冷萃与季节饮品为载体，呈现当周风味与实验性组合。
             </p>
             <div className="bg-paper text-ink">
@@ -85,16 +85,16 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <section className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-2 md:px-8">
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:grid-cols-2 md:px-8 md:py-12">
         {coffee ? <ProductCard product={coffee} priority remainingStock={stock.map.get(coffee.slug)} /> : null}
         {unit ? <ProductCard product={unit} /> : null}
       </section>
       <OrderPanel />
-      <section className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-14 md:flex-row md:px-8">
-        <Link href="/coffee" className="border border-ink px-5 py-4 text-sm uppercase tracking-[0.18em]">
+      <section className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 md:flex-row md:px-8 md:py-14">
+        <Link href="/coffee" className="border border-ink px-4 py-3 text-sm uppercase tracking-[0.18em] md:px-5 md:py-4">
           Order Coffee
         </Link>
-        <Link href="/objects" className="border border-ink/20 px-5 py-4 text-sm uppercase tracking-[0.18em]">
+        <Link href="/objects" className="border border-ink/20 px-4 py-3 text-sm uppercase tracking-[0.18em] md:px-5 md:py-4">
           View Unit Series
         </Link>
       </section>
