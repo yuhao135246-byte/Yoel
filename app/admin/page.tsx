@@ -13,7 +13,8 @@ const links = [
   ["Orders", "/admin/orders"],
   ["Customers", "/admin/customers"],
   ["Products", "/admin/products"],
-  ["Delivery", "/admin/delivery"]
+  ["Delivery", "/admin/delivery"],
+  ["Inventory", "/admin/inventory"]
 ];
 
 export default function AdminPage() {
@@ -30,7 +31,7 @@ export default function AdminPage() {
             </div>
           ))}
         </div>
-        <div className="mt-10 grid gap-3 md:grid-cols-4">
+        <div className="mt-10 grid gap-3 md:grid-cols-5">
           {links.map(([label, href]) => (
             <Link key={href} href={href} className="border border-ink px-5 py-4 text-sm uppercase tracking-[0.18em]">
               {label}

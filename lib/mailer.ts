@@ -30,6 +30,7 @@ export async function sendOrderNotification(details: {
   address: string;
   notes?: string;
   items: { name: string; quantity: number; price: number }[];
+  deliveryDate?: string;
   deliveryArea?: string;
   deliverySlot?: string;
   subtotal: number;
@@ -55,6 +56,7 @@ export async function sendOrderNotification(details: {
     <p>姓名：${details.name}</p>
     <p>手机号：${details.phone}</p>
     <p>地址：${details.address}</p>
+    <p>配送日期：${details.deliveryDate ?? "未填写"}</p>
     <p>配送区域：${details.deliveryArea ?? "未填写"}</p>
     <p>预计配送时间：${details.deliverySlot ?? "未填写"}</p>
     <p>备注：${details.notes ?? "无"}</p>
@@ -69,7 +71,7 @@ export async function sendOrderNotification(details: {
     from: fromAddress,
     to: recipient,
     subject: `新订单 ${details.orderNumber}`,
-    text: `新订单 ${details.orderNumber}\n姓名：${details.name}\n手机号：${details.phone}\n地址：${details.address}\n配送区域：${details.deliveryArea ?? "未填写"}\n预计配送时间：${details.deliverySlot ?? "未填写"}\n备注：${details.notes ?? "无"}\n商品金额：RMB ${details.subtotal}\n配送费：RMB ${details.deliveryFee}\n订单总额：RMB ${details.total}\n商品：${details.items
+    text: `新订单 ${details.orderNumber}\n姓名：${details.name}\n手机号：${details.phone}\n地址：${details.address}\n配送日期：${details.deliveryDate ?? "未填写"}\n配送区域：${details.deliveryArea ?? "未填写"}\n预计配送时间：${details.deliverySlot ?? "未填写"}\n备注：${details.notes ?? "无"}\n商品金额：RMB ${details.subtotal}\n配送费：RMB ${details.deliveryFee}\n订单总额：RMB ${details.total}\n商品：${details.items
       .map((item) => `${item.name} x ${item.quantity} - RMB ${item.price * item.quantity}`)
       .join("; ")}`,
     html

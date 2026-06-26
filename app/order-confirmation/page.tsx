@@ -6,6 +6,7 @@ export default async function OrderConfirmationPage({
 }: {
   searchParams: Promise<{
     orderNumber?: string;
+    deliveryDate?: string;
     deliveryArea?: string;
     deliverySlot?: string;
     subtotal?: string;
@@ -14,6 +15,7 @@ export default async function OrderConfirmationPage({
   }>;
 }) {
   const params = await searchParams;
+  const deliveryDate = params.deliveryDate;
   const deliveryArea = params.deliveryArea;
   const deliverySlot = params.deliverySlot;
   const subtotal = Number(params.subtotal ?? "0");
@@ -37,6 +39,12 @@ export default async function OrderConfirmationPage({
               <div className="flex items-center justify-between">
                 <span>配送区域</span>
                 <span className="font-mono">{deliveryArea}</span>
+              </div>
+            ) : null}
+            {deliveryDate ? (
+              <div className="flex items-center justify-between">
+                <span>配送日期</span>
+                <span className="font-mono">{deliveryDate}</span>
               </div>
             ) : null}
             {deliverySlot ? (

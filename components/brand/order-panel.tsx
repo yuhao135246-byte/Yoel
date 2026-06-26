@@ -1,21 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { products } from "@/lib/data";
 import {
+  buildRollingDeliveryDateOptions,
   DELIVERY_SLOTS,
   DELIVERY_WINDOW,
   formatDeliveryDate,
-  getAvailableDeliveryDates
+  getDefaultDeliveryDate
 } from "@/lib/delivery";
 import { createOrderNumber } from "@/lib/order-number";
 
+type DeliveryDateOption = {
+  date: string;
+  label: string;
+  isToday: boolean;
+  isAvailable: boolean;
+};
+
 export function OrderPanel() {
   const coffee = products.filter((product) => product.category === "COFFEE");
-  const availableDates = getAvailableDeliveryDates();
+  const [dateOptions, setDateOptions] = useState<DeliveryDateOption[]>(
+    buildRollingDeliveryDateOptions({ isTodayAvailable: true })
+  );
   const [selectedSlug, setSelectedSlug] = useState(coffee[0].slug);
   const [quantity, setQuantity] = useState(1);
-  const [deliveryDate, setDeliveryDate] = useState(availableDates[0]?.date ?? "");
+  const [deliveryDate, setDeliveryDate] = useState(getDefaultDeliveryDate());
   const [deliverySlot, setDeliverySlot] = useState(DELIVERY_SLOTS[0]);
   const selected = coffee.find((product) => product.slug === selectedSlug) ?? coffee[0];
   const total = useMemo(() => selected.price * quantity, [quantity, selected.price]);
@@ -23,6 +33,37 @@ export function OrderPanel() {
     () => createOrderNumber(),
     [selectedSlug, quantity, deliveryDate, deliverySlot]
   );
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadDateOptions() {
+      try {
+        const response = await fetch("/api/order", { cache: "no-store" });
+        const result = await response.json();
+
+        if (!response.ok || !active) {
+          return;
+        }
+
+        if (Array.isArray(result.dateOptions)) {
+          setDateOptions(result.dateOptions as DeliveryDateOption[]);
+        }
+
+        if (typeof result.defaultDeliveryDate === "string") {
+          setDeliveryDate(result.defaultDeliveryDate);
+        }
+      } catch {
+        // Keep fallback rolling dates when the API is unavailable.
+      }
+    }
+
+    void loadDateOptions();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <section className="bg-ink px-5 py-10 text-paper md:px-8">
@@ -68,9 +109,9 @@ export function OrderPanel() {
               onChange={(event) => setDeliveryDate(event.target.value)}
               className="h-12 border border-ink/20 bg-paper px-3 text-base normal-case tracking-normal"
             >
-              {availableDates.map((date) => (
-                <option key={date.date} value={date.date}>
-                  {formatDeliveryDate(date.date)}
+              {dateOptions.map((option) => (
+                <option key={option.date} value={option.date} disabled={!option.isAvailable}>
+                  {option.label}
                 </option>
               ))}
             </select>

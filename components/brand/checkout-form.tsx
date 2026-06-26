@@ -23,6 +23,13 @@ type CartItem = {
 type DeliveryAvailability = {
   date: string;
   isFull: boolean;
+  defaultDeliveryDate: string;
+  dateOptions: {
+    date: string;
+    label: string;
+    isToday: boolean;
+    isAvailable: boolean;
+  }[];
   message?: string;
   areas: {
     area: DeliveryArea;
@@ -41,6 +48,7 @@ export function CheckoutForm() {
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [deliveryDate, setDeliveryDate] = useState("");
   const [deliveryArea, setDeliveryArea] = useState<DeliveryArea | "">("");
   const [availability, setAvailability] = useState<DeliveryAvailability | null>(null);
   const [isLoadingAvailability, setLoadingAvailability] = useState(true);
@@ -54,10 +62,11 @@ export function CheckoutForm() {
   useEffect(() => {
     let isActive = true;
 
-    async function loadAvailability() {
+    async function loadAvailability(date?: string) {
       try {
         setLoadingAvailability(true);
-        const response = await fetch("/api/order", { cache: "no-store" });
+        const query = date ? `?deliveryDate=${encodeURIComponent(date)}` : "";
+        const response = await fetch(`/api/order${query}`, { cache: "no-store" });
         const result = await response.json();
 
         if (!response.ok) {
@@ -69,6 +78,7 @@ export function CheckoutForm() {
         }
 
         setAvailability(result);
+        setDeliveryDate(result.date);
         const firstAvailableArea = result.areas.find((area: DeliveryAvailability["areas"][number]) => area.isAvailable)?.area ?? "";
         setDeliveryArea(firstAvailableArea);
       } catch (fetchError) {
@@ -91,6 +101,33 @@ export function CheckoutForm() {
     };
   }, []);
 
+  async function handleDeliveryDateChange(nextDate: string) {
+    setDeliveryDate(nextDate);
+
+    try {
+      setLoadingAvailability(true);
+      setError("");
+      const response = await fetch(`/api/order?deliveryDate=${encodeURIComponent(nextDate)}`, {
+        cache: "no-store"
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "读取配送容量失败");
+      }
+
+      setAvailability(result);
+      if (!result.areas.some((area: DeliveryAvailability["areas"][number]) => area.area === deliveryArea && area.isAvailable)) {
+        const firstAvailableArea = result.areas.find((area: DeliveryAvailability["areas"][number]) => area.isAvailable)?.area ?? "";
+        setDeliveryArea(firstAvailableArea);
+      }
+    } catch (fetchError) {
+      setError(fetchError instanceof Error ? fetchError.message : "读取配送容量失败");
+    } finally {
+      setLoadingAvailability(false);
+    }
+  }
+
   const subtotal = useMemo(
     () => calculateSubtotal(items),
     [items]
@@ -111,6 +148,11 @@ export function CheckoutForm() {
       return;
     }
 
+    if (!deliveryDate) {
+      setError("请选择配送日期。");
+      return;
+    }
+
     setSubmitting(true);
     setError("");
 
@@ -122,6 +164,7 @@ export function CheckoutForm() {
         phone,
         address,
         notes,
+        deliveryDate,
         deliveryArea,
         items,
         subtotal,
@@ -139,7 +182,7 @@ export function CheckoutForm() {
 
     window.localStorage.removeItem("cadence-cart");
     router.push(
-      `/order-confirmation?orderNumber=${encodeURIComponent(result.orderNumber)}&deliveryArea=${encodeURIComponent(result.deliveryArea ?? deliveryArea)}&deliverySlot=${encodeURIComponent(result.deliverySlot ?? selectedSlot)}&subtotal=${encodeURIComponent(String(result.subtotal ?? subtotal))}&deliveryFee=${encodeURIComponent(String(result.deliveryFee ?? deliveryFee))}&total=${encodeURIComponent(String(result.total ?? total))}`
+      `/order-confirmation?orderNumber=${encodeURIComponent(result.orderNumber)}&deliveryDate=${encodeURIComponent(result.deliveryDate ?? deliveryDate)}&deliveryArea=${encodeURIComponent(result.deliveryArea ?? deliveryArea)}&deliverySlot=${encodeURIComponent(result.deliverySlot ?? selectedSlot)}&subtotal=${encodeURIComponent(String(result.subtotal ?? subtotal))}&deliveryFee=${encodeURIComponent(String(result.deliveryFee ?? deliveryFee))}&total=${encodeURIComponent(String(result.total ?? total))}`
     );
   }
 
@@ -180,12 +223,31 @@ export function CheckoutForm() {
           className="h-12 border border-ink/20 bg-paper px-3"
         />
         <div className="grid gap-2">
+          <label className="text-xs uppercase tracking-[0.16em] text-graphite">配送日期</label>
+          <select
+            aria-label="配送日期"
+            value={deliveryDate}
+            onChange={(event) => {
+              void handleDeliveryDateChange(event.target.value);
+            }}
+            disabled={isLoadingAvailability}
+            className="h-12 border border-ink/20 bg-paper px-3"
+          >
+            <option value="">请选择配送日期</option>
+            {(availability?.dateOptions ?? []).map((option) => (
+              <option key={option.date} value={option.date} disabled={!option.isAvailable}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="grid gap-2">
           <label className="text-xs uppercase tracking-[0.16em] text-graphite">配送区域</label>
           <select
             aria-label="配送区域"
             value={deliveryArea}
             onChange={(event) => setDeliveryArea(event.target.value as DeliveryArea | "")}
-            disabled={isLoadingAvailability || availability?.isFull}
+            disabled={isLoadingAvailability || availability?.isFull || !deliveryDate}
             className="h-12 border border-ink/20 bg-paper px-3"
           >
             <option value="">请选择配送区域</option>
@@ -199,7 +261,7 @@ export function CheckoutForm() {
           {fullAreas.length > 0 ? (
             <div className="grid gap-1 text-sm text-graphite">
               {fullAreas.map((area) => (
-                <p key={area.area}>{area.area}：该区域今日配送已满</p>
+                <p key={area.area}>{area.area}：该区域该日期配送已满</p>
               ))}
             </div>
           ) : null}
@@ -233,7 +295,14 @@ export function CheckoutForm() {
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
         <button
           data-testid="submit-order"
-          disabled={isSubmitting || items.length === 0 || isLoadingAvailability || availability?.isFull || !deliveryArea}
+          disabled={
+            isSubmitting ||
+            items.length === 0 ||
+            isLoadingAvailability ||
+            availability?.isFull ||
+            !deliveryDate ||
+            !deliveryArea
+          }
           className="h-12 bg-ink text-sm uppercase tracking-[0.18em] text-paper disabled:opacity-40"
         >
           {isSubmitting ? "提交中" : "提交订单"}

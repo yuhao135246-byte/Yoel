@@ -2,7 +2,20 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Product } from "@/lib/data";
 
-export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+type ProductCardProps = {
+  product: Product;
+  priority?: boolean;
+  remainingStock?: number;
+};
+
+export function ProductCard({ product, priority = false, remainingStock }: ProductCardProps) {
+  const stockLabel =
+    typeof remainingStock === "number"
+      ? remainingStock <= 0
+        ? "Sold Out"
+        : `Only ${remainingStock} Left`
+      : null;
+
   return (
     <article className="grid gap-5 border-t border-ink/15 pt-5">
       <Link href={product.category === "COFFEE" ? "/coffee" : "/objects"} className="block overflow-hidden bg-bone">
@@ -30,6 +43,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           ))}
         </div>
         <p className="text-xs uppercase tracking-[0.18em] text-graphite">{product.availability}</p>
+        {stockLabel ? <p className="font-mono text-xs uppercase tracking-[0.16em] text-warm">{stockLabel}</p> : null}
       </div>
     </article>
   );

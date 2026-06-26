@@ -2,9 +2,37 @@ import { AddToCartButton } from "@/components/brand/add-to-cart-button";
 import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
 import { products } from "@/lib/data";
+import { ensureInventoryForNextDays, getDefaultInventoryDeliveryDate, getInventoryByDate } from "@/lib/inventory";
+import { supabaseAdmin } from "@/lib/supabase";
 
-export default function CoffeePage() {
+async function loadStockMap() {
+  const deliveryDate = getDefaultInventoryDeliveryDate();
+
+  if (!supabaseAdmin) {
+    return {
+      deliveryDate,
+      map: new Map<string, number>()
+    };
+  }
+
+  try {
+    await ensureInventoryForNextDays(supabaseAdmin, 7);
+    const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
+    return {
+      deliveryDate,
+      map: new Map(records.map((item) => [item.productId, item.remainingStock]))
+    };
+  } catch {
+    return {
+      deliveryDate,
+      map: new Map<string, number>()
+    };
+  }
+}
+
+export default async function CoffeePage() {
   const coffee = products.filter((product) => product.category === "COFFEE");
+  const stock = await loadStockMap();
 
   return (
     <main className="bg-paper text-ink">
@@ -18,8 +46,16 @@ export default function CoffeePage() {
       <section className="mx-auto grid max-w-7xl gap-8 px-5 pb-14 md:grid-cols-2 md:px-8">
         {coffee.map((product, index) => (
           <div key={product.slug} className="grid gap-5">
-            <ProductCard product={product} priority={index === 0} />
-            <AddToCartButton product={product} />
+            <ProductCard
+              product={product}
+              priority={index === 0}
+              remainingStock={stock.map.get(product.slug)}
+            />
+            <AddToCartButton
+              product={product}
+              remainingStock={stock.map.get(product.slug)}
+              deliveryDate={stock.deliveryDate}
+            />
           </div>
         ))}
       </section>

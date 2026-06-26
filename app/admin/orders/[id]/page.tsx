@@ -25,15 +25,41 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const { data: order, error } = await supabaseAdmin
+  const { data: richOrder, error: richError } = await supabaseAdmin
     .from("orders")
     .select(
-      "id, order_number, customer_name, phone, address, notes, status, product_name, quantity, amount, items, created_at"
+      "id, order_number, customer_name, phone, address, notes, status, product_name, quantity, amount, items, created_at, delivery_date, delivery_area, delivery_slot"
     )
     .eq("id", resolvedParams.id)
     .single();
 
-  if (error || !order) {
+  let order = richOrder;
+
+  if (richError || !richOrder) {
+    const message = richError?.message?.toLowerCase() ?? "";
+    if (!message.includes("delivery_date")) {
+      notFound();
+    }
+
+    const { data: legacyOrder, error: legacyError } = await supabaseAdmin
+      .from("orders")
+      .select("id, order_number, customer_name, phone, address, notes, status, product_name, quantity, amount, items, created_at")
+      .eq("id", resolvedParams.id)
+      .single();
+
+    if (legacyError || !legacyOrder) {
+      notFound();
+    }
+
+    order = {
+      ...legacyOrder,
+      delivery_date: null,
+      delivery_area: null,
+      delivery_slot: null
+    };
+  }
+
+  if (!order) {
     notFound();
   }
 
@@ -66,6 +92,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <p>地址：{order.address}</p>
               <p>备注：{order.notes ?? "无"}</p>
               <p>创建时间：{formatDate(order.created_at)}</p>
+              <p>配送日期：{order.delivery_date ?? "未填写"}</p>
+              <p>配送区域：{order.delivery_area ?? "未填写"}</p>
+              <p>预计配送时间：{order.delivery_slot ?? "未填写"}</p>
               <p>状态：{STATUS_LABELS[order.status] ?? order.status}</p>
             </div>
 

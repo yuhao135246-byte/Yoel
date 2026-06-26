@@ -3,9 +3,12 @@ import { orders as sampleOrders } from "@/lib/data";
 import { runtimeOrders } from "@/lib/order-store";
 import { supabaseAdmin } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+
 type AdminOrder = {
   id: string;
   number: string;
+  deliveryDate?: string;
   customer: string;
   phone: string;
   address: string;
@@ -31,6 +34,7 @@ async function getOrders() {
       ...runtimeOrders.map((order) => ({
         id: order.number,
         number: order.number,
+        deliveryDate: undefined,
         customer: order.customer,
         phone: order.phone,
         address: order.address,
@@ -44,6 +48,7 @@ async function getOrders() {
       ...sampleOrders.map((order, index) => ({
         id: `sample-${index}`,
         number: order.number,
+        deliveryDate: undefined,
         customer: order.customer,
         phone: "未知",
         address: order.delivery,
@@ -60,16 +65,44 @@ async function getOrders() {
   try {
     const { data, error } = await supabaseAdmin
       .from("orders")
-      .select("id, order_number, customer_name, phone, address, product_name, quantity, amount, status, created_at, notes")
+      .select("id, order_number, delivery_date, customer_name, phone, address, product_name, quantity, amount, status, created_at, notes")
       .order("created_at", { ascending: false });
 
-    if (error || !data) {
+    if (!error && data) {
+      return data.map((order) => ({
+        id: order.id,
+        number: order.order_number,
+        deliveryDate: order.delivery_date ?? undefined,
+        customer: order.customer_name,
+        phone: order.phone,
+        address: order.address,
+        product: order.product_name,
+        quantity: order.quantity,
+        amount: Number(order.amount),
+        status: STATUS_LABELS[order.status] ?? order.status,
+        createdAt: order.created_at ? new Date(order.created_at).toISOString() : new Date().toISOString(),
+        notes: order.notes ?? ""
+      })) satisfies AdminOrder[];
+    }
+
+    const legacyMessage = error?.message?.toLowerCase() ?? "";
+    if (!legacyMessage.includes("delivery_date")) {
       throw error ?? new Error("读取订单失败");
     }
 
-    return data.map((order) => ({
+    const legacyResult = await supabaseAdmin
+      .from("orders")
+      .select("id, order_number, customer_name, phone, address, product_name, quantity, amount, status, created_at, notes")
+      .order("created_at", { ascending: false });
+
+    if (legacyResult.error || !legacyResult.data) {
+      throw legacyResult.error ?? new Error("读取订单失败");
+    }
+
+    return legacyResult.data.map((order) => ({
       id: order.id,
       number: order.order_number,
+      deliveryDate: undefined,
       customer: order.customer_name,
       phone: order.phone,
       address: order.address,
@@ -85,6 +118,7 @@ async function getOrders() {
       ...runtimeOrders.map((order) => ({
         id: order.number,
         number: order.number,
+        deliveryDate: undefined,
         customer: order.customer,
         phone: order.phone,
         address: order.address,
@@ -98,6 +132,7 @@ async function getOrders() {
       ...sampleOrders.map((order, index) => ({
         id: `sample-${index}`,
         number: order.number,
+        deliveryDate: undefined,
         customer: order.customer,
         phone: "未知",
         address: order.delivery,
@@ -121,8 +156,9 @@ export default async function OrdersPage() {
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Admin / Orders</p>
         <h1 className="mt-6 text-5xl leading-none md:text-7xl">订单管理</h1>
         <div className="mt-10 overflow-hidden border border-ink/15">
-          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/15 bg-bone px-4 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">
+          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/15 bg-bone px-4 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">
             <span>订单号</span>
+            <span>配送日期</span>
             <span>姓名</span>
             <span>电话</span>
             <span>地址</span>
@@ -135,9 +171,10 @@ export default async function OrdersPage() {
             <Link
               key={order.id}
               href={`/admin/orders/${order.id}`}
-              className="grid grid-cols-[1.2fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/10 px-4 py-4 text-sm text-left hover:bg-bone"
+              className="grid grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/10 px-4 py-4 text-sm text-left hover:bg-bone"
             >
               <span className="font-mono">{order.number}</span>
+              <span className="font-mono">{order.deliveryDate ?? "-"}</span>
               <span>{order.customer}</span>
               <span>{order.phone}</span>
               <span>{order.address}</span>

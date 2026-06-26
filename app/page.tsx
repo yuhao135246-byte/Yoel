@@ -3,10 +3,38 @@ import { AddToCartButton } from "@/components/brand/add-to-cart-button";
 import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
 import { products } from "@/lib/data";
+import { ensureInventoryForNextDays, getDefaultInventoryDeliveryDate, getInventoryByDate } from "@/lib/inventory";
+import { supabaseAdmin } from "@/lib/supabase";
 
-export default function HomePage() {
+async function loadStockMap() {
+  const deliveryDate = getDefaultInventoryDeliveryDate();
+
+  if (!supabaseAdmin) {
+    return {
+      deliveryDate,
+      map: new Map<string, number>()
+    };
+  }
+
+  try {
+    await ensureInventoryForNextDays(supabaseAdmin, 7);
+    const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
+    return {
+      deliveryDate,
+      map: new Map(records.map((item) => [item.productId, item.remainingStock]))
+    };
+  } catch {
+    return {
+      deliveryDate,
+      map: new Map<string, number>()
+    };
+  }
+}
+
+export default async function HomePage() {
   const coffee = products.find((product) => product.slug === "stitch-cold-brew");
   const unit = products.find((product) => product.category === "OBJECT");
+  const stock = await loadStockMap();
 
   return (
     <main className="bg-paper text-ink">
@@ -46,13 +74,19 @@ export default function HomePage() {
               以冷萃与季节饮品为载体，呈现当周风味与实验性组合。
             </p>
             <div className="bg-paper text-ink">
-              {coffee ? <AddToCartButton product={coffee} /> : null}
+              {coffee ? (
+                <AddToCartButton
+                  product={coffee}
+                  remainingStock={stock.map.get(coffee.slug)}
+                  deliveryDate={stock.deliveryDate}
+                />
+              ) : null}
             </div>
           </div>
         </div>
       </section>
       <section className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-2 md:px-8">
-        {coffee ? <ProductCard product={coffee} priority /> : null}
+        {coffee ? <ProductCard product={coffee} priority remainingStock={stock.map.get(coffee.slug)} /> : null}
         {unit ? <ProductCard product={unit} /> : null}
       </section>
       <OrderPanel />

@@ -17,10 +17,48 @@ type CartItem = {
 
 export function CartView() {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [remainingStockMap, setRemainingStockMap] = useState<Record<string, number>>({});
+  const [stockError, setStockError] = useState("");
 
   useEffect(() => {
     const raw = window.localStorage.getItem("cadence-cart");
     setItems(raw ? JSON.parse(raw) : []);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadStock() {
+      try {
+        const response = await fetch("/api/inventory", { cache: "no-store" });
+        const result = await response.json();
+
+        if (!response.ok) {
+          return;
+        }
+
+        if (!active || !Array.isArray(result.records)) {
+          return;
+        }
+
+        const stockMap = Object.fromEntries(
+          result.records.map((record: { productId: string; remainingStock: number }) => [
+            record.productId,
+            Number(record.remainingStock ?? 0)
+          ])
+        );
+
+        setRemainingStockMap(stockMap);
+      } catch {
+        // Ignore stock load failure in cart; server-side validation still runs at checkout.
+      }
+    }
+
+    void loadStock();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   function persistItems(nextItems: CartItem[]) {
@@ -48,6 +86,15 @@ export function CartView() {
   }
 
   function increaseQuantity(slug: string) {
+    const current = items.find((item) => item.slug === slug);
+    const remaining = remainingStockMap[slug];
+
+    if (current && Number.isFinite(remaining) && current.quantity + 1 > remaining) {
+      setStockError(`库存不足\n当前剩余：${remaining}`);
+      return;
+    }
+
+    setStockError("");
     const nextItems = items.map((item) =>
       item.slug === slug
         ? {
@@ -116,6 +163,7 @@ export function CartView() {
           ))
         )}
       </div>
+      {stockError ? <p className="mt-3 text-sm text-red-600 whitespace-pre-line">{stockError}</p> : null}
       <div className="mt-8 grid gap-3 border-t border-ink/15 pt-5 text-sm">
         <div className="flex items-center justify-between">
           <span>商品金额</span>

@@ -35,6 +35,19 @@ export type DeliveryDate = {
   status: DeliveryStatus;
 };
 
+export type DeliveryCapacitySnapshot = {
+  capacity: number;
+  booked: number;
+  isClosed?: boolean;
+};
+
+export type DeliveryDateOption = {
+  date: string;
+  label: string;
+  isToday: boolean;
+  isAvailable: boolean;
+};
+
 export const deliveryDates: DeliveryDate[] = [
   { date: "2026-06-24", capacity: 18, booked: 11, status: "AVAILABLE" },
   { date: "2026-06-25", capacity: 18, booked: 18, status: "FULL" },
@@ -52,6 +65,58 @@ export function getDeliveryStatus(date: DeliveryDate): DeliveryStatus {
 
 export function getAvailableDeliveryDates() {
   return deliveryDates.filter((date) => getDeliveryStatus(date) === "AVAILABLE");
+}
+
+export function canBookToday(snapshot: DeliveryCapacitySnapshot) {
+  if (snapshot.isClosed || snapshot.capacity <= 0) {
+    return false;
+  }
+
+  return snapshot.booked < snapshot.capacity;
+}
+
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+export function toDateKey(value: Date) {
+  return `${value.getFullYear()}-${pad2(value.getMonth() + 1)}-${pad2(value.getDate())}`;
+}
+
+export function addDays(base: Date, days: number) {
+  const next = new Date(base);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+export function getDefaultDeliveryDate(today = new Date()) {
+  return toDateKey(addDays(today, 1));
+}
+
+export function buildRollingDeliveryDateOptions(config: {
+  today?: Date;
+  days?: number;
+  isTodayAvailable: boolean;
+}) {
+  const today = config.today ?? new Date();
+  const days = config.days ?? 3;
+  const options: DeliveryDateOption[] = [];
+
+  for (let offset = 0; offset < days; offset += 1) {
+    const date = addDays(today, offset);
+    const dateKey = toDateKey(date);
+    const isToday = offset === 0;
+    const prefix = isToday ? "今天" : offset === 1 ? "明天" : offset === 2 ? "后天" : `${offset}天后`;
+
+    options.push({
+      date: dateKey,
+      label: `${prefix}（${dateKey}）`,
+      isToday,
+      isAvailable: isToday ? config.isTodayAvailable : true
+    });
+  }
+
+  return options;
 }
 
 export function formatDeliveryDate(value: string) {

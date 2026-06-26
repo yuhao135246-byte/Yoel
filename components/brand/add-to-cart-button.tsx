@@ -10,13 +10,32 @@ type CartItem = {
   quantity: number;
 };
 
-export function AddToCartButton({ product }: { product: Product }) {
+type AddToCartButtonProps = {
+  product: Product;
+  remainingStock?: number;
+  deliveryDate?: string;
+};
+
+export function AddToCartButton({ product, remainingStock, deliveryDate }: AddToCartButtonProps) {
   const router = useRouter();
+  const isSoldOut = typeof remainingStock === "number" && remainingStock <= 0;
 
   function addToCart() {
+    if (isSoldOut) {
+      return;
+    }
+
     const raw = window.localStorage.getItem("cadence-cart");
     const items: CartItem[] = raw ? JSON.parse(raw) : [];
     const existing = items.find((item) => item.slug === product.slug);
+
+    if (typeof remainingStock === "number") {
+      const nextQuantity = (existing?.quantity ?? 0) + 1;
+      if (nextQuantity > remainingStock) {
+        window.alert(`库存不足\n当前剩余：${remainingStock}`);
+        return;
+      }
+    }
 
     if (existing) {
       existing.quantity += 1;
@@ -38,9 +57,11 @@ export function AddToCartButton({ product }: { product: Product }) {
       type="button"
       data-testid={`add-to-cart-${product.slug}`}
       onClick={addToCart}
-      className="h-12 border border-ink px-5 text-sm uppercase tracking-[0.18em]"
+      disabled={isSoldOut}
+      className="h-12 border border-ink px-5 text-sm uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-50"
+      title={deliveryDate ? `配送日期 ${deliveryDate}` : undefined}
     >
-      加入购物车
+      {isSoldOut ? "Sold Out" : "加入购物车"}
     </button>
   );
 }
