@@ -292,31 +292,6 @@ async function insertOrder(record: InsertOrderRecord) {
     .single();
 }
 
-function hasMissingDeliveryDateColumn(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  const maybeError = error as { message?: string };
-  const message = maybeError.message?.toLowerCase() ?? "";
-  return message.includes("delivery_date");
-}
-
-function hasMissingInventorySchema(error: unknown) {
-  if (!error || typeof error !== "object") {
-    return false;
-  }
-
-  const maybeError = error as { message?: string };
-  const message = maybeError.message?.toLowerCase() ?? "";
-
-  return (
-    message.includes("inventory") ||
-    message.includes("reserve_inventory_items") ||
-    message.includes("set_inventory_total_stock")
-  );
-}
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const selectedDate = url.searchParams.get("deliveryDate") ?? undefined;
@@ -393,9 +368,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log("Step 1 ensureInventory");
     await ensureInventoryForNextDays(supabaseAdmin, 7);
+    console.log("Step 1 OK");
 
+    console.log("Step 2 getInventory");
     const inventoryForDate = await getInventoryByDate(supabaseAdmin, deliveryDate);
+    console.log("Step 2 OK");
     const inventoryMap = new Map(inventoryForDate.map((item) => [item.productId, item]));
     const requestedItems = aggregateOrderItems(items);
 
@@ -413,7 +392,9 @@ export async function POST(request: Request) {
       }
     }
 
+    console.log("Step 3 getDeliveryAvailability");
     const availability = await getDeliveryAvailability(deliveryDate);
+    console.log("Step 3 OK");
     if (availability.isFull) {
       return new Response(JSON.stringify({ error: availability.message }), { status: 409 });
     }
@@ -423,10 +404,13 @@ export async function POST(request: Request) {
       return new Response(JSON.stringify({ error: areaStatus?.message ?? "该区域该日期配送已满" }), { status: 409 });
     }
 
+    console.log("Step 4 createOrderNumber");
     const orderNumber = await createOrderNumber();
+    console.log("Step 4 OK");
     const productName = buildProductSummary(items);
     const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
+    console.log("Step 5 insertOrder");
     const { data: order, error } = await insertOrder({
       order_number: orderNumber,
       customer_name: name,
@@ -448,15 +432,20 @@ export async function POST(request: Request) {
     });
 
     if (error || !order) {
+      console.error("Supabase Error:", error);
       throw error ?? new Error("订单保存失败");
     }
 
+    console.log("Step 5 OK");
+
     try {
+      console.log("Step 6 reserveInventory");
       await reserveInventoryForOrder({
         supabase: supabaseAdmin,
         deliveryDate,
         items
       });
+      console.log("Step 6 OK");
     } catch (stockError) {
       await supabaseAdmin.from("orders").delete().eq("id", order.id);
       const stockMessage = stockError instanceof Error ? stockError.message : "库存不足";
@@ -464,6 +453,7 @@ export async function POST(request: Request) {
     }
 
     try {
+      console.log("Step 7 sendMail");
       await sendOrderNotification({
         orderNumber,
         name,
@@ -478,6 +468,7 @@ export async function POST(request: Request) {
         deliveryFee,
         total
       });
+      console.log("Step 7 OK");
     } catch (mailError) {
       console.error("订单已保存，但邮件发送失败", mailError);
     }
@@ -498,20 +489,20 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("订单保存失败", error);
 
-    if (hasMissingInventorySchema(error)) {
-      return new Response(
-        JSON.stringify({ error: "数据库缺少库存结构，请先执行 supabase/inventory-v1.sql" }),
-        { status: 500 }
-      );
-    }
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
+    const stack =
+      process.env.NODE_ENV === "development"
+        ? error instanceof Error
+          ? error.stack
+          : undefined
+        : undefined;
 
-    if (hasMissingDeliveryDateColumn(error)) {
-      return new Response(
-        JSON.stringify({ error: "数据库缺少 delivery_date 字段，请先执行 supabase/orders-delivery-v1.sql" }),
-        { status: 500 }
-      );
-    }
-
-    return new Response(JSON.stringify({ error: "订单保存失败" }), { status: 500 });
+    return new Response(
+      JSON.stringify({
+        error: message,
+        stack
+      }),
+      { status: 500 }
+    );
   }
 }
