@@ -5,6 +5,9 @@ import { products } from "@/lib/data";
 import { ensureInventoryForNextDays, getDefaultInventoryDeliveryDate, getInventoryByDate } from "@/lib/inventory";
 import { supabaseAdmin } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function loadStockMap() {
   const deliveryDate = getDefaultInventoryDeliveryDate();
 

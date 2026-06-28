@@ -8,6 +8,9 @@ import {
 } from "@/lib/inventory";
 import { supabaseAdmin } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }

@@ -1,6 +1,9 @@
 import { getDefaultInventoryDeliveryDate, getInventoryByDate, updateInventoryTotalStock } from "@/lib/inventory";
 import { supabaseAdmin } from "@/lib/supabase";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type UpdateInventoryPayload = {
   productId?: string;
   deliveryDate?: string;

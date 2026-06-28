@@ -21,6 +21,9 @@ import {
   reserveInventoryForOrder
 } from "@/lib/inventory";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type ApiOrderItem = {
   slug?: string;
   name: string;
