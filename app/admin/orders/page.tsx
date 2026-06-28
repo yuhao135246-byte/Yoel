@@ -22,6 +22,7 @@ type AdminOrder = {
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "待付款",
+  AWAITING_PAYMENT_CONFIRMATION: "待付款确认",
   RESERVED: "待发货",
   PAID: "已付款",
   FULFILLED: "已发货",

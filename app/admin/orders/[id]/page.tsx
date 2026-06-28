@@ -5,6 +5,7 @@ import { OrderStatusForm } from "@/components/admin/order-status-form";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "待付款",
+  AWAITING_PAYMENT_CONFIRMATION: "待付款确认",
   RESERVED: "待发货",
   PAID: "已付款",
   FULFILLED: "已发货",
@@ -125,7 +126,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <div className="grid gap-6">
             <OrderStatusForm
               orderId={order.id}
-              currentStatus={order.status as "PENDING" | "RESERVED" | "PAID" | "FULFILLED" | "CANCELLED"}
+              currentStatus={
+                order.status as
+                  | "PENDING"
+                  | "AWAITING_PAYMENT_CONFIRMATION"
+                  | "RESERVED"
+                  | "PAID"
+                  | "FULFILLED"
+                  | "CANCELLED"
+              }
             />
           </div>
         </div>

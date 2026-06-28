@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 const STATUS_OPTIONS = [
   { value: "PENDING", label: "待付款" },
+  { value: "AWAITING_PAYMENT_CONFIRMATION", label: "待付款确认" },
   { value: "RESERVED", label: "待发货" },
   { value: "PAID", label: "已付款" },
   { value: "FULFILLED", label: "已发货" },
@@ -43,7 +44,7 @@ export function OrderStatusForm({
 
       setMessage("状态已更新");
       router.refresh();
-    } catch (error) {
+    } catch {
       setMessage("保存状态失败，请稍后重试");
     } finally {
       setIsSaving(false);

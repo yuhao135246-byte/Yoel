@@ -1,6 +1,13 @@
 import { supabaseAdmin } from "@/lib/supabase";
 
-const STATUS_VALUES = ["PENDING", "RESERVED", "PAID", "FULFILLED", "CANCELLED"] as const;
+const STATUS_VALUES = [
+  "PENDING",
+  "AWAITING_PAYMENT_CONFIRMATION",
+  "RESERVED",
+  "PAID",
+  "FULFILLED",
+  "CANCELLED"
+] as const;
 
 type StatusValue = (typeof STATUS_VALUES)[number];
 
