@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { products } from "@/lib/data";
 import {
@@ -79,7 +80,7 @@ export function OrderPanel() {
         </div>
         <form className="grid gap-4 bg-paper p-4 text-ink md:gap-5 md:p-6">
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            Product
+            产品
             <select
               value={selectedSlug}
               onChange={(event) => setSelectedSlug(event.target.value)}
@@ -93,7 +94,7 @@ export function OrderPanel() {
             </select>
           </label>
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            Quantity
+            数量
             <input
               type="number"
               min="1"
@@ -103,7 +104,7 @@ export function OrderPanel() {
             />
           </label>
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            Delivery Date
+            配送日期
             <select
               value={deliveryDate}
               onChange={(event) => setDeliveryDate(event.target.value)}
@@ -117,10 +118,10 @@ export function OrderPanel() {
             </select>
           </label>
           <div className="border border-ink/15 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-graphite">
-            Morning delivery window: {DELIVERY_WINDOW}
+            配送时间窗口：{DELIVERY_WINDOW}
           </div>
           <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            Delivery Slot
+            配送时间段
             <select
               value={deliverySlot}
               onChange={(event) => setDeliverySlot(event.target.value)}
@@ -139,14 +140,14 @@ export function OrderPanel() {
           </div>
           <input placeholder="配送地址" className="h-12 border border-ink/20 bg-paper px-3" />
           <div className="border-t border-ink/15 pt-3 font-mono text-sm">
-            <p>Order {orderNumber}</p>
-            <p className="mt-2">Delivery {deliveryDate ? formatDeliveryDate(deliveryDate) : "Unavailable"}</p>
-            <p className="mt-1">Slot {deliverySlot} / Window {DELIVERY_WINDOW}</p>
+            <p>订单编号 {orderNumber}</p>
+            <p className="mt-2">配送日期 {deliveryDate ? formatDeliveryDate(deliveryDate) : "暂不可用"}</p>
+            <p className="mt-1">配送时段 {deliverySlot} / 时间窗口 {DELIVERY_WINDOW}</p>
             <p className="mt-2 text-xl md:text-2xl">RMB {total}</p>
           </div>
-          <button type="button" className="h-12 bg-ink text-sm uppercase tracking-[0.18em] text-paper">
-            Reserve WeChat Pay
-          </button>
+          <Link href="/checkout" className="flex h-12 items-center justify-center bg-ink px-4 text-sm uppercase tracking-[0.18em] text-paper">
+            前往结算
+          </Link>
         </form>
       </div>
     </section>
