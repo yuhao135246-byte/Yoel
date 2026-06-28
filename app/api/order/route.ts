@@ -146,9 +146,12 @@ async function getDeliveryAvailability(dateKey: string): Promise<DeliveryAvailab
 async function buildDeliveryAvailabilityResponse(selectedDateKey?: string): Promise<DeliveryAvailabilityResponse> {
   const dateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable: true });
   const defaultDeliveryDate = getDefaultDeliveryDate();
+  const availableDates = new Set(dateOptions.map((option) => option.date));
 
-  const fallbackDate = defaultDeliveryDate;
-  const selectedDate = selectedDateKey && isValidDateKey(selectedDateKey) ? selectedDateKey : fallbackDate;
+  const selectedDate =
+    selectedDateKey && isValidDateKey(selectedDateKey) && availableDates.has(selectedDateKey)
+      ? selectedDateKey
+      : defaultDeliveryDate;
   const activeAvailability = await getDeliveryAvailability(selectedDate);
 
   return {
@@ -262,6 +265,13 @@ export async function POST(request: Request) {
   if (!deliveryDate || !isValidDateKey(deliveryDate)) {
     return new Response(JSON.stringify({ error: "请选择有效的配送日期。" }), {
       status: 400
+    });
+  }
+
+  const activeDateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable: true });
+  if (!activeDateOptions.some((option) => option.date === deliveryDate)) {
+    return new Response(JSON.stringify({ error: "当前时段仅支持可选配送日期，请刷新后重试。" }), {
+      status: 409
     });
   }
 

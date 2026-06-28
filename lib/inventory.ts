@@ -1,5 +1,5 @@
 import { products } from "@/lib/data";
-import { addDays, getDefaultDeliveryDate, toDateKey } from "@/lib/delivery";
+import { addDays, DELIVERY_CUTOFF_HOUR, getDefaultDeliveryDate, toDateKey } from "@/lib/delivery";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type InventoryStatus = "Available" | "Sold Out";
@@ -124,8 +124,8 @@ export async function ensureInventoryForNextDays(supabase: SupabaseClient, _days
   // Ensure today always has baseline rows for first-time bootstrap.
   await ensureInventoryForDate(supabase, todayKey);
 
-  // After 22:00, tomorrow starts from today's remaining stock once (no overwrite if already set).
-  if (now.getHours() >= 22) {
+  // After cutoff, tomorrow starts from today's remaining stock once (no overwrite if already set).
+  if (now.getHours() >= DELIVERY_CUTOFF_HOUR) {
     await rolloverInventoryToTomorrow({
       supabase,
       sourceDate: todayKey,

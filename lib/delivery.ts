@@ -1,4 +1,5 @@
 export const DELIVERY_WINDOW = "07:00 - 12:00";
+export const DELIVERY_CUTOFF_HOUR = 17;
 export const AREA_DAILY_CAPACITY = 5;
 export const GLOBAL_DAILY_CAPACITY = 15;
 
@@ -90,7 +91,7 @@ export function addDays(base: Date, days: number) {
 }
 
 export function getDefaultDeliveryDate(today = new Date()) {
-  const isAfterCutoff = today.getHours() >= 22;
+  const isAfterCutoff = today.getHours() >= DELIVERY_CUTOFF_HOUR;
   return toDateKey(isAfterCutoff ? addDays(today, 1) : today);
 }
 
@@ -100,24 +101,28 @@ export function buildRollingDeliveryDateOptions(config: {
   isTodayAvailable: boolean;
 }) {
   const today = config.today ?? new Date();
-  const days = config.days ?? 2;
-  const options: DeliveryDateOption[] = [];
+  const todayKey = toDateKey(today);
+  const tomorrowKey = toDateKey(addDays(today, 1));
 
-  for (let offset = 0; offset < days; offset += 1) {
-    const date = addDays(today, offset);
-    const dateKey = toDateKey(date);
-    const isToday = offset === 0;
-    const prefix = isToday ? "今天" : "明天";
-
-    options.push({
-      date: dateKey,
-      label: `${prefix}（${dateKey}）`,
-      isToday,
-      isAvailable: isToday ? config.isTodayAvailable : true
-    });
+  if (today.getHours() >= DELIVERY_CUTOFF_HOUR) {
+    return [
+      {
+        date: tomorrowKey,
+        label: `明天（${tomorrowKey}）`,
+        isToday: false,
+        isAvailable: true
+      }
+    ];
   }
 
-  return options;
+  return [
+    {
+      date: todayKey,
+      label: `今天（${todayKey}）`,
+      isToday: true,
+      isAvailable: true
+    }
+  ];
 }
 
 export function formatDeliveryDate(value: string) {
