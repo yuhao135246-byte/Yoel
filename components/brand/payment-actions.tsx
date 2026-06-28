@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { PAYMENT_LINKS } from "@/lib/config";
 
 type PaymentActionsProps = {
   orderNumber?: string;
 };
 
-const WECHAT_PAYMENT_URL = process.env.NEXT_PUBLIC_WECHAT_PAYMENT_URL?.trim() ?? "";
-const ALIPAY_PAYMENT_URL = process.env.NEXT_PUBLIC_ALIPAY_PAYMENT_URL?.trim() ?? "";
+const WECHAT_PAYMENT_URL = PAYMENT_LINKS.wechat;
+const ALIPAY_PAYMENT_URL = PAYMENT_LINKS.alipay;
 
 export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [hasOpenedPayment, setHasOpenedPayment] = useState(false);

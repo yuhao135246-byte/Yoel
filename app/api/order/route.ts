@@ -2,7 +2,6 @@ import { formatOrderNumber } from "@/lib/order-number";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
-  AREA_DAILY_CAPACITY,
   buildRollingDeliveryDateOptions,
   canBookToday,
   getDefaultDeliveryDate,
@@ -160,8 +159,7 @@ async function loadOrdersByDeliveryDate(dateKey: string) {
   if (!result.error) {
     return {
       date: dateKey,
-      rows: result.data ?? [],
-      supportsDeliveryArea: true
+      rows: result.data ?? []
     };
   }
 
@@ -177,45 +175,28 @@ async function loadOrdersByDeliveryDate(dateKey: string) {
 
   return {
     date: range.date,
-    rows: (legacyResult.data ?? []).map((row) => ({ ...row, delivery_area: null })),
-    supportsDeliveryArea: false
+    rows: (legacyResult.data ?? []).map((row) => ({ ...row, delivery_area: null }))
   };
 }
 
 async function getDeliveryAvailability(dateKey: string): Promise<DeliveryAvailability> {
-  const { date, rows, supportsDeliveryArea } = await loadOrdersByDeliveryDate(dateKey);
+  const { date, rows } = await loadOrdersByDeliveryDate(dateKey);
   const totalBooked = rows.length;
   const isFull = totalBooked >= GLOBAL_DAILY_CAPACITY;
-  const areaCounts = new Map<DeliveryArea, number>();
-
-  for (const deliveryArea of DELIVERY_AREAS.map((item) => item.area)) {
-    areaCounts.set(deliveryArea, 0);
-  }
-
-  if (supportsDeliveryArea) {
-    for (const row of rows) {
-      if (row.delivery_area && isDeliveryArea(row.delivery_area)) {
-        areaCounts.set(row.delivery_area, (areaCounts.get(row.delivery_area) ?? 0) + 1);
-      }
-    }
-  }
+  const globalRemaining = Math.max(GLOBAL_DAILY_CAPACITY - totalBooked, 0);
 
   return {
     date,
     isFull,
     message: isFull ? `${date} 晨间配送已满，请改约其他日期` : undefined,
     areas: DELIVERY_AREAS.map(({ area, slot }) => {
-      const booked = areaCounts.get(area) ?? 0;
-      const remaining = Math.max(AREA_DAILY_CAPACITY - booked, 0);
-      const isAvailable = !isFull && remaining > 0;
-
       return {
         area,
         slot,
-        booked,
-        remaining,
-        isAvailable,
-        message: isAvailable ? undefined : "该区域该日期配送已满"
+        booked: 0,
+        remaining: globalRemaining,
+        isAvailable: !isFull,
+        message: isFull ? "该日期配送已满" : undefined
       };
     })
   };
@@ -308,7 +289,7 @@ export async function GET(request: Request) {
         area,
         slot,
         booked: 0,
-        remaining: AREA_DAILY_CAPACITY,
+        remaining: GLOBAL_DAILY_CAPACITY,
         isAvailable: true
       }))
     });
@@ -397,11 +378,6 @@ export async function POST(request: Request) {
     console.log("Step 3 OK");
     if (availability.isFull) {
       return new Response(JSON.stringify({ error: availability.message }), { status: 409 });
-    }
-
-    const areaStatus = availability.areas.find((item) => item.area === deliveryArea);
-    if (!areaStatus?.isAvailable) {
-      return new Response(JSON.stringify({ error: areaStatus?.message ?? "该区域该日期配送已满" }), { status: 409 });
     }
 
     console.log("Step 4 createOrderNumber");
