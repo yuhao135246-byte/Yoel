@@ -21,9 +21,26 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
     return /micromessenger/i.test(window.navigator.userAgent);
   }
 
+  function normalizeWeChatTarget(rawValue: string) {
+    const value = rawValue.trim();
+
+    if (value.startsWith("#付款:")) {
+      return value.slice("#付款:".length).trim();
+    }
+
+    return value;
+  }
+
   function openWeChatPayment() {
-    // Always try opening the configured WeChat deep link directly.
-    window.location.assign(WECHAT_PAYMENT_URL);
+    const target = normalizeWeChatTarget(WECHAT_PAYMENT_URL);
+
+    if (!target) {
+      setMessage("支付链接未配置，请联系管理员。");
+      return;
+    }
+
+    // Always try opening the configured WeChat payment target directly.
+    window.location.assign(target);
     setHasOpenedPayment(true);
     if (!isWeChatBrowser()) {
       setMessage("请使用微信打开本页面后点击【微信支付】。");
