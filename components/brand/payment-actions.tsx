@@ -17,7 +17,23 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "AWAITING_PAYMENT_CONFIRMATION" | "PAID">("PENDING");
   const [message, setMessage] = useState("");
 
-  function openPaymentLink(url: string) {
+  function isWeChatBrowser() {
+    return /micromessenger/i.test(window.navigator.userAgent);
+  }
+
+  function openWeChatPayment() {
+    // Always try opening the configured WeChat deep link directly.
+    window.location.assign(WECHAT_PAYMENT_URL);
+    setHasOpenedPayment(true);
+    if (!isWeChatBrowser()) {
+      setMessage("请使用微信打开本页面后点击【微信支付】。");
+      return;
+    }
+
+    setMessage("");
+  }
+
+  function openAlipayPayment(url: string) {
     if (!url) {
       setMessage("支付链接未配置，请联系管理员。");
       return;
@@ -73,14 +89,14 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
-          onClick={() => openPaymentLink(WECHAT_PAYMENT_URL)}
+          onClick={openWeChatPayment}
           className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
         >
           微信支付
         </button>
         <button
           type="button"
-          onClick={() => openPaymentLink(ALIPAY_PAYMENT_URL)}
+          onClick={() => openAlipayPayment(ALIPAY_PAYMENT_URL)}
           className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
         >
           支付宝支付
