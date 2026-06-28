@@ -2,6 +2,7 @@ import { formatOrderNumber } from "@/lib/order-number";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
+  getChinaNow,
   getBookingDateOptions,
   getDefaultBookingDate,
   DELIVERY_AREAS,
@@ -108,7 +109,7 @@ async function createOrderNumber() {
     throw new Error("Supabase 服务未配置");
   }
 
-  const today = new Date();
+  const today = getChinaNow();
   const prefix = `CD-${today.toISOString().slice(0, 10).replaceAll("-", "")}-`;
   const { data, error } = await supabaseAdmin
     .from("orders")
@@ -333,7 +334,7 @@ export async function POST(request: Request) {
       status: "PENDING",
       notes,
       items,
-      created_at: new Date().toISOString(),
+      created_at: getChinaNow().toISOString(),
       delivery_date: deliveryDate,
       delivery_area: deliveryArea,
       delivery_slot: deliverySlot,

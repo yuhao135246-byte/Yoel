@@ -98,7 +98,15 @@ export function addDays(base: Date, days: number) {
   return next;
 }
 
-export function getBookingDateContext(now = new Date()): BookingDateContext {
+export function getChinaNow() {
+  return new Date(
+    new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Shanghai"
+    })
+  );
+}
+
+export function getBookingDateContext(now = getChinaNow()): BookingDateContext {
   const todayKey = toDateKey(now);
   const tomorrowKey = toDateKey(addDays(now, 1));
   const cutoffPassed = now.getHours() >= DELIVERY_CUTOFF_HOUR;
@@ -128,15 +136,15 @@ export function getBookingDateContext(now = new Date()): BookingDateContext {
   };
 }
 
-export function getDefaultBookingDate(now = new Date()) {
+export function getDefaultBookingDate(now = getChinaNow()) {
   return getBookingDateContext(now).defaultBookingDate;
 }
 
-export function getBookingDateOptions(now = new Date()) {
+export function getBookingDateOptions(now = getChinaNow()) {
   return getBookingDateContext(now).dateOptions;
 }
 
-export function getDefaultDeliveryDate(today = new Date()) {
+export function getDefaultDeliveryDate(today = getChinaNow()) {
   return getDefaultBookingDate(today);
 }
 

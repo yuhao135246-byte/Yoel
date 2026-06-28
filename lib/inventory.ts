@@ -1,5 +1,5 @@
 import { products } from "@/lib/data";
-import { addDays, DELIVERY_CUTOFF_HOUR, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
+import { addDays, DELIVERY_CUTOFF_HOUR, getChinaNow, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type InventoryStatus = "Available" | "Sold Out";
@@ -33,7 +33,7 @@ function getDefaultStockForProduct(productId: string) {
   return INVENTORY_DEFAULT_STOCK[productId] ?? 10;
 }
 
-export function getInventoryDateRange(days = 2, today = new Date()) {
+export function getInventoryDateRange(days = 2, today = getChinaNow()) {
   return Array.from({ length: days }, (_, index) => toDateKey(addDays(today, index)));
 }
 
@@ -117,7 +117,7 @@ async function rolloverInventoryToTomorrow(params: {
 
 export async function ensureInventoryForNextDays(supabase: SupabaseClient, _days = 2) {
   void _days;
-  const now = new Date();
+  const now = getChinaNow();
   const todayKey = toDateKey(now);
   const tomorrowKey = toDateKey(addDays(now, 1));
 
