@@ -2,8 +2,8 @@ import { formatOrderNumber } from "@/lib/order-number";
 import { supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
-  buildRollingDeliveryDateOptions,
-  getDefaultDeliveryDate,
+  getBookingDateOptions,
+  getDefaultBookingDate,
   DELIVERY_AREAS,
   getDeliverySlotForArea,
   isDeliveryArea,
@@ -147,8 +147,8 @@ async function getDeliveryAvailability(dateKey: string): Promise<DeliveryAvailab
 }
 
 async function buildDeliveryAvailabilityResponse(selectedDateKey?: string): Promise<DeliveryAvailabilityResponse> {
-  const dateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable: true });
-  const defaultDeliveryDate = getDefaultDeliveryDate();
+  const dateOptions = getBookingDateOptions();
+  const defaultDeliveryDate = getDefaultBookingDate();
   const availableDates = new Set(dateOptions.map((option) => option.date));
 
   const selectedDate =
@@ -210,12 +210,15 @@ export async function GET(request: Request) {
   const selectedDate = url.searchParams.get("deliveryDate") ?? undefined;
 
   if (!supabaseAdmin) {
-    const defaultDeliveryDate = getDefaultDeliveryDate();
+    const defaultDeliveryDate = getDefaultBookingDate();
+    const dateOptions = getBookingDateOptions();
+    const availableDates = new Set(dateOptions.map((option) => option.date));
+    const activeDate = selectedDate && availableDates.has(selectedDate) ? selectedDate : defaultDeliveryDate;
 
     return Response.json({
-      date: selectedDate ?? defaultDeliveryDate,
+      date: activeDate,
       isFull: false,
-      dateOptions: buildRollingDeliveryDateOptions({ isTodayAvailable: true }),
+      dateOptions,
       defaultDeliveryDate,
       areas: DELIVERY_AREAS.map(({ area, slot }) => ({
         area,
@@ -271,7 +274,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const activeDateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable: true });
+  const activeDateOptions = getBookingDateOptions();
   if (!activeDateOptions.some((option) => option.date === deliveryDate)) {
     return new Response(JSON.stringify({ error: "当前时段仅支持可选配送日期，请刷新后重试。" }), {
       status: 409

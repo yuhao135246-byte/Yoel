@@ -49,6 +49,14 @@ export type DeliveryDateOption = {
   isAvailable: boolean;
 };
 
+export type BookingDateContext = {
+  todayKey: string;
+  tomorrowKey: string;
+  cutoffPassed: boolean;
+  defaultBookingDate: string;
+  dateOptions: DeliveryDateOption[];
+};
+
 export const deliveryDates: DeliveryDate[] = [
   { date: "2026-06-24", capacity: 18, booked: 11, status: "AVAILABLE" },
   { date: "2026-06-25", capacity: 18, booked: 18, status: "FULL" },
@@ -90,9 +98,46 @@ export function addDays(base: Date, days: number) {
   return next;
 }
 
+export function getBookingDateContext(now = new Date()): BookingDateContext {
+  const todayKey = toDateKey(now);
+  const tomorrowKey = toDateKey(addDays(now, 1));
+  const cutoffPassed = now.getHours() >= DELIVERY_CUTOFF_HOUR;
+
+  return {
+    todayKey,
+    tomorrowKey,
+    cutoffPassed,
+    defaultBookingDate: cutoffPassed ? tomorrowKey : todayKey,
+    dateOptions: cutoffPassed
+      ? [
+          {
+            date: tomorrowKey,
+            label: `明天（${tomorrowKey}）`,
+            isToday: false,
+            isAvailable: true
+          }
+        ]
+      : [
+          {
+            date: todayKey,
+            label: `今天（${todayKey}）`,
+            isToday: true,
+            isAvailable: true
+          }
+        ]
+  };
+}
+
+export function getDefaultBookingDate(now = new Date()) {
+  return getBookingDateContext(now).defaultBookingDate;
+}
+
+export function getBookingDateOptions(now = new Date()) {
+  return getBookingDateContext(now).dateOptions;
+}
+
 export function getDefaultDeliveryDate(today = new Date()) {
-  const isAfterCutoff = today.getHours() >= DELIVERY_CUTOFF_HOUR;
-  return toDateKey(isAfterCutoff ? addDays(today, 1) : today);
+  return getDefaultBookingDate(today);
 }
 
 export function buildRollingDeliveryDateOptions(config: {
@@ -100,29 +145,10 @@ export function buildRollingDeliveryDateOptions(config: {
   days?: number;
   isTodayAvailable: boolean;
 }) {
-  const today = config.today ?? new Date();
-  const todayKey = toDateKey(today);
-  const tomorrowKey = toDateKey(addDays(today, 1));
-
-  if (today.getHours() >= DELIVERY_CUTOFF_HOUR) {
-    return [
-      {
-        date: tomorrowKey,
-        label: `明天（${tomorrowKey}）`,
-        isToday: false,
-        isAvailable: true
-      }
-    ];
-  }
-
-  return [
-    {
-      date: todayKey,
-      label: `今天（${todayKey}）`,
-      isToday: true,
-      isAvailable: true
-    }
-  ];
+  return getBookingDateOptions(config.today).map((option) => ({
+    ...option,
+    isAvailable: option.isToday ? config.isTodayAvailable : true
+  }));
 }
 
 export function formatDeliveryDate(value: string) {

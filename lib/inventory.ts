@@ -1,5 +1,5 @@
 import { products } from "@/lib/data";
-import { addDays, DELIVERY_CUTOFF_HOUR, getDefaultDeliveryDate, toDateKey } from "@/lib/delivery";
+import { addDays, DELIVERY_CUTOFF_HOUR, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type InventoryStatus = "Available" | "Sold Out";
@@ -252,5 +252,5 @@ export async function reserveInventoryForOrder(params: {
 }
 
 export function getDefaultInventoryDeliveryDate() {
-  return getDefaultDeliveryDate();
+  return getDefaultBookingDate();
 }

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { products } from "@/lib/data";
 import {
-  buildRollingDeliveryDateOptions,
   DELIVERY_SLOTS,
   DELIVERY_WINDOW,
   formatDeliveryDate,
-  getDefaultDeliveryDate
+  getBookingDateOptions,
+  getDefaultBookingDate
 } from "@/lib/delivery";
 import { createOrderNumber } from "@/lib/order-number";
 
@@ -22,18 +22,15 @@ type DeliveryDateOption = {
 export function OrderPanel() {
   const coffee = products.filter((product) => product.category === "COFFEE");
   const [dateOptions, setDateOptions] = useState<DeliveryDateOption[]>(
-    buildRollingDeliveryDateOptions({ isTodayAvailable: true })
+    getBookingDateOptions()
   );
   const [selectedSlug, setSelectedSlug] = useState(coffee[0].slug);
   const [quantity, setQuantity] = useState(1);
-  const [deliveryDate, setDeliveryDate] = useState(getDefaultDeliveryDate());
+  const [deliveryDate, setDeliveryDate] = useState(getDefaultBookingDate());
   const [deliverySlot, setDeliverySlot] = useState(DELIVERY_SLOTS[0]);
   const selected = coffee.find((product) => product.slug === selectedSlug) ?? coffee[0];
   const total = useMemo(() => selected.price * quantity, [quantity, selected.price]);
-  const orderNumber = useMemo(
-    () => createOrderNumber(),
-    [selectedSlug, quantity, deliveryDate, deliverySlot]
-  );
+  const orderNumber = useMemo(() => createOrderNumber(), []);
 
   useEffect(() => {
     let active = true;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getBookingDateOptions, getDefaultBookingDate } from "@/lib/delivery";
 
 type InventoryRow = {
   productId: string;
@@ -16,35 +17,15 @@ type InventoryResponse = {
   records: InventoryRow[];
 };
 
-function addDays(base: Date, days: number) {
-  const next = new Date(base);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
-function toDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 export default function InventoryPage() {
-  const today = useMemo(() => new Date(), []);
-  const [deliveryDate, setDeliveryDate] = useState(toDateKey(addDays(today, 1)));
+  const [deliveryDate, setDeliveryDate] = useState(getDefaultBookingDate());
   const [rows, setRows] = useState<InventoryRow[]>([]);
   const [drafts, setDrafts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [savingProduct, setSavingProduct] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const quickDates = useMemo(
-    () => [
-      { label: "今天", value: toDateKey(today) },
-      { label: "明天", value: toDateKey(addDays(today, 1)) }
-    ],
-    [today]
-  );
+  const quickDates = useMemo(() => getBookingDateOptions().map((item) => ({ label: item.label, value: item.date })), []);
 
   async function loadInventory(date: string) {
     setLoading(true);

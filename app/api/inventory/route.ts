@@ -1,7 +1,6 @@
 import { products } from "@/lib/data";
-import { addDays, toDateKey } from "@/lib/delivery";
+import { getBookingDateOptions, getDefaultBookingDate } from "@/lib/delivery";
 import {
-  getDefaultInventoryDeliveryDate,
   getInventoryByDate,
   getInventoryDateRange,
   INVENTORY_DEFAULT_STOCK
@@ -15,19 +14,13 @@ function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-function buildDateOptions() {
-  const today = new Date();
-  return [0, 1].map((offset) => {
-    const date = toDateKey(addDays(today, offset));
-    const label = offset === 0 ? "今天" : "明天";
-    return { date, label: `${label}（${date}）` };
-  });
-}
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const queryDate = url.searchParams.get("deliveryDate") ?? "";
-  const deliveryDate = isValidDateKey(queryDate) ? queryDate : getDefaultInventoryDeliveryDate();
+  const defaultDeliveryDate = getDefaultBookingDate();
+  const dateOptions = getBookingDateOptions();
+  const availableDates = new Set(dateOptions.map((option) => option.date));
+  const deliveryDate = isValidDateKey(queryDate) && availableDates.has(queryDate) ? queryDate : defaultDeliveryDate;
 
   if (!supabaseAdmin) {
     const records = products
@@ -46,8 +39,8 @@ export async function GET(request: Request) {
 
     return Response.json({
       deliveryDate,
-      defaultDeliveryDate: getDefaultInventoryDeliveryDate(),
-      dateOptions: buildDateOptions(),
+      defaultDeliveryDate,
+      dateOptions,
       rangeDates: getInventoryDateRange(2),
       records
     });
@@ -57,8 +50,8 @@ export async function GET(request: Request) {
     const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
     return Response.json({
       deliveryDate,
-      defaultDeliveryDate: getDefaultInventoryDeliveryDate(),
-      dateOptions: buildDateOptions(),
+      defaultDeliveryDate,
+      dateOptions,
       rangeDates: getInventoryDateRange(2),
       records
     });
