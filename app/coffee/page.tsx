@@ -16,7 +16,7 @@ async function loadStockMap() {
   }
 
   try {
-    await ensureInventoryForNextDays(supabaseAdmin, 7);
+    await ensureInventoryForNextDays(supabaseAdmin, 2);
     const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
     return {
       deliveryDate,

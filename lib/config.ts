@@ -1,4 +1,4 @@
 export const PAYMENT_LINKS = {
-  wechat: "#付款:Cadence咖啡生活(ZYCZYC103)/收款/001",
+  wechat: "https://payapp.wechatpay.cn/sjt/qr/AQHH84iCRyCnEazgMhd3kkyU",
   alipay: "https://qr.alipay.com/fkx18625tfksnibeyzrg74d"
 } as const;

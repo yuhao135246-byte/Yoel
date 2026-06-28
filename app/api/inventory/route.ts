@@ -14,9 +14,9 @@ function isValidDateKey(value: string) {
 
 function buildDateOptions() {
   const today = new Date();
-  return [0, 1, 2].map((offset) => {
+  return [0, 1].map((offset) => {
     const date = toDateKey(addDays(today, offset));
-    const label = offset === 0 ? "今天" : offset === 1 ? "明天" : "后天";
+    const label = offset === 0 ? "今天" : "明天";
     return { date, label: `${label}（${date}）` };
   });
 }
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
       deliveryDate,
       defaultDeliveryDate: getDefaultInventoryDeliveryDate(),
       dateOptions: buildDateOptions(),
-      rangeDates: getInventoryDateRange(7),
+      rangeDates: getInventoryDateRange(2),
       records
     });
   }
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       deliveryDate,
       defaultDeliveryDate: getDefaultInventoryDeliveryDate(),
       dateOptions: buildDateOptions(),
-      rangeDates: getInventoryDateRange(7),
+      rangeDates: getInventoryDateRange(2),
       records
     });
   } catch (error) {

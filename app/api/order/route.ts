@@ -3,14 +3,10 @@ import { supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
   buildRollingDeliveryDateOptions,
-  canBookToday,
   getDefaultDeliveryDate,
   DELIVERY_AREAS,
-  GLOBAL_DAILY_CAPACITY,
   getDeliverySlotForArea,
   isDeliveryArea,
-  toDateKey,
-  type DeliveryCapacitySnapshot,
   type DeliveryDateOption,
   type DeliveryArea
 } from "@/lib/delivery";
@@ -67,15 +63,13 @@ type InsertOrderRecord = {
 
 type DeliveryAvailability = {
   date: string;
-  isFull: boolean;
-  message?: string;
+  isFull: false;
   areas: {
     area: DeliveryArea;
     slot: string;
     booked: number;
     remaining: number;
-    isAvailable: boolean;
-    message?: string;
+    isAvailable: true;
   }[];
 };
 
@@ -129,101 +123,33 @@ async function createOrderNumber() {
   return formatOrderNumber(today, nextIndex);
 }
 
-function getDateRange(dateKey: string) {
-  const [year, month, day] = dateKey.split("-").map((item) => Number(item));
-  const start = new Date(year, month - 1, day);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-
-  return {
-    date: dateKey,
-    start: start.toISOString(),
-    end: end.toISOString()
-  };
-}
-
 function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-async function loadOrdersByDeliveryDate(dateKey: string) {
-  const range = getDateRange(dateKey);
-
-  const result = await supabaseAdmin!
-    .from("orders")
-    .select("id, delivery_area, delivery_date, created_at")
-    .eq("delivery_date", dateKey);
-
-  if (!result.error) {
-    return {
-      date: dateKey,
-      rows: result.data ?? []
-    };
-  }
-
-  const legacyResult = await supabaseAdmin!
-    .from("orders")
-    .select("id, created_at")
-    .gte("created_at", range.start)
-    .lt("created_at", range.end);
-
-  if (legacyResult.error) {
-    throw legacyResult.error;
-  }
-
-  return {
-    date: range.date,
-    rows: (legacyResult.data ?? []).map((row) => ({ ...row, delivery_area: null }))
-  };
-}
-
 async function getDeliveryAvailability(dateKey: string): Promise<DeliveryAvailability> {
-  const { date, rows } = await loadOrdersByDeliveryDate(dateKey);
-  const totalBooked = rows.length;
-  const isFull = totalBooked >= GLOBAL_DAILY_CAPACITY;
-  const globalRemaining = Math.max(GLOBAL_DAILY_CAPACITY - totalBooked, 0);
-
   return {
-    date,
-    isFull,
-    message: isFull ? `${date} 晨间配送已满，请改约其他日期` : undefined,
+    date: dateKey,
+    isFull: false,
     areas: DELIVERY_AREAS.map(({ area, slot }) => {
       return {
         area,
         slot,
         booked: 0,
-        remaining: globalRemaining,
-        isAvailable: !isFull,
-        message: isFull ? "该日期配送已满" : undefined
+        remaining: 9999,
+        isAvailable: true
       };
     })
   };
 }
 
-function getTodayCapacitySnapshot(availability: DeliveryAvailability): DeliveryCapacitySnapshot {
-  return {
-    capacity: GLOBAL_DAILY_CAPACITY,
-    booked: availability.areas.reduce((sum, area) => sum + area.booked, 0),
-    isClosed: availability.isFull
-  };
-}
-
 async function buildDeliveryAvailabilityResponse(selectedDateKey?: string): Promise<DeliveryAvailabilityResponse> {
-  const todayKey = toDateKey(new Date());
-  const todayAvailability = await getDeliveryAvailability(todayKey);
-  const todaySnapshot = getTodayCapacitySnapshot(todayAvailability);
-  const isTodayAvailable = canBookToday(todaySnapshot);
-  const dateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable });
+  const dateOptions = buildRollingDeliveryDateOptions({ isTodayAvailable: true });
   const defaultDeliveryDate = getDefaultDeliveryDate();
 
   const fallbackDate = defaultDeliveryDate;
   const selectedDate = selectedDateKey && isValidDateKey(selectedDateKey) ? selectedDateKey : fallbackDate;
-  const activeAvailability =
-    selectedDate === todayKey
-      ? todayAvailability
-      : await getDeliveryAvailability(selectedDate);
+  const activeAvailability = await getDeliveryAvailability(selectedDate);
 
   return {
     ...activeAvailability,
@@ -289,7 +215,7 @@ export async function GET(request: Request) {
         area,
         slot,
         booked: 0,
-        remaining: GLOBAL_DAILY_CAPACITY,
+        remaining: 9999,
         isAvailable: true
       }))
     });
@@ -350,7 +276,7 @@ export async function POST(request: Request) {
 
   try {
     console.log("Step 1 ensureInventory");
-    await ensureInventoryForNextDays(supabaseAdmin, 7);
+    await ensureInventoryForNextDays(supabaseAdmin, 2);
     console.log("Step 1 OK");
 
     console.log("Step 2 getInventory");
@@ -373,20 +299,13 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log("Step 3 getDeliveryAvailability");
-    const availability = await getDeliveryAvailability(deliveryDate);
-    console.log("Step 3 OK");
-    if (availability.isFull) {
-      return new Response(JSON.stringify({ error: availability.message }), { status: 409 });
-    }
-
-    console.log("Step 4 createOrderNumber");
+    console.log("Step 3 createOrderNumber");
     const orderNumber = await createOrderNumber();
-    console.log("Step 4 OK");
+    console.log("Step 3 OK");
     const productName = buildProductSummary(items);
     const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
-    console.log("Step 5 insertOrder");
+    console.log("Step 4 insertOrder");
     const { data: order, error } = await insertOrder({
       order_number: orderNumber,
       customer_name: name,
@@ -412,17 +331,17 @@ export async function POST(request: Request) {
       throw error ?? new Error("订单保存失败");
     }
 
-    console.log("Step 5 OK");
+    console.log("Step 4 OK");
 
     try {
-      console.log("Step 6 reserveInventory");
+      console.log("Step 5 reserveInventory");
       await reserveInventoryForOrder({
         supabase: supabaseAdmin,
         deliveryDate,
         orderId: order.id,
         items
       });
-      console.log("Step 6 OK");
+      console.log("Step 5 OK");
     } catch (stockError) {
       await supabaseAdmin.from("orders").delete().eq("id", order.id);
       const stockMessage = stockError instanceof Error ? stockError.message : "库存不足";
@@ -430,7 +349,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      console.log("Step 7 sendMail");
+      console.log("Step 6 sendMail");
       await sendOrderNotification({
         orderNumber,
         name,
@@ -445,7 +364,7 @@ export async function POST(request: Request) {
         deliveryFee,
         total
       });
-      console.log("Step 7 OK");
+      console.log("Step 6 OK");
     } catch (mailError) {
       console.error("订单已保存，但邮件发送失败", mailError);
     }

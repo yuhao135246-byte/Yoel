@@ -41,8 +41,7 @@ export default function InventoryPage() {
   const quickDates = useMemo(
     () => [
       { label: "今天", value: toDateKey(today) },
-      { label: "明天", value: toDateKey(addDays(today, 1)) },
-      { label: "后天", value: toDateKey(addDays(today, 2)) }
+      { label: "明天", value: toDateKey(addDays(today, 1)) }
     ],
     [today]
   );
@@ -125,7 +124,7 @@ export default function InventoryPage() {
           仅设置初始库存。系统会在订单创建成功后自动扣减库存，并实时计算已售数量与剩余库存。
         </p>
 
-        <div className="mt-8 grid gap-4 border border-ink/15 p-5 md:grid-cols-[1.1fr_1fr]">
+        <div className="mt-8 grid gap-4 border border-ink/15 p-5">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.16em] text-graphite">配送日期</p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -143,15 +142,6 @@ export default function InventoryPage() {
               ))}
             </div>
           </div>
-          <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            任意日期
-            <input
-              type="date"
-              value={deliveryDate}
-              onChange={(event) => setDeliveryDate(event.target.value)}
-              className="h-12 border border-ink/20 bg-paper px-3 text-base normal-case tracking-normal"
-            />
-          </label>
         </div>
 
         {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}

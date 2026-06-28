@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
-  DELIVERY_AREAS,
   getDeliverySlotForArea,
   type DeliveryArea
 } from "@/lib/delivery";
@@ -22,7 +21,6 @@ type CartItem = {
 
 type DeliveryAvailability = {
   date: string;
-  isFull: boolean;
   defaultDeliveryDate: string;
   dateOptions: {
     date: string;
@@ -30,14 +28,12 @@ type DeliveryAvailability = {
     isToday: boolean;
     isAvailable: boolean;
   }[];
-  message?: string;
   areas: {
     area: DeliveryArea;
     slot: string;
     booked: number;
     remaining: number;
     isAvailable: boolean;
-    message?: string;
   }[];
 };
 
@@ -79,7 +75,7 @@ export function CheckoutForm() {
 
         setAvailability(result);
         setDeliveryDate(result.date);
-        const firstAvailableArea = result.areas.find((area: DeliveryAvailability["areas"][number]) => area.isAvailable)?.area ?? "";
+        const firstAvailableArea = result.areas[0]?.area ?? "";
         setDeliveryArea(firstAvailableArea);
       } catch (fetchError) {
         if (!isActive) {
@@ -117,8 +113,8 @@ export function CheckoutForm() {
       }
 
       setAvailability(result);
-      if (!result.areas.some((area: DeliveryAvailability["areas"][number]) => area.area === deliveryArea && area.isAvailable)) {
-        const firstAvailableArea = result.areas.find((area: DeliveryAvailability["areas"][number]) => area.isAvailable)?.area ?? "";
+      if (!result.areas.some((area: DeliveryAvailability["areas"][number]) => area.area === deliveryArea)) {
+        const firstAvailableArea = result.areas[0]?.area ?? "";
         setDeliveryArea(firstAvailableArea);
       }
     } catch (fetchError) {
@@ -134,8 +130,7 @@ export function CheckoutForm() {
   );
   const deliveryFee = useMemo(() => calculateDeliveryFee(subtotal), [subtotal]);
   const total = useMemo(() => calculateOrderTotal(subtotal), [subtotal]);
-  const availableAreas = availability?.areas.filter((area) => area.isAvailable) ?? [];
-  const fullAreas = availability?.areas.filter((area) => !area.isAvailable) ?? [];
+  const availableAreas = availability?.areas ?? [];
   const selectedSlot = deliveryArea ? getDeliverySlotForArea(deliveryArea) : "";
 
   const [error, setError] = useState("");
@@ -144,7 +139,7 @@ export function CheckoutForm() {
     event.preventDefault();
 
     if (!deliveryArea) {
-      setError(availability?.message ?? "请选择配送区域。");
+      setError("请选择配送区域。");
       return;
     }
 
@@ -194,9 +189,6 @@ export function CheckoutForm() {
         <p className="mt-4 max-w-md text-base leading-7 text-graphite md:mt-6">
           请填写姓名、电话、地址和备注，确认购物车后提交订单。
         </p>
-        {availability?.message ? (
-          <p className="mt-4 text-sm text-red-600">{availability.message}</p>
-        ) : null}
       </div>
       <form className="grid gap-4 border border-ink/15 p-4 md:gap-5 md:p-5" onSubmit={submitOrder}>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -247,7 +239,7 @@ export function CheckoutForm() {
             aria-label="配送区域"
             value={deliveryArea}
             onChange={(event) => setDeliveryArea(event.target.value as DeliveryArea | "")}
-            disabled={isLoadingAvailability || availability?.isFull || !deliveryDate}
+            disabled={isLoadingAvailability || !deliveryDate}
             className="h-12 border border-ink/20 bg-paper px-3"
           >
             <option value="">请选择配送区域</option>
@@ -258,13 +250,6 @@ export function CheckoutForm() {
             ))}
           </select>
           {selectedSlot ? <p className="text-sm text-graphite">预计配送时间：{selectedSlot}</p> : null}
-          {fullAreas.length > 0 ? (
-            <div className="grid gap-1 text-sm text-graphite">
-              {fullAreas.map((area) => (
-                <p key={area.area}>{area.area}：该区域该日期配送已满</p>
-              ))}
-            </div>
-          ) : null}
         </div>
         <textarea
           aria-label="备注"
@@ -299,7 +284,6 @@ export function CheckoutForm() {
             isSubmitting ||
             items.length === 0 ||
             isLoadingAvailability ||
-            availability?.isFull ||
             !deliveryDate ||
             !deliveryArea
           }

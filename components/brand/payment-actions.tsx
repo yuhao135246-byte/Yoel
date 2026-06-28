@@ -21,18 +21,8 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
     return /micromessenger/i.test(window.navigator.userAgent);
   }
 
-  function normalizeWeChatTarget(rawValue: string) {
-    const value = rawValue.trim();
-
-    if (value.startsWith("#付款:")) {
-      return value.slice("#付款:".length).trim();
-    }
-
-    return value;
-  }
-
   function openWeChatPayment() {
-    const target = normalizeWeChatTarget(WECHAT_PAYMENT_URL);
+    const target = WECHAT_PAYMENT_URL.trim();
 
     if (!target) {
       setMessage("支付链接未配置，请联系管理员。");

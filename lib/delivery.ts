@@ -90,7 +90,8 @@ export function addDays(base: Date, days: number) {
 }
 
 export function getDefaultDeliveryDate(today = new Date()) {
-  return toDateKey(addDays(today, 1));
+  const isAfterCutoff = today.getHours() >= 22;
+  return toDateKey(isAfterCutoff ? addDays(today, 1) : today);
 }
 
 export function buildRollingDeliveryDateOptions(config: {
@@ -99,14 +100,14 @@ export function buildRollingDeliveryDateOptions(config: {
   isTodayAvailable: boolean;
 }) {
   const today = config.today ?? new Date();
-  const days = config.days ?? 3;
+  const days = config.days ?? 2;
   const options: DeliveryDateOption[] = [];
 
   for (let offset = 0; offset < days; offset += 1) {
     const date = addDays(today, offset);
     const dateKey = toDateKey(date);
     const isToday = offset === 0;
-    const prefix = isToday ? "今天" : offset === 1 ? "明天" : offset === 2 ? "后天" : `${offset}天后`;
+    const prefix = isToday ? "今天" : "明天";
 
     options.push({
       date: dateKey,
