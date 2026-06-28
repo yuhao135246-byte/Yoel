@@ -443,6 +443,7 @@ export async function POST(request: Request) {
       await reserveInventoryForOrder({
         supabase: supabaseAdmin,
         deliveryDate,
+        orderId: order.id,
         items
       });
       console.log("Step 6 OK");

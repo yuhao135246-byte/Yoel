@@ -12,8 +12,8 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
   const stockLabel =
     typeof remainingStock === "number"
       ? remainingStock <= 0
-        ? "Sold Out"
-        : `Only ${remainingStock} Left`
+        ? "售罄"
+        : `仅剩 ${remainingStock}`
       : null;
 
   return (

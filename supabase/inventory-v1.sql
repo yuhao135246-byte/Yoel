@@ -15,6 +15,16 @@ create table if not exists public.inventory (
   constraint inventory_status_valid check (status in ('Available', 'Sold Out'))
 );
 
+create table if not exists public.inventory_reservations (
+  order_id uuid not null,
+  product_id text not null,
+  delivery_date date not null,
+  quantity integer not null,
+  created_at timestamptz not null default now(),
+  constraint inventory_reservations_pk primary key (order_id, product_id, delivery_date),
+  constraint inventory_reservations_quantity_positive check (quantity > 0)
+);
+
 create or replace function public.inventory_apply_derived_fields()
 returns trigger
 language plpgsql
@@ -110,6 +120,7 @@ end;
 $$;
 
 create or replace function public.reserve_inventory_items(
+  p_order_id uuid,
   p_delivery_date date,
   p_items jsonb
 )
@@ -127,6 +138,10 @@ declare
   v_item record;
   v_row public.inventory%rowtype;
 begin
+  if p_order_id is null then
+    raise exception 'order_id is required';
+  end if;
+
   if p_delivery_date is null then
     raise exception 'delivery date is required';
   end if;
@@ -146,6 +161,16 @@ begin
 
     if v_item.quantity is null or v_item.quantity <= 0 then
       raise exception 'invalid quantity for %', v_item.product_id;
+    end if;
+
+    if exists (
+      select 1
+      from public.inventory_reservations as r
+      where r.order_id = p_order_id
+        and r.product_id = v_item.product_id
+        and r.delivery_date = p_delivery_date
+    ) then
+      continue;
     end if;
 
     select inv.id,
@@ -177,6 +202,22 @@ begin
     select x.product_id, x.quantity
     from jsonb_to_recordset(p_items) as x(product_id text, quantity integer)
   loop
+    insert into public.inventory_reservations (
+      order_id,
+      product_id,
+      delivery_date,
+      quantity
+    ) values (
+      p_order_id,
+      v_item.product_id,
+      p_delivery_date,
+      v_item.quantity
+    ) on conflict do nothing;
+
+    if not found then
+      continue;
+    end if;
+
     -- SET lhs must be bare column names (PostgreSQL syntax requirement);
     -- rhs uses inv.sold_quantity to avoid ambiguity with the return variable.
     update public.inventory as inv

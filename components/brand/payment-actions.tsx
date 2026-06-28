@@ -13,11 +13,12 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [hasOpenedPayment, setHasOpenedPayment] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "AWAITING_PAYMENT_CONFIRMATION" | "PAID">("PENDING");
   const [message, setMessage] = useState("");
 
   function openPaymentLink(url: string) {
     if (!url) {
-      setMessage("Payment link is not configured.");
+      setMessage("支付链接未配置，请联系管理员。");
       return;
     }
 
@@ -28,7 +29,7 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
 
   async function confirmPayment() {
     if (!orderNumber) {
-      setMessage("Order number is missing.");
+      setMessage("订单编号缺失，请返回重试。");
       return;
     }
 
@@ -44,13 +45,19 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error ?? "Failed to submit payment confirmation.");
+        throw new Error(result.error ?? "提交支付确认失败，请稍后重试。");
       }
 
+      const status = result?.order?.status as string | undefined;
+      if (status === "PAID") {
+        setPaymentStatus("PAID");
+      } else {
+        setPaymentStatus("AWAITING_PAYMENT_CONFIRMATION");
+      }
       setIsConfirmed(true);
-      setMessage("Payment confirmation submitted. Our team will verify it shortly.");
+      setMessage("支付确认已提交，客服将尽快完成核对。");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Failed to submit payment confirmation.");
+      setMessage(error instanceof Error ? error.message : "提交支付确认失败，请稍后重试。");
     } finally {
       setIsSubmitting(false);
     }
@@ -58,26 +65,30 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
 
   return (
     <div className="mt-2 grid gap-4">
+      <p className="font-mono text-xs uppercase tracking-[0.16em] text-graphite">
+        支付状态：
+        {paymentStatus === "PAID" ? "已支付" : paymentStatus === "AWAITING_PAYMENT_CONFIRMATION" ? "待确认付款" : "待支付"}
+      </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => openPaymentLink(WECHAT_PAYMENT_URL)}
           className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
         >
-          Continue with WeChat
+          微信支付
         </button>
         <button
           type="button"
           onClick={() => openPaymentLink(ALIPAY_PAYMENT_URL)}
           className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
         >
-          Continue with Alipay
+          支付宝支付
         </button>
       </div>
 
       {hasOpenedPayment ? (
         <p className="text-sm text-graphite">
-          Please enter the exact order amount shown above when making payment.
+          请在微信或支付宝中输入与订单一致的付款金额。
         </p>
       ) : null}
 
@@ -85,9 +96,9 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
         type="button"
         onClick={confirmPayment}
         disabled={!orderNumber || isSubmitting || isConfirmed}
-        className="h-14 bg-ink px-4 text-base uppercase tracking-[0.12em] text-paper disabled:opacity-40"
+        className="h-14 bg-ink px-4 text-base text-paper disabled:opacity-40"
       >
-        {isSubmitting ? "Submitting..." : isConfirmed ? "Payment Confirmation Submitted" : "I've Completed Payment"}
+        {isSubmitting ? "提交中..." : isConfirmed ? "已提交支付确认" : "我已完成支付"}
       </button>
 
       {message ? <p className="text-sm text-graphite">{message}</p> : null}

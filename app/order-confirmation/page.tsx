@@ -27,30 +27,30 @@ export default async function OrderConfirmationPage({
   return (
     <main className="min-h-screen bg-paper px-5 py-12 text-ink md:px-8">
       <section className="mx-auto max-w-3xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Payment</p>
-        <h1 className="mt-6 text-4xl leading-tight md:text-6xl">Order Created Successfully</h1>
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">付款页面</p>
+        <h1 className="mt-6 text-4xl leading-tight md:text-6xl">订单创建成功</h1>
 
         <div className="mt-10 grid gap-4 rounded border border-ink/15 bg-white p-5 md:p-6">
           <div className="flex items-center justify-between text-sm text-graphite">
-            <span>Order Number</span>
+            <span>订单编号</span>
             <span className="font-mono text-ink">{params.orderNumber ?? "-"}</span>
           </div>
           <div className="border-y border-ink/10 py-5">
-            <p className="text-xs uppercase tracking-[0.16em] text-graphite">Amount Due</p>
+            <p className="text-xs uppercase tracking-[0.16em] text-graphite">应付金额</p>
             <p className="mt-2 font-mono text-4xl leading-none text-ink md:text-5xl">RMB {amountDue}</p>
           </div>
           <div className="grid gap-3 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-graphite">Delivery Date</span>
+              <span className="text-graphite">配送日期</span>
               <span className="font-mono">{deliveryDate ?? "-"}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-graphite">Delivery Area</span>
+              <span className="text-graphite">配送区域</span>
               <span className="font-mono">{deliveryArea ?? "-"}</span>
             </div>
             {deliverySlot ? (
               <div className="flex items-center justify-between">
-                <span className="text-graphite">Delivery Slot</span>
+                <span className="text-graphite">配送时间段</span>
                 <span className="font-mono">{deliverySlot}</span>
               </div>
             ) : null}
@@ -60,11 +60,11 @@ export default async function OrderConfirmationPage({
         </div>
 
         {hasPricing ? (
-          <p className="mt-4 text-sm text-graphite">Subtotal: RMB {subtotal} · Delivery Fee: RMB {deliveryFee}</p>
+          <p className="mt-4 text-sm text-graphite">商品金额：RMB {subtotal} · 配送费：RMB {deliveryFee}</p>
         ) : null}
 
         <Link href="/coffee" className="mt-10 inline-flex border border-ink px-5 py-4 text-sm uppercase tracking-[0.18em]">
-          Back To Menu
+          返回菜单
         </Link>
       </section>
     </main>

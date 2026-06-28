@@ -120,7 +120,10 @@ export default function InventoryPage() {
     <main className="min-h-screen bg-paper px-5 py-12 text-ink md:px-8">
       <section className="mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Admin / Inventory</p>
-        <h1 className="mt-6 text-5xl leading-none md:text-7xl">Inventory</h1>
+        <h1 className="mt-6 text-5xl leading-none md:text-7xl">库存管理</h1>
+        <p className="mt-4 max-w-2xl text-sm leading-7 text-graphite">
+          仅设置初始库存。系统会在订单创建成功后自动扣减库存，并实时计算已售数量与剩余库存。
+        </p>
 
         <div className="mt-8 grid gap-4 border border-ink/15 p-5 md:grid-cols-[1.1fr_1fr]">
           <div>
@@ -163,7 +166,7 @@ export default function InventoryPage() {
               <h2 className="text-2xl">{row.productName}</h2>
               <div className="mt-4 grid gap-4 md:grid-cols-[1fr_0.8fr_0.8fr_0.8fr_auto] md:items-end">
                 <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-                  库存
+                  初始库存
                   <input
                     type="number"
                     min="0"
@@ -187,7 +190,7 @@ export default function InventoryPage() {
                 </div>
                 <div>
                   <p className="font-mono text-xs uppercase tracking-[0.16em] text-graphite">状态</p>
-                  <p className="mt-2 text-xl">{row.status}</p>
+                  <p className="mt-2 text-xl">{row.remainingStock <= 0 ? "售罄" : "在售"}</p>
                 </div>
                 <button
                   type="button"
@@ -197,7 +200,7 @@ export default function InventoryPage() {
                   disabled={savingProduct === row.productId}
                   className="h-12 border border-ink px-5 text-sm uppercase tracking-[0.18em] disabled:opacity-50"
                 >
-                  {savingProduct === row.productId ? "保存中" : "保存"}
+                  {savingProduct === row.productId ? "保存中" : "更新初始库存"}
                 </button>
               </div>
             </article>

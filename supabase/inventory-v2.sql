@@ -2,6 +2,16 @@
 -- Replaces function definitions only. Table structure and triggers are unchanged.
 -- Run this in the Supabase SQL Editor to update both functions.
 
+create table if not exists public.inventory_reservations (
+  order_id uuid not null,
+  product_id text not null,
+  delivery_date date not null,
+  quantity integer not null,
+  created_at timestamptz not null default now(),
+  constraint inventory_reservations_pk primary key (order_id, product_id, delivery_date),
+  constraint inventory_reservations_quantity_positive check (quantity > 0)
+);
+
 -- ---------------------------------------------------------------------------
 -- set_inventory_total_stock
 -- ---------------------------------------------------------------------------
@@ -82,6 +92,7 @@ $$;
 -- reserve_inventory_items
 -- ---------------------------------------------------------------------------
 create or replace function public.reserve_inventory_items(
+  p_order_id      uuid,
   p_delivery_date date,
   p_items         jsonb
 )
@@ -100,6 +111,10 @@ declare
   v_item record;
   v_row  public.inventory%rowtype;
 begin
+  if p_order_id is null then
+    raise exception 'order_id is required';
+  end if;
+
   if p_delivery_date is null then
     raise exception 'delivery date is required';
   end if;
@@ -119,6 +134,16 @@ begin
 
     if v_item.quantity is null or v_item.quantity <= 0 then
       raise exception 'invalid quantity for %', v_item.product_id;
+    end if;
+
+    if exists (
+      select 1
+      from public.inventory_reservations as r
+      where r.order_id = p_order_id
+        and r.product_id = v_item.product_id
+        and r.delivery_date = p_delivery_date
+    ) then
+      continue;
     end if;
 
     select inv.id,
@@ -150,6 +175,22 @@ begin
     select x.product_id, x.quantity
     from jsonb_to_recordset(p_items) as x(product_id text, quantity integer)
   loop
+    insert into public.inventory_reservations (
+      order_id,
+      product_id,
+      delivery_date,
+      quantity
+    ) values (
+      p_order_id,
+      v_item.product_id,
+      p_delivery_date,
+      v_item.quantity
+    ) on conflict do nothing;
+
+    if not found then
+      continue;
+    end if;
+
     update public.inventory as inv
     set sold_quantity = inv.sold_quantity + v_item.quantity
     where inv.product_id    = v_item.product_id

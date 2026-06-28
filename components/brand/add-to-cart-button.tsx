@@ -61,7 +61,7 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
       className="h-12 w-full border border-ink px-4 text-sm uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto md:px-5"
       title={deliveryDate ? `配送日期 ${deliveryDate}` : undefined}
     >
-      {isSoldOut ? "Sold Out" : "加入购物车"}
+      {isSoldOut ? "售罄" : "加入购物车"}
     </button>
   );
 }

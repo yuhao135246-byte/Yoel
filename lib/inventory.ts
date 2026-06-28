@@ -147,6 +147,7 @@ export async function updateInventoryTotalStock(params: {
 export async function reserveInventoryForOrder(params: {
   supabase: SupabaseClient;
   deliveryDate: string;
+  orderId: string;
   items: { slug?: string; name: string; quantity: number }[];
 }) {
   const payload = params.items
@@ -161,12 +162,23 @@ export async function reserveInventoryForOrder(params: {
   }
 
   const { data, error } = await params.supabase.rpc("reserve_inventory_items", {
+    p_order_id: params.orderId,
     p_delivery_date: params.deliveryDate,
     p_items: payload
   });
 
   if (error) {
-    throw error;
+    // Backward compatibility for older SQL function signatures.
+    const fallback = await params.supabase.rpc("reserve_inventory_items", {
+      p_delivery_date: params.deliveryDate,
+      p_items: payload
+    });
+
+    if (fallback.error) {
+      throw fallback.error;
+    }
+
+    return Array.isArray(fallback.data) ? fallback.data : [];
   }
 
   return Array.isArray(data) ? data : [];
