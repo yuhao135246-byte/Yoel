@@ -26,6 +26,7 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
   "stitch-cold-brew": 20,
   "tanat-peach": 15,
   "tanat-ombligon": 15,
+  "tanat-sidra": 15,
   "fruit-lemon-tea": 30
 };
 

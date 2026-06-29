@@ -5,7 +5,11 @@ export type Product = {
   name: string;
   category: ProductCategory;
   layer: string;
+  subtitle?: string;
+  score?: number;
   price: number;
+  currency?: string;
+  available?: boolean;
   unit: string;
   availability: string;
   description: string;
@@ -53,6 +57,22 @@ export const products: Product[] = [
     details: ["草莓", "覆盆子", "桃子果酱"],
     image: "/assets/tanat-ombligon.jpg",
     tags: ["冷萃", "Ombligon", "日晒"]
+  },
+  {
+    slug: "tanat-sidra",
+    name: "TANAT Sidra 希爪 厌氧日晒",
+    category: "COFFEE",
+    layer: "冷萃系列",
+    subtitle: "哥伦比亚｜皮塔利托｜Nestor Lasso 89分",
+    price: 48,
+    currency: "RMB",
+    available: true,
+    unit: "杯",
+    availability: "周一至周日上午配送",
+    description: "杏子｜草莓｜樱桃",
+    details: ["杏子", "草莓", "樱桃"],
+    image: "/assets/tanat-Sidra.jpg",
+    tags: ["冷萃", "Sidra", "厌氧日晒"]
   },
   {
     slug: "fruit-lemon-tea",

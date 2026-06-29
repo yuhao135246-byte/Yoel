@@ -9,11 +9,14 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, priority = false, remainingStock }: ProductCardProps) {
+  const priceLabel = `${product.currency ?? "RMB"} ${product.price}`;
   const stockLabel =
     typeof remainingStock === "number"
       ? remainingStock <= 0
         ? "售罄"
         : `仅剩 ${remainingStock}`
+      : product.available === false
+        ? "售罄"
       : null;
 
   return (
@@ -33,8 +36,10 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-warm">{product.layer}</p>
             <h3 className="mt-1 text-2xl md:mt-2">{product.name}</h3>
+            {typeof product.score === "number" ? <p className="mt-1 text-sm text-graphite">{product.score} 分</p> : null}
+            {product.subtitle ? <p className="mt-1 text-sm text-graphite">{product.subtitle}</p> : null}
           </div>
-          <p className="font-mono text-sm">RMB {product.price}</p>
+          <p className="font-mono text-sm">{priceLabel}</p>
         </div>
         <p className="text-base leading-6 text-graphite">{product.description}</p>
         <div className="grid gap-0.5 text-sm text-graphite">
