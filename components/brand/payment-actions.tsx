@@ -84,7 +84,8 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
             />
           </div>
           <p className="mt-4 text-sm leading-6 text-graphite">
-          请使用微信扫一扫完成支付，支付完成后点击「我已完成支付」。          </p>
+            请使用微信扫一扫完成支付，支付完成后点击「我已完成支付」。
+          </p>
         </div>
         <button
           type="button"
