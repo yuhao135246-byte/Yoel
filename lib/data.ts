@@ -85,9 +85,25 @@ export const products: Product[] = [
     unit: "份",
     availability: "Available（可售）",
     description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片、黄油炒蛋",
-    details: [],
+    details: ["手作甜椒酱", "生菜", "鸡腿肉", "坚果", "芝士片", "黄油炒蛋"],
     image: "/assets/鸡肉卷.png",
     tags: ["冷萃", "轻食", "鸡肉卷"]
+  },
+  {
+    slug: "yunnan-lincang-cold-brew",
+    name: "云南临沧",
+    category: "COFFEE",
+    layer: "Cold Brew（冷萃）",
+    subtitle: "浅烘｜白桃荔枝浸渍处理",
+    price: 45,
+    currency: "¥",
+    available: true,
+    unit: "杯",
+    availability: "Available",
+    description: "荔枝｜桃子｜白茶｜野花蜜",
+    details: ["荔枝", "桃子", "白茶", "野花蜜"],
+    image: "/assets/云南临沧.png",
+    tags: ["冷萃", "云南", "浸渍处理"]
   },
   {
     slug: "fruit-lemon-tea",

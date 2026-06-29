@@ -27,6 +27,7 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
   "tanat-peach": 15,
   "tanat-ombligon": 15,
   "tanat-sidra": 15,
+  "yunnan-lincang-cold-brew": 15,
   "fruit-lemon-tea": 30
 };
 
