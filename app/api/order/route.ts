@@ -257,6 +257,14 @@ export async function POST(request: Request) {
       }))
     : [];
 
+  console.log("Order received", {
+    name,
+    phone,
+    deliveryDate,
+    deliveryArea,
+    itemsCount: items.length
+  });
+
   if (!name || !phone || !address || items.length === 0) {
     return new Response(JSON.stringify({ error: "姓名、电话、地址和商品不能为空。" }), {
       status: 400
@@ -348,6 +356,16 @@ export async function POST(request: Request) {
       throw error ?? new Error("订单保存失败");
     }
 
+    console.log("Order saved", {
+      orderId: order.id,
+      orderNumber,
+      deliveryDate,
+      deliveryArea,
+      subtotal,
+      deliveryFee,
+      total
+    });
+
     console.log("Step 4 OK");
 
     try {
@@ -366,6 +384,10 @@ export async function POST(request: Request) {
     }
 
     try {
+      console.log("Sending email...", {
+        orderId: order.id,
+        orderNumber
+      });
       console.log("Step 6 sendMail");
       await sendOrderNotification({
         orderNumber,
@@ -381,8 +403,13 @@ export async function POST(request: Request) {
         deliveryFee,
         total
       });
+      console.log("Email sent successfully", {
+        orderId: order.id,
+        orderNumber
+      });
       console.log("Step 6 OK");
     } catch (mailError) {
+      console.error("Email failed", mailError);
       console.error("订单已保存，但邮件发送失败", {
         orderNumber,
         orderId: order.id,
