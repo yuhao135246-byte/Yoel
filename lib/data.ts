@@ -17,7 +17,7 @@ export type Product = {
 export const products: Product[] = [
   {
     slug: "stitch-cold-brew",
-    name: "Stitch 冷萃冰滴",
+    name: "Stitch 悉尼 冰滴",
     category: "COFFEE",
     layer: "冷萃系列",
     price: 55,
@@ -30,7 +30,7 @@ export const products: Product[] = [
   },
   {
     slug: "tanat-peach",
-    name: "TANAT 桃子联合发酵冷萃",
+    name: "TANAT 桃子联合发酵冰滴",
     category: "COFFEE",
     layer: "冷萃系列",
     price: 55,
@@ -43,7 +43,7 @@ export const products: Product[] = [
   },
   {
     slug: "tanat-ombligon",
-    name: "TANAT Ombligon 冰手冲",
+    name: "TANAT Ombligon 冷萃",
     category: "COFFEE",
     layer: "冷萃系列",
     price: 43,
