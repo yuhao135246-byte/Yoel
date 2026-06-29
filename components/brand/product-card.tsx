@@ -9,7 +9,8 @@ type ProductCardProps = {
 };
 
 export function ProductCard({ product, priority = false, remainingStock }: ProductCardProps) {
-  const priceLabel = `${product.currency ?? "RMB"} ${product.price}`;
+  const currency = product.currency ?? "RMB";
+  const priceLabel = /^[¥$€£]$/.test(currency) ? `${currency}${product.price}` : `${currency} ${product.price}`;
   const stockLabel =
     typeof remainingStock === "number"
       ? remainingStock <= 0

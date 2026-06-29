@@ -53,7 +53,7 @@ export const products: Product[] = [
     price: 43,
     unit: "杯",
     availability: "周一至周日上午配送",
-    description: "哥伦比亚 El Diviso，Ombligon 稀有品种。",
+    description: "哥伦比亚 El Diviso，（大肚脐）稀有品种。",
     details: ["草莓", "覆盆子", "桃子果酱"],
     image: "/assets/tanat-ombligon.jpg",
     tags: ["冷萃", "Ombligon", "日晒"]
@@ -75,6 +75,21 @@ export const products: Product[] = [
     tags: ["冷萃", "Sidra", "厌氧日晒"]
   },
   {
+    slug: "sweet-pepper-chicken-wrap",
+    name: "甜椒鸡肉卷",
+    category: "COFFEE",
+    layer: "冷萃系列",
+    price: 22,
+    currency: "¥",
+    available: true,
+    unit: "份",
+    availability: "Available（可售）",
+    description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片",
+    details: [],
+    image: "/assets/鸡肉卷.png",
+    tags: ["冷萃", "轻食", "鸡肉卷"]
+  },
+  {
     slug: "fruit-lemon-tea",
     name: "季节水果柠檬茶",
     category: "COFFEE",
@@ -83,7 +98,7 @@ export const products: Product[] = [
     unit: "杯",
     availability: "周一至周日上午配送",
     description: "季节水果与手工冷泡茶。",
-    details: ["柠檬", "热带水果", "清爽茶感"],
+    details: ["柠檬", "西瓜 & 甜橙", "茉莉花茶"],
     image: "/assets/季节水果柠檬茶.png",
     tags: ["水果茶", "柠檬", "季节饮品"]
   }
