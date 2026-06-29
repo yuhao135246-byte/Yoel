@@ -8,6 +8,13 @@ const recipient = process.env.ORDER_NOTIFICATION_TO ?? "yuhdesign@163.com";
 const fromAddress = process.env.ORDER_NOTIFICATION_FROM ?? user ?? "no-reply@cadence.local";
 
 function getTransporter() {
+  console.log({
+    SMTP_USER: process.env.SMTP_USER,
+    SMTP_PASS_EXISTS: !!process.env.SMTP_PASS,
+    SMTP_HOST: process.env.SMTP_HOST,
+    SMTP_PORT: process.env.SMTP_PORT
+  });
+
   if (!host || !user || !pass) {
     console.error("SMTP 未配置，无法发送邮件", {
       hasHost: Boolean(host),
