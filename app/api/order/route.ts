@@ -383,7 +383,12 @@ export async function POST(request: Request) {
       });
       console.log("Step 6 OK");
     } catch (mailError) {
-      console.error("订单已保存，但邮件发送失败", mailError);
+      console.error("订单已保存，但邮件发送失败", {
+        orderNumber,
+        orderId: order.id,
+        error: mailError instanceof Error ? mailError.message : String(mailError),
+        stack: mailError instanceof Error ? mailError.stack : undefined
+      });
     }
 
     return new Response(

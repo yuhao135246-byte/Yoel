@@ -9,8 +9,24 @@ const fromAddress = process.env.ORDER_NOTIFICATION_FROM ?? user ?? "no-reply@cad
 
 function getTransporter() {
   if (!host || !user || !pass) {
+    console.error("SMTP 未配置，无法发送邮件", {
+      hasHost: Boolean(host),
+      hasUser: Boolean(user),
+      hasPass: Boolean(pass),
+      port,
+      recipient,
+      fromAddress
+    });
     throw new Error("SMTP 未配置，无法发送邮件。");
   }
+
+  console.log("准备创建邮件传输器", {
+    host,
+    port,
+    user,
+    recipient,
+    fromAddress
+  });
 
   return nodemailer.createTransport({
     host,
@@ -67,7 +83,7 @@ export async function sendOrderNotification(details: {
     <ul>${htmlItems}</ul>
   `;
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: fromAddress,
     to: recipient,
     subject: `新订单 ${details.orderNumber}`,
@@ -75,5 +91,12 @@ export async function sendOrderNotification(details: {
       .map((item) => `${item.name} x ${item.quantity} - RMB ${item.price * item.quantity}`)
       .join("; ")}`,
     html
+  });
+
+  console.log("订单通知邮件发送成功", {
+    orderNumber: details.orderNumber,
+    messageId: info.messageId,
+    accepted: info.accepted,
+    rejected: info.rejected
   });
 }
