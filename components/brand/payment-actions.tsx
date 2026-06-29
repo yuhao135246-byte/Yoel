@@ -16,9 +16,11 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "AWAITING_PAYMENT_CONFIRMATION" | "PAID">("PENDING");
   const [message, setMessage] = useState("");
+  const [isWechatModalOpen, setIsWechatModalOpen] = useState(false);
+  const [isCopyingLink, setIsCopyingLink] = useState(false);
 
   function isWeChatBrowser() {
-    return /micromessenger/i.test(window.navigator.userAgent);
+    return /MicroMessenger/i.test(window.navigator.userAgent);
   }
 
   function openWeChatPayment() {
@@ -29,15 +31,37 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
       return;
     }
 
-    // Always try opening the configured WeChat payment target directly.
-    window.location.assign(target);
-    setHasOpenedPayment(true);
-    if (!isWeChatBrowser()) {
-      setMessage("请使用微信打开本页面后点击【微信支付】。");
+    const isWechat = isWeChatBrowser();
+
+    if (isWechat) {
+      window.location.href = target;
+      setHasOpenedPayment(true);
       return;
     }
 
     setMessage("");
+    setIsWechatModalOpen(true);
+  }
+
+  async function copyWeChatPaymentLink() {
+    const target = WECHAT_PAYMENT_URL.trim();
+
+    if (!target) {
+      setMessage("支付链接未配置，请联系管理员。");
+      return;
+    }
+
+    setIsCopyingLink(true);
+
+    try {
+      await window.navigator.clipboard.writeText(target);
+      setMessage("支付链接已复制，请打开微信粘贴并访问完成支付。");
+      setIsWechatModalOpen(false);
+    } catch {
+      setMessage("复制失败，请手动复制支付链接后在微信中打开。");
+    } finally {
+      setIsCopyingLink(false);
+    }
   }
 
   function openAlipayPayment(url: string) {
@@ -126,6 +150,35 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
       </button>
 
       {message ? <p className="text-sm text-graphite">{message}</p> : null}
+
+      {isWechatModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4">
+          <div className="w-full max-w-md border border-ink/15 bg-paper p-6 text-ink shadow-xl">
+            <h2 className="text-xl leading-tight">请使用微信完成支付</h2>
+            <p className="mt-4 text-sm leading-6 text-graphite">
+              微信经营收款链接只能在微信内打开。请点击下面按钮复制链接，然后发送到微信聊天，点击即可完成支付。
+            </p>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={copyWeChatPaymentLink}
+                disabled={isCopyingLink}
+                className="h-12 flex-1 border border-ink/20 bg-white px-4 text-sm text-ink disabled:opacity-40"
+              >
+                {isCopyingLink ? "复制中..." : "复制支付链接"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsWechatModalOpen(false)}
+                className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
