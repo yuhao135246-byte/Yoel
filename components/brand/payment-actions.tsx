@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { PAYMENT_LINKS } from "@/lib/config";
 
@@ -7,9 +8,8 @@ type PaymentActionsProps = {
   orderNumber?: string;
 };
 
-const WECHAT_PAYMENT_URL = PAYMENT_LINKS.wechat;
 const ALIPAY_PAYMENT_URL = PAYMENT_LINKS.alipay;
-const WECHAT_PAYMENT_INSTRUCTION = "#付款:Cadence咖啡生活(ZYCZYC103)/收款/001";
+const WECHAT_PAYMENT_QR_SRC = "/assets/Wechat pay.jpg";
 
 export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [hasOpenedPayment, setHasOpenedPayment] = useState(false);
@@ -17,22 +17,6 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState<"PENDING" | "AWAITING_PAYMENT_CONFIRMATION" | "PAID">("PENDING");
   const [message, setMessage] = useState("");
-
-  function isWeChatBrowser() {
-    return /MicroMessenger/i.test(window.navigator.userAgent);
-  }
-
-  function openWeChatPayment() {
-    const isWechat = isWeChatBrowser();
-
-    if (isWechat) {
-      window.location.href = WECHAT_PAYMENT_INSTRUCTION;
-      setHasOpenedPayment(true);
-      return;
-    }
-
-    window.alert("请点击右上角 → 在微信中打开本页面，然后点击微信支付。");
-  }
 
   function openAlipayPayment(url: string) {
     if (!url) {
@@ -88,13 +72,21 @@ export function PaymentActions({ orderNumber }: PaymentActionsProps) {
         {paymentStatus === "PAID" ? "已支付" : paymentStatus === "AWAITING_PAYMENT_CONFIRMATION" ? "待确认付款" : "待支付"}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={openWeChatPayment}
-          className="h-12 border border-ink/20 bg-white px-4 text-sm text-ink"
-        >
-          微信支付
-        </button>
+        <div className="flex flex-col items-center justify-center border border-ink/20 bg-white px-4 py-5 text-center">
+          <p className="text-sm text-ink">微信支付</p>
+          <div className="mt-4 w-full max-w-[240px]">
+            <Image
+              src={WECHAT_PAYMENT_QR_SRC}
+              alt="微信支付二维码"
+              width={800}
+              height={800}
+              className="mx-auto h-auto w-full"
+            />
+          </div>
+          <p className="mt-4 text-sm leading-6 text-graphite">
+            请使用微信扫一扫完成支付，支付完成后点击"我已完成支付"。
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => openAlipayPayment(ALIPAY_PAYMENT_URL)}
