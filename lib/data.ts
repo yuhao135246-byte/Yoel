@@ -84,7 +84,7 @@ export const products: Product[] = [
     available: true,
     unit: "份",
     availability: "Available（可售）",
-    description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片",
+    description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片、黄油炒蛋",
     details: [],
     image: "/assets/鸡肉卷.png",
     tags: ["冷萃", "轻食", "鸡肉卷"]
