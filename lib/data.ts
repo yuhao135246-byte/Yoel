@@ -20,16 +20,16 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    slug: "stitch-cold-brew",
-    name: "Stitch 悉尼 冰滴",
+    slug: "HYDRANGEA-cold-brew",
+    name: "EL Sendero 黑莓冷萃",
     category: "COFFEE",
     layer: "冷萃系列",
-    price: 55,
+    price: 53,
     unit: "杯",
     availability: "周一至周日上午配送",
-    description: "哥伦比亚 El Encanto 魅惑庄园，Caturra + Chiroso，酵母接种日晒。",
-    details: ["巧克力牛奶", "樱桃酱", "红苹果"],
-    image: "/assets/stitch.jpg",
+    description: "哥伦比亚 艾尔森德罗 庄园，Caturra ，黑莓发酵蜜处理。",
+    details: ["黑莓酱", "青柠", "红茶"],
+    image: "/assets/HYDRANGEA-cold-brew.png",
     tags: ["冷萃", "冰滴", "哥伦比亚"]
   },
   {
@@ -75,21 +75,6 @@ export const products: Product[] = [
     tags: ["冷萃", "Sidra", "厌氧日晒"]
   },
   {
-    slug: "sweet-pepper-chicken-wrap",
-    name: "甜椒鸡肉卷",
-    category: "COFFEE",
-    layer: "冷萃系列",
-    price: 22,
-    currency: "¥",
-    available: true,
-    unit: "份",
-    availability: "Available（可售）",
-    description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片、黄油炒蛋",
-    details: ["手作甜椒酱", "生菜", "鸡腿肉", "坚果", "芝士片", "黄油炒蛋"],
-    image: "/assets/鸡肉卷.png",
-    tags: ["冷萃", "轻食", "鸡肉卷"]
-  },
-  {
     slug: "yunnan-lincang-cold-brew",
     name: "云南临沧",
     category: "COFFEE",
@@ -117,6 +102,36 @@ export const products: Product[] = [
     details: ["柠檬", "西瓜 & 甜橙", "茉莉花茶"],
     image: "/assets/季节水果柠檬茶.png",
     tags: ["水果茶", "柠檬", "季节饮品"]
+  },
+  {
+    slug: "sweet-pepper-chicken-wrap",
+    name: "甜椒鸡肉卷",
+    category: "COFFEE",
+    layer: "Chicken Wrap（鸡肉卷）",
+    price: 22,
+    currency: "¥",
+    available: true,
+    unit: "份",
+    availability: "Available（可售）",
+    description: "手作甜椒酱、生菜、鸡腿肉、坚果、芝士片、黄油炒蛋",
+    details: ["手作甜椒酱", "生菜", "鸡腿肉", "坚果", "芝士片", "黄油炒蛋"],
+    image: "/assets/鸡肉卷.png",
+    tags: ["冷萃", "轻食", "鸡肉卷"]
+  },
+  {
+    slug: "mustard-chicken-wrap",
+    name: "芥酱鸡肉卷",
+    category: "COFFEE",
+    layer: "Chicken Wrap（鸡肉卷）",
+    price: 22,
+    currency: "¥",
+    available: true,
+    unit: "份",
+    availability: "Available（可售）",
+    description: "芥末酸奶蜂蜜蛋黄酱（Mustard）｜生菜｜鸡腿肉｜坚果",
+    details: ["芥末酸奶蜂蜜蛋黄酱（Mustard）", "生菜", "鸡腿肉","黄油炒蛋", "坚果"],
+    image: "/assets/芥末蛋黄酱鸡肉卷.png",
+    tags: ["冷萃", "轻食", "鸡肉卷"]
   }
 ];
 

@@ -11,12 +11,19 @@ export default function ProductsPage() {
       name: product.name,
       subtitle: product.subtitle ?? "",
       description: product.description,
+      details: product.details.join("｜"),
+      availability: product.availability,
+      available: product.available ?? true,
       price: product.price,
       image: product.image
     }))
   );
 
-  function updateDraft(slug: string, key: "name" | "subtitle" | "description" | "price" | "image", value: string) {
+  function updateDraft(
+    slug: string,
+    key: "name" | "subtitle" | "description" | "details" | "availability" | "price" | "image",
+    value: string
+  ) {
     setDrafts((prev) =>
       prev.map((item) => {
         if (item.slug !== slug) {
@@ -30,6 +37,12 @@ export default function ProductsPage() {
 
         return { ...item, [key]: value };
       })
+    );
+  }
+
+  function updateAvailabilityFlag(slug: string, value: boolean) {
+    setDrafts((prev) =>
+      prev.map((item) => (item.slug === slug ? { ...item, available: value } : item))
     );
   }
 
@@ -66,6 +79,28 @@ export default function ProductsPage() {
                   rows={2}
                   aria-label={`${product.slug}-tasting-notes`}
                 />
+                <textarea
+                  value={draft.details}
+                  onChange={(event) => updateDraft(product.slug, "details", event.target.value)}
+                  className="mt-3 w-full resize-none bg-transparent text-sm leading-7 text-graphite outline-none"
+                  rows={2}
+                  aria-label={`${product.slug}-ingredients`}
+                />
+                <input
+                  value={draft.availability}
+                  onChange={(event) => updateDraft(product.slug, "availability", event.target.value)}
+                  className="mt-3 w-full bg-transparent text-sm leading-7 text-graphite outline-none"
+                  aria-label={`${product.slug}-availability-label`}
+                />
+                <label className="mt-3 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-graphite">
+                  <input
+                    type="checkbox"
+                    checked={draft.available}
+                    onChange={(event) => updateAvailabilityFlag(product.slug, event.target.checked)}
+                    aria-label={`${product.slug}-available`}
+                  />
+                  可售状态
+                </label>
                 <input
                   type="number"
                   value={draft.price}
