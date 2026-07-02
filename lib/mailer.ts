@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { products } from "@/lib/data";
 
 const host = process.env.SMTP_HOST;
 const port = Number(process.env.SMTP_PORT ?? "587");
@@ -52,7 +53,18 @@ export async function sendOrderNotification(details: {
   phone: string;
   address: string;
   notes?: string;
-  items: { name: string; quantity: number; price: number }[];
+  items: {
+    slug?: string;
+    name: string;
+    quantity: number;
+    price: number;
+    selectedOptions?: {
+      groupKey: string;
+      groupLabel: string;
+      value: string;
+      label: string;
+    }[];
+  }[];
   deliveryDate?: string;
   deliveryArea?: string;
   deliverySlot?: string;
@@ -69,8 +81,26 @@ export async function sendOrderNotification(details: {
   });
 
   const transporter = getTransporter();
+  const productBySlug = new Map(products.map((product) => [product.slug, product]));
   const htmlItems = details.items
-    .map((item) => `<li>${item.name} x ${item.quantity} - RMB ${item.price * item.quantity}</li>`)
+    .map((item) => {
+      const optionLines = (item.selectedOptions ?? [])
+        .map((option) => `<br/>${option.groupLabel}：${option.label}`)
+        .join("");
+      const includedLines = item.slug
+        ? (productBySlug.get(item.slug)?.inventoryItems ?? [])
+            .map((included) => {
+              const includedProduct = productBySlug.get(included.slug);
+              if (!includedProduct) {
+                return "";
+              }
+
+              return `<br/>${includedProduct.name} x ${included.quantity * item.quantity}`;
+            })
+            .join("")
+        : "";
+      return `<li>${item.name} x ${item.quantity}${optionLines}${includedLines}<br/>RMB ${item.price * item.quantity}</li>`;
+    })
     .join("");
 
   const html = `
@@ -95,7 +125,27 @@ export async function sendOrderNotification(details: {
     to: recipient,
     subject: `新订单 ${details.orderNumber}`,
     text: `新订单 ${details.orderNumber}\n姓名：${details.name}\n手机号：${details.phone}\n地址：${details.address}\n配送日期：${details.deliveryDate ?? "未填写"}\n配送区域：${details.deliveryArea ?? "未填写"}\n预计配送时间：${details.deliverySlot ?? "未填写"}\n备注：${details.notes ?? "无"}\n商品金额：RMB ${details.subtotal}\n配送费：RMB ${details.deliveryFee}\n订单总额：RMB ${details.total}\n商品：${details.items
-      .map((item) => `${item.name} x ${item.quantity} - RMB ${item.price * item.quantity}`)
+      .map((item) => {
+        const optionText = (item.selectedOptions ?? [])
+          .map((option) => `${option.groupLabel}：${option.label}`)
+          .join("，");
+        const includedText = item.slug
+          ? (productBySlug.get(item.slug)?.inventoryItems ?? [])
+              .map((included) => {
+                const includedProduct = productBySlug.get(included.slug);
+                if (!includedProduct) {
+                  return "";
+                }
+
+                return `${includedProduct.name} x ${included.quantity * item.quantity}`;
+              })
+              .filter((line) => line.length > 0)
+              .join("，")
+          : "";
+        const line = `${item.name} x ${item.quantity}`;
+        const detail = [optionText, includedText].filter((entry) => entry.length > 0).join("，");
+        return detail ? `${line}（${detail}） - RMB ${item.price * item.quantity}` : `${line} - RMB ${item.price * item.quantity}`;
+      })
       .join("; ")}`,
     html
   });

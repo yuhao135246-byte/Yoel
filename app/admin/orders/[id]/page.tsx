@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import { OrderStatusForm } from "@/components/admin/order-status-form";
+import { products } from "@/lib/data";
 
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "待付款",
@@ -64,8 +65,23 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
     notFound();
   }
 
+  const productBySlug = new Map(products.map((product) => [product.slug, product]));
+
   const items = Array.isArray(order.items)
-    ? order.items
+    ? order.items.map((item) => ({
+      slug: String(item?.slug ?? ""),
+        name: String(item?.name ?? ""),
+        quantity: Number(item?.quantity ?? 1),
+        selectedOptions: Array.isArray(item?.selectedOptions)
+          ? item.selectedOptions
+              .map((option) => ({
+                groupKey: String(option?.groupKey ?? ""),
+                groupLabel: String(option?.groupLabel ?? ""),
+                label: String(option?.label ?? "")
+              }))
+              .filter((option) => option.groupKey.length > 0)
+          : []
+      }))
     : order.product_name
     ? [{ name: order.product_name, quantity: order.quantity, price: Number(order.amount) }]
     : [];
@@ -105,7 +121,26 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 {items.length > 0 ? (
                   items.map((item, index) => (
                     <div key={`${item.name}-${index}`} className="grid grid-cols-[1fr_0.35fr] gap-3">
-                      <span>{item.name}</span>
+                      <div>
+                        <span>{item.name}</span>
+                        {item.selectedOptions?.map((option) => (
+                          <p key={`${item.name}-${index}-${option.groupKey}`} className="mt-1 text-xs text-graphite">
+                            {option.groupLabel}：{option.label}
+                          </p>
+                        ))}
+                        {(productBySlug.get(item.slug)?.inventoryItems ?? []).map((included, includedIndex) => {
+                          const includedProduct = productBySlug.get(included.slug);
+                          if (!includedProduct) {
+                            return null;
+                          }
+
+                          return (
+                            <p key={`${item.name}-${index}-included-${includedIndex}`} className="mt-1 text-xs text-graphite">
+                              {includedProduct.name} x {included.quantity * item.quantity}
+                            </p>
+                          );
+                        })}
+                      </div>
                       <span className="font-mono text-right">x{item.quantity}</span>
                     </div>
                   ))

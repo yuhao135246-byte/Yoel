@@ -12,6 +12,9 @@ export default function ProductsPage() {
       subtitle: product.subtitle ?? "",
       description: product.description,
       details: product.details.join("｜"),
+      optionGroups: (product.optionGroups ?? [])
+        .map((group) => `${group.label}：${group.options.map((option) => option.label).join(" / ")}`)
+        .join("\n"),
       availability: product.availability,
       available: product.available ?? true,
       price: product.price,
@@ -21,7 +24,7 @@ export default function ProductsPage() {
 
   function updateDraft(
     slug: string,
-    key: "name" | "subtitle" | "description" | "details" | "availability" | "price" | "image",
+    key: "name" | "subtitle" | "description" | "details" | "optionGroups" | "availability" | "price" | "image",
     value: string
   ) {
     setDrafts((prev) =>
@@ -85,6 +88,13 @@ export default function ProductsPage() {
                   className="mt-3 w-full resize-none bg-transparent text-sm leading-7 text-graphite outline-none"
                   rows={2}
                   aria-label={`${product.slug}-ingredients`}
+                />
+                <textarea
+                  value={draft.optionGroups}
+                  onChange={(event) => updateDraft(product.slug, "optionGroups", event.target.value)}
+                  className="mt-3 w-full resize-none bg-transparent text-sm leading-7 text-graphite outline-none"
+                  rows={2}
+                  aria-label={`${product.slug}-option-groups`}
                 />
                 <input
                   value={draft.availability}

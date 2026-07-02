@@ -11,12 +11,19 @@ import {
   calculateOrderTotal,
   calculateSubtotal
 } from "@/lib/order-pricing";
+import { products } from "@/lib/data";
 
 type CartItem = {
   slug: string;
   name: string;
   price: number;
   quantity: number;
+  selectedOptions?: {
+    groupKey: string;
+    groupLabel: string;
+    value: string;
+    label: string;
+  }[];
 };
 
 type DeliveryAvailability = {
@@ -132,6 +139,7 @@ export function CheckoutForm() {
   const total = useMemo(() => calculateOrderTotal(subtotal), [subtotal]);
   const availableAreas = availability?.areas ?? [];
   const selectedSlot = deliveryArea ? getDeliverySlotForArea(deliveryArea) : "";
+  const productBySlug = useMemo(() => new Map(products.map((product) => [product.slug, product])), []);
 
   const [error, setError] = useState("");
 
@@ -259,8 +267,27 @@ export function CheckoutForm() {
           className="min-h-24 border border-ink/20 bg-paper px-3 py-3"
         />
         <div className="border-t border-ink/15 pt-3 font-mono text-sm">
-          {items.map((item) => (
-            <p key={item.slug} className="leading-6">{item.name} x {item.quantity}</p>
+          {items.map((item, index) => (
+            <div key={`${item.slug}-${index}`}>
+              <p className="leading-6">{item.name} x {item.quantity}</p>
+              {item.selectedOptions?.map((option) => (
+                <p key={`${item.slug}-${index}-${option.groupKey}`} className="text-xs text-graphite">
+                  {option.groupLabel}：{option.label}
+                </p>
+              ))}
+              {(productBySlug.get(item.slug)?.inventoryItems ?? []).map((included, includedIndex) => {
+                const includedProduct = productBySlug.get(included.slug);
+                if (!includedProduct) {
+                  return null;
+                }
+
+                return (
+                  <p key={`${item.slug}-${index}-included-${includedIndex}`} className="text-xs text-graphite">
+                    {includedProduct.name} x {included.quantity * item.quantity}
+                  </p>
+                );
+              })}
+            </div>
           ))}
           <div className="mt-2 grid gap-2 text-sm text-graphite">
             <p className="flex items-center justify-between">

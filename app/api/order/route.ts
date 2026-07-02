@@ -21,6 +21,7 @@ import {
   getInventoryByDate,
   reserveInventoryForOrder
 } from "@/lib/inventory";
+import { products } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -30,6 +31,12 @@ type ApiOrderItem = {
   name: string;
   price: number;
   quantity: number;
+  selectedOptions?: {
+    groupKey: string;
+    groupLabel: string;
+    value: string;
+    label: string;
+  }[];
 };
 
 type ApiOrderPayload = {
@@ -83,22 +90,51 @@ type DeliveryAvailabilityResponse = DeliveryAvailability & {
 };
 
 function buildProductSummary(items: ApiOrderItem[]) {
-  if (items.length === 1) {
-    return items[0].name;
+  const lineItems = items.map((item) => {
+    const optionText = (item.selectedOptions ?? [])
+      .map((option) => `${option.groupLabel}：${option.label}`)
+      .join("，");
+    return optionText ? `${item.name} x${item.quantity}（${optionText}）` : `${item.name} x${item.quantity}`;
+  });
+
+  if (lineItems.length === 1) {
+    return lineItems[0];
   }
 
-  return items.map((item) => `${item.name} x${item.quantity}`).join("、");
+  return lineItems.join("、");
 }
 
-function aggregateOrderItems(items: ApiOrderItem[]) {
+function buildInventoryReservationItems(items: ApiOrderItem[]) {
   const quantityBySlug = new Map<string, number>();
+  const productBySlug = new Map(products.map((product) => [product.slug, product]));
 
   for (const item of items) {
     if (!item.slug) {
       continue;
     }
 
-    quantityBySlug.set(item.slug, (quantityBySlug.get(item.slug) ?? 0) + Math.max(1, item.quantity));
+    const quantity = Math.max(1, item.quantity);
+    const product = productBySlug.get(item.slug);
+    const components = product?.inventoryItems ?? [];
+    const selectedOptions = item.selectedOptions ?? [];
+    const optionComponents = selectedOptions.flatMap((selectedOption) => {
+      const group = product?.optionGroups?.find((item) => item.key === selectedOption.groupKey);
+      const option = group?.options.find((item) => item.value === selectedOption.value);
+      return option?.inventoryItems ?? [];
+    });
+    const allComponents = [...components, ...optionComponents];
+
+    if (allComponents.length > 0) {
+      for (const component of allComponents) {
+        quantityBySlug.set(
+          component.slug,
+          (quantityBySlug.get(component.slug) ?? 0) + quantity * Math.max(1, component.quantity)
+        );
+      }
+      continue;
+    }
+
+    quantityBySlug.set(item.slug, (quantityBySlug.get(item.slug) ?? 0) + quantity);
   }
 
   return Array.from(quantityBySlug.entries()).map(([slug, quantity]) => ({ slug, quantity }));
@@ -253,9 +289,20 @@ export async function POST(request: Request) {
         slug: item.slug,
         name: item.name,
         price: Number(item.price),
-        quantity: Math.max(1, Number(item.quantity))
+        quantity: Math.max(1, Number(item.quantity)),
+        selectedOptions: Array.isArray(item.selectedOptions)
+          ? item.selectedOptions
+              .map((option) => ({
+                groupKey: String(option.groupKey ?? ""),
+                groupLabel: String(option.groupLabel ?? ""),
+                value: String(option.value ?? ""),
+                label: String(option.label ?? "")
+              }))
+              .filter((option) => option.groupKey.length > 0 && option.value.length > 0)
+          : undefined
       }))
     : [];
+  const productBySlug = new Map(products.map((product) => [product.slug, product]));
 
   console.log("Order received", {
     name,
@@ -283,6 +330,30 @@ export async function POST(request: Request) {
     });
   }
 
+  for (const item of items) {
+    if (!item.slug) {
+      continue;
+    }
+
+    const product = productBySlug.get(item.slug);
+    const requiredGroups = (product?.optionGroups ?? []).filter((group) => group.required !== false);
+    const selectedOptions = item.selectedOptions ?? [];
+
+    for (const group of requiredGroups) {
+      const selected = selectedOptions.find((option) => option.groupKey === group.key);
+      const hasValidOption = Boolean(
+        selected &&
+          group.options.some((option) => option.value === selected.value)
+      );
+
+      if (!hasValidOption) {
+        return new Response(JSON.stringify({ error: `${item.name} 缺少必选项：${group.label}` }), {
+          status: 400
+        });
+      }
+    }
+  }
+
   const activeDateOptions = getBookingDateOptions();
   if (!activeDateOptions.some((option) => option.date === deliveryDate)) {
     return new Response(JSON.stringify({ error: "当前时段仅支持可选配送日期，请刷新后重试。" }), {
@@ -308,7 +379,7 @@ export async function POST(request: Request) {
     const inventoryForDate = await getInventoryByDate(supabaseAdmin, deliveryDate);
     console.log("Step 2 OK");
     const inventoryMap = new Map(inventoryForDate.map((item) => [item.productId, item]));
-    const requestedItems = aggregateOrderItems(items);
+    const requestedItems = buildInventoryReservationItems(items);
 
     for (const requested of requestedItems) {
       const stock = inventoryMap.get(requested.slug);
@@ -374,7 +445,11 @@ export async function POST(request: Request) {
         supabase: supabaseAdmin,
         deliveryDate,
         orderId: order.id,
-        items
+        items: requestedItems.map((item) => ({
+          slug: item.slug,
+          name: item.slug,
+          quantity: item.quantity
+        }))
       });
       console.log("Step 5 OK");
     } catch (stockError) {

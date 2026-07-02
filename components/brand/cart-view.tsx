@@ -7,12 +7,19 @@ import {
   calculateOrderTotal,
   calculateSubtotal
 } from "@/lib/order-pricing";
+import { products } from "@/lib/data";
 
 type CartItem = {
   slug: string;
   name: string;
   price: number;
   quantity: number;
+  selectedOptions?: {
+    groupKey: string;
+    groupLabel: string;
+    value: string;
+    label: string;
+  }[];
 };
 
 export function CartView() {
@@ -66,9 +73,9 @@ export function CartView() {
     window.localStorage.setItem("cadence-cart", JSON.stringify(nextItems));
   }
 
-  function decreaseQuantity(slug: string) {
-    const nextItems = items.flatMap((item) => {
-      if (item.slug !== slug) {
+  function decreaseQuantity(indexToChange: number) {
+    const nextItems = items.flatMap((item, index) => {
+      if (index !== indexToChange) {
         return item;
       }
 
@@ -85,9 +92,13 @@ export function CartView() {
     persistItems(nextItems);
   }
 
-  function increaseQuantity(slug: string) {
-    const current = items.find((item) => item.slug === slug);
-    const remaining = remainingStockMap[slug];
+  function increaseQuantity(indexToChange: number) {
+    const current = items[indexToChange];
+    if (!current) {
+      return;
+    }
+
+    const remaining = remainingStockMap[current.slug];
 
     if (current && Number.isFinite(remaining) && current.quantity + 1 > remaining) {
       setStockError(`库存不足\n当前剩余：${remaining}`);
@@ -95,8 +106,8 @@ export function CartView() {
     }
 
     setStockError("");
-    const nextItems = items.map((item) =>
-      item.slug === slug
+    const nextItems = items.map((item, index) =>
+      index === indexToChange
         ? {
             ...item,
             quantity: item.quantity + 1
@@ -107,8 +118,8 @@ export function CartView() {
     persistItems(nextItems);
   }
 
-  function removeItem(slug: string) {
-    persistItems(items.filter((item) => item.slug !== slug));
+  function removeItem(indexToRemove: number) {
+    persistItems(items.filter((_, index) => index !== indexToRemove));
   }
 
   const subtotal = useMemo(
@@ -117,6 +128,7 @@ export function CartView() {
   );
   const deliveryFee = useMemo(() => calculateDeliveryFee(subtotal), [subtotal]);
   const total = useMemo(() => calculateOrderTotal(subtotal), [subtotal]);
+  const productBySlug = useMemo(() => new Map(products.map((product) => [product.slug, product])), []);
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-12">
@@ -126,17 +138,34 @@ export function CartView() {
         {items.length === 0 ? (
           <p className="text-sm text-graphite">购物车为空。</p>
         ) : (
-          items.map((item) => (
-            <div key={item.slug} className="grid gap-3 border-t border-ink/15 py-4 text-base md:grid-cols-[1fr_auto_0.35fr] md:items-center md:gap-4 md:py-5">
+          items.map((item, index) => (
+            <div key={`${item.slug}-${index}`} className="grid gap-3 border-t border-ink/15 py-4 text-base md:grid-cols-[1fr_auto_0.35fr] md:items-center md:gap-4 md:py-5">
               <div className="grid gap-1">
                 <p>{item.name}</p>
+                {item.selectedOptions?.map((option) => (
+                  <p key={`${item.slug}-${index}-${option.groupKey}`} className="text-sm text-graphite">
+                    {option.groupLabel}：{option.label}
+                  </p>
+                ))}
+                {(productBySlug.get(item.slug)?.inventoryItems ?? []).map((included, includedIndex) => {
+                  const includedProduct = productBySlug.get(included.slug);
+                  if (!includedProduct) {
+                    return null;
+                  }
+
+                  return (
+                    <p key={`${item.slug}-${index}-included-${includedIndex}`} className="text-sm text-graphite">
+                      {includedProduct.name} x {included.quantity * item.quantity}
+                    </p>
+                  );
+                })}
                 <p className="mt-1 font-mono text-xs text-graphite">RMB {item.price} / 份</p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   aria-label={`减少 ${item.name} 数量`}
-                  onClick={() => decreaseQuantity(item.slug)}
+                  onClick={() => decreaseQuantity(index)}
                   className="flex h-10 w-10 items-center justify-center border border-ink/20 text-lg"
                 >
                   -
@@ -145,12 +174,12 @@ export function CartView() {
                 <button
                   type="button"
                   aria-label={`增加 ${item.name} 数量`}
-                  onClick={() => increaseQuantity(item.slug)}
+                  onClick={() => increaseQuantity(index)}
                   className="flex h-10 w-10 items-center justify-center border border-ink/20 text-lg"
                 >
                   +
                 </button>
-                <button type="button" onClick={() => removeItem(item.slug)} className="ml-0 border border-ink/20 px-3 py-2 text-xs uppercase tracking-[0.16em] text-graphite md:ml-2">
+                <button type="button" onClick={() => removeItem(index)} className="ml-0 border border-ink/20 px-3 py-2 text-xs uppercase tracking-[0.16em] text-graphite md:ml-2">
                   删除
                 </button>
               </div>

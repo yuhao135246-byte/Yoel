@@ -1,5 +1,23 @@
 export type ProductCategory = "COFFEE" | "OBJECT" | "RESEARCH";
 
+export type ProductInventoryItem = {
+  slug: string;
+  quantity: number;
+};
+
+export type ProductOption = {
+  value: string;
+  label: string;
+  inventoryItems?: ProductInventoryItem[];
+};
+
+export type ProductOptionGroup = {
+  key: string;
+  label: string;
+  required?: boolean;
+  options: ProductOption[];
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -16,6 +34,8 @@ export type Product = {
   details: string[];
   image: string;
   tags: string[];
+  inventoryItems?: ProductInventoryItem[];
+  optionGroups?: ProductOptionGroup[];
 };
 
 export const products: Product[] = [
@@ -132,6 +152,56 @@ export const products: Product[] = [
     details: ["芥末酸奶蜂蜜蛋黄酱（Mustard）", "生菜", "鸡腿肉","黄油炒蛋", "坚果"],
     image: "/assets/芥末蛋黄酱鸡肉卷.png",
     tags: ["冷萃", "轻食", "鸡肉卷"]
+  },
+  {
+    slug: "low-cal-wrap-fruit-tea-lunch-combo",
+    name: "低卡鸡肉卷水果茶午餐",
+    category: "COFFEE",
+    layer: "Lunch Combo（午餐套餐）",
+    price: 35,
+    currency: "¥",
+    available: true,
+    unit: "份",
+    availability: "Available（可售）",
+    description: "鸡肉卷二选一｜水果茶",
+    details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 芥酱鸡肉卷", "水果茶"],
+    image: "/assets/combo.png",
+    tags: ["午餐套餐", "鸡肉卷", "水果茶"],
+    inventoryItems: [
+      {
+        slug: "fruit-lemon-tea",
+        quantity: 1
+      }
+    ],
+    optionGroups: [
+      {
+        key: "wrapChoice",
+        label: "鸡肉卷选择",
+        required: true,
+        options: [
+          {
+            value: "sweet-pepper-chicken-wrap",
+            label: "甜椒鸡肉卷",
+            inventoryItems: [
+              {
+                slug: "sweet-pepper-chicken-wrap",
+                quantity: 1
+              }
+            ]
+          },
+          {
+            value: "mustard-chicken-wrap",
+            label: "芥酱鸡肉卷",
+            inventoryItems: [
+              {
+                slug: "mustard-chicken-wrap",
+                quantity: 1
+              }
+            ]
+          }
+        ]
+      }
+    ]
   }
 ];
 
