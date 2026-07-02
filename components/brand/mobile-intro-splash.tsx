@@ -12,6 +12,7 @@ export function MobileIntroSplash() {
   const fallbackTimeoutRef = useRef<number | null>(null);
   const finishedRef = useRef(false);
   const previousOverflowRef = useRef("");
+  const showIntro = true;
   const [phase, setPhase] = useState<SplashPhase>("hidden");
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export function MobileIntroSplash() {
     }, 500);
   }
 
-  if (phase === "hidden") {
+  if (!showIntro || phase === "hidden") {
     return null;
   }
 

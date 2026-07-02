@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Footer } from "@/components/brand/footer";
 import { Header } from "@/components/brand/header";
+import { MobileIntroSplash } from "@/components/brand/mobile-intro-splash";
 
 export const metadata: Metadata = {
   title: "CADENCE | 冷萃研究与菜单",
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="zh">
       <body>
+        <MobileIntroSplash />
         <Header />
         {children}
         <Footer />
