@@ -95,7 +95,7 @@ export function MobileIntroSplash() {
         onEnded={() => finishIntro()}
         onError={() => finishIntro()}
       >
-        <source src="/intro.mp4" type="video/mp4" />
+        <source src="/Intro.mp4" type="video/mp4" />
       </video>
     </div>
   );
