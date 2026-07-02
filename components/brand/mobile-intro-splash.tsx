@@ -20,10 +20,10 @@ export function MobileIntroSplash() {
       return;
     }
 
-    const hasPlayed = window.sessionStorage.getItem(INTRO_SESSION_KEY) === "1";
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
-    if (hasPlayed || !isMobile) {
+    // Temporary debug mode: ignore session flag so intro plays on every refresh.
+    if (!isMobile) {
       return;
     }
 
@@ -87,7 +87,7 @@ export function MobileIntroSplash() {
       <video
         ref={videoRef}
         src="/Intro.mp4"
-        className="h-full w-full object-cover"
+        className="h-full w-full bg-black object-contain"
         autoPlay
         muted
         playsInline
