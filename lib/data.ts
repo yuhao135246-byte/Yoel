@@ -165,7 +165,7 @@ export const products: Product[] = [
     availability: "Available（可售）",
     description: "鸡肉卷二选一｜水果茶",
     details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 芥酱鸡肉卷", "水果茶"],
-    image: "/assets/combo.png",
+    image: "/assets/Combo.png",
     tags: ["午餐套餐", "鸡肉卷", "水果茶"],
     inventoryItems: [
       {
