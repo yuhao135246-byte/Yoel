@@ -13,6 +13,19 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "已完成"
 };
 
+type SelectedOption = {
+  groupKey: string;
+  groupLabel: string;
+  label: string;
+};
+
+type OrderItemView = {
+  slug: string;
+  name: string;
+  quantity: number;
+  selectedOptions: SelectedOption[];
+};
+
 function formatDate(value: string | Date) {
   return new Date(value).toLocaleString("zh-CN", {
     dateStyle: "short",
@@ -67,23 +80,23 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const productBySlug = new Map(products.map((product) => [product.slug, product]));
 
-  const items = Array.isArray(order.items)
+  const items: OrderItemView[] = Array.isArray(order.items)
     ? order.items.map((item) => ({
       slug: String(item?.slug ?? ""),
         name: String(item?.name ?? ""),
         quantity: Number(item?.quantity ?? 1),
         selectedOptions: Array.isArray(item?.selectedOptions)
           ? item.selectedOptions
-              .map((option) => ({
+              .map((option: SelectedOption) => ({
                 groupKey: String(option?.groupKey ?? ""),
                 groupLabel: String(option?.groupLabel ?? ""),
                 label: String(option?.label ?? "")
               }))
-              .filter((option) => option.groupKey.length > 0)
+              .filter((option: SelectedOption) => option.groupKey.length > 0)
           : []
       }))
     : order.product_name
-    ? [{ name: order.product_name, quantity: order.quantity, price: Number(order.amount) }]
+    ? [{ slug: "", name: order.product_name, quantity: Number(order.quantity ?? 1), selectedOptions: [] }]
     : [];
 
   return (

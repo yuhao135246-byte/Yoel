@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AddToCartButton } from "@/components/brand/add-to-cart-button";
+import { MobileIntroSplash } from "@/components/brand/mobile-intro-splash";
 import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
 import { products } from "@/lib/data";
@@ -41,7 +42,9 @@ export default async function HomePage() {
   const stock = await loadStockMap();
 
   return (
-    <main className="bg-paper text-ink">
+    <>
+      <MobileIntroSplash />
+      <main className="bg-paper text-ink">
       <section className="mx-auto grid min-h-[64vh] max-w-7xl content-between px-4 py-8 md:px-8 md:py-16">
         <div className="grid gap-6 md:grid-cols-[1.1fr_0.9fr] md:items-end md:gap-10">
           <div>
@@ -102,6 +105,7 @@ export default async function HomePage() {
           View Unit Series
         </Link>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
