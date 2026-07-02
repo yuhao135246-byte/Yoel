@@ -85,6 +85,7 @@ export function MobileIntroSplash() {
     >
       <video
         ref={videoRef}
+        src="/Intro.mp4"
         className="h-full w-full object-cover"
         autoPlay
         muted
@@ -94,9 +95,7 @@ export function MobileIntroSplash() {
         disablePictureInPicture
         onEnded={() => finishIntro()}
         onError={() => finishIntro()}
-      >
-        <source src="/Intro.mp4" type="video/mp4" />
-      </video>
+      />
     </div>
   );
 }
