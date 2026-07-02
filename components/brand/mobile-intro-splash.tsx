@@ -10,8 +10,7 @@ export function MobileIntroSplash() {
   const fallbackTimeoutRef = useRef<number | null>(null);
   const finishedRef = useRef(false);
   const previousOverflowRef = useRef("");
-  const showIntro = true;
-  const [phase, setPhase] = useState<SplashPhase>("hidden");
+  const [phase, setPhase] = useState<SplashPhase>("visible");
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -19,27 +18,17 @@ export function MobileIntroSplash() {
     }
 
     console.log("Splash mounted");
-
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (!isMobile) {
-      return;
-    }
+    console.log("Video element created");
 
     const previousOverflow = document.body.style.overflow;
     previousOverflowRef.current = previousOverflow;
-    setPhase("visible");
     document.body.style.overflow = "hidden";
 
     fallbackTimeoutRef.current = window.setTimeout(() => {
       finishIntro();
     }, 7000);
 
-    // iOS Safari is stricter about autoplay; retrying play() on mount improves reliability.
-    window.setTimeout(() => {
-      void videoRef.current?.play().catch(() => {
-        finishIntro();
-      });
-    }, 0);
+    videoRef.current?.play().catch(console.error);
 
     return () => {
       document.body.style.overflow = previousOverflow;
@@ -70,13 +59,13 @@ export function MobileIntroSplash() {
     }, 500);
   }
 
-  if (!showIntro || phase === "hidden") {
+  if (phase === "hidden") {
     return null;
   }
 
   return (
     <div
-      className={`fixed inset-0 z-[999999] flex items-center justify-center bg-black transition-opacity duration-500 ease-out md:hidden ${
+      className={`fixed inset-0 z-[999999] flex items-center justify-center bg-black transition-opacity duration-500 ease-out ${
         phase === "fading" ? "opacity-0" : "opacity-100"
       }`}
       aria-hidden="true"
@@ -85,7 +74,7 @@ export function MobileIntroSplash() {
         ref={videoRef}
         src="/Intro.mp4"
         className="bg-black"
-        style={{ width: "100vw", height: "100vh", objectFit: "contain" }}
+        style={{ width: "100vw", height: "auto", maxHeight: "100vh", objectFit: "contain" }}
         autoPlay
         muted
         playsInline
@@ -93,9 +82,14 @@ export function MobileIntroSplash() {
         controls={false}
         disablePictureInPicture
         onLoadedData={() => console.log("Video loaded")}
+        onCanPlay={() => console.log("Video can play")}
         onPlay={() => console.log("Video started")}
-        onEnded={() => finishIntro()}
-        onError={() => finishIntro()}
+        onPlaying={() => console.log("Video started")}
+        onError={(event) => console.error("Video error", event)}
+        onEnded={() => {
+          console.log("Video ended");
+          finishIntro();
+        }}
       />
     </div>
   );
