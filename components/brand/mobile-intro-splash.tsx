@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const INTRO_SESSION_KEY = "cadence-mobile-intro-played";
-
 type SplashPhase = "hidden" | "visible" | "fading";
 
 export function MobileIntroSplash() {
@@ -20,9 +18,9 @@ export function MobileIntroSplash() {
       return;
     }
 
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    console.log("Splash mounted");
 
-    // Temporary debug mode: ignore session flag so intro plays on every refresh.
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (!isMobile) {
       return;
     }
@@ -64,7 +62,6 @@ export function MobileIntroSplash() {
     }
     finishedRef.current = true;
 
-    window.sessionStorage.setItem(INTRO_SESSION_KEY, "1");
     setPhase("fading");
 
     fadeTimeoutRef.current = window.setTimeout(() => {
@@ -79,7 +76,7 @@ export function MobileIntroSplash() {
 
   return (
     <div
-      className={`fixed inset-0 z-[120] bg-black transition-opacity duration-500 ease-out md:hidden ${
+      className={`fixed inset-0 z-[999999] flex items-center justify-center bg-black transition-opacity duration-500 ease-out md:hidden ${
         phase === "fading" ? "opacity-0" : "opacity-100"
       }`}
       aria-hidden="true"
@@ -87,13 +84,16 @@ export function MobileIntroSplash() {
       <video
         ref={videoRef}
         src="/Intro.mp4"
-        className="h-full w-full bg-black object-contain"
+        className="bg-black"
+        style={{ width: "100vw", height: "100vh", objectFit: "contain" }}
         autoPlay
         muted
         playsInline
         preload="auto"
         controls={false}
         disablePictureInPicture
+        onLoadedData={() => console.log("Video loaded")}
+        onPlay={() => console.log("Video started")}
         onEnded={() => finishIntro()}
         onError={() => finishIntro()}
       />
