@@ -1,5 +1,5 @@
 export const DELIVERY_WINDOW = "07:00 - 12:00";
-export const DELIVERY_CUTOFF_HOUR = 17;
+export const DELIVERY_CUTOFF_HOUR = 12;
 export const AREA_DAILY_CAPACITY = 5;
 export const GLOBAL_DAILY_CAPACITY = 15;
 
