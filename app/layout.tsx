@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Footer } from "@/components/brand/footer";
+import { FloatingCartButton } from "@/components/brand/floating-cart-button";
 import { Header } from "@/components/brand/header";
 import { MobileIntroSplash } from "@/components/brand/mobile-intro-splash";
 
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         {children}
         <Footer />
+        <FloatingCartButton />
       </body>
     </html>
   );

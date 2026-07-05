@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { notifyCartChanged } from "@/components/brand/floating-cart-button";
 import type { Product } from "@/lib/data";
 
 type SelectedOption = {
@@ -26,12 +26,12 @@ type AddToCartButtonProps = {
 };
 
 export function AddToCartButton({ product, remainingStock, deliveryDate }: AddToCartButtonProps) {
-  const router = useRouter();
   const isSoldOut = typeof remainingStock === "number" && remainingStock <= 0;
   const [optionValues, setOptionValues] = useState<Record<string, string>>(() =>
     Object.fromEntries((product.optionGroups ?? []).map((group) => [group.key, ""]))
   );
   const [selectionError, setSelectionError] = useState("");
+  const [isAdded, setIsAdded] = useState(false);
 
   const selectedOptions = useMemo(() => {
     return (product.optionGroups ?? []).flatMap((group) => {
@@ -112,8 +112,23 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
     }
 
     window.localStorage.setItem("cadence-cart", JSON.stringify(items));
-    router.push("/cart");
+    notifyCartChanged();
+    setIsAdded(true);
   }
+
+  useEffect(() => {
+    if (!isAdded) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      setIsAdded(false);
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [isAdded]);
 
   return (
     <div className="grid gap-3">
@@ -143,15 +158,18 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
         </div>
       ))}
       {selectionError ? <p className="text-sm text-red-600">{selectionError}</p> : null}
+      {isAdded ? <p className="text-sm text-emerald-700">已加入购物车</p> : null}
       <button
         type="button"
         data-testid={`add-to-cart-${product.slug}`}
         onClick={addToCart}
         disabled={isSoldOut}
-        className="h-12 w-full border border-ink px-4 text-sm uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-50 md:w-auto md:px-5"
+        className={`h-12 w-full border border-ink px-4 text-sm uppercase tracking-[0.18em] transition duration-200 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto md:px-5 ${
+          isAdded ? "scale-[1.01] border-ink bg-ink text-paper" : ""
+        }`}
         title={deliveryDate ? `配送日期 ${deliveryDate}` : undefined}
       >
-        {isSoldOut ? "售罄" : "加入购物车"}
+        {isSoldOut ? "售罄" : isAdded ? "已加入" : "加入购物车"}
       </button>
     </div>
   );

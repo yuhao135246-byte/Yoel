@@ -7,6 +7,7 @@ import {
   calculateOrderTotal,
   calculateSubtotal
 } from "@/lib/order-pricing";
+import { notifyCartChanged } from "@/components/brand/floating-cart-button";
 import { products } from "@/lib/data";
 
 type CartItem = {
@@ -71,6 +72,7 @@ export function CartView() {
   function persistItems(nextItems: CartItem[]) {
     setItems(nextItems);
     window.localStorage.setItem("cadence-cart", JSON.stringify(nextItems));
+    notifyCartChanged();
   }
 
   function decreaseQuantity(indexToChange: number) {
