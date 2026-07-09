@@ -54,16 +54,17 @@ export const products: Product[] = [
   },
   {
     slug: "tanat-peach",
-    name: "TANAT 桃子联合发酵冰滴",
+    name: "Panama Elida Falda CRD GW0403",
     category: "COFFEE",
     layer: "冷萃系列",
-    price: 55,
+    subtitle: "巴拿马·波奎特｜艾力达 Falda｜瑰夏｜CRD 水洗｜92分",
+    price: 102,
     unit: "杯",
     availability: "周一至周日上午配送",
-    description: "法国 TANAT × Los Patios 实验发酵站。",
-    details: ["桃子", "菠萝", "木瓜"],
-    image: "/assets/tanat-peach.png",
-    tags: ["冷萃", "发酵", "水果"]
+    description: "Lamastus 家族艾力达庄园 Falda 微地块，1800m+。",
+    details: ["茉莉花", "白葡萄干", "香橼", "蔓越莓"],
+    image: "/assets/艾力达瑰夏.png",
+    tags: ["冰滴", "瑰夏", "巴拿马"]
   },
   {
     slug: "tanat-ombligon",
@@ -242,7 +243,7 @@ export const journalNotes = [
     summary: "Parametric forms, material tolerances, fabrication constraints, and small-batch assembly notes."
   },
   {
-    title: "Tokyo Notes",
+    title: "Notes",
     code: "J-003",
     summary: "Observations on retail quietness, product rituals, hospitality, and spatial discipline."
   }
@@ -260,8 +261,8 @@ export const orders = [
   {
     number: "CD-20260622-002",
     customer: "Lin Chen",
-    item: "TANAT 桃子联合发酵冷萃",
-    total: 55,
+    item: "Panama Elida Falda CRD GW0403",
+    total: 102,
     status: "Reserved",
     delivery: "2026-06-26 / 09:30"
   },
