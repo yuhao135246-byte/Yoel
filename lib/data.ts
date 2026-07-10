@@ -53,6 +53,22 @@ export const products: Product[] = [
     tags: ["冷萃", "冰滴", "哥伦比亚"]
   },
   {
+    slug: "costa-rica-violet-black-honey-cold-brew",
+    name: "哥斯达黎加 · 紫罗兰 · 黑蜜处理",
+    category: "COFFEE",
+    layer: "冷萃系列",
+    subtitle: "哥斯达黎加｜中央山谷｜圣伊西德罗48区（San Isidro 48）｜卡杜拉 / 卡杜艾｜黑蜜处理｜1700m+",
+    price: 50,
+    currency: "RMB",
+    available: true,
+    unit: "杯",
+    availability: "周一至周日上午配送",
+    description: "紫罗兰 · 玫瑰 · 樱桃 · 桃子杏脯 · 浆果果酱 · 香草甜浓巧",
+    details: ["紫罗兰", "玫瑰", "樱桃", "桃子杏脯", "浆果果酱", "香草甜浓巧"],
+    image: "/assets/紫罗兰.png",
+    tags: ["冷萃", "哥斯达黎加", "黑蜜处理"]
+  },
+  {
     slug: "tanat-peach",
     name: "Panama Elida Falda CRD GW0403",
     category: "COFFEE",
