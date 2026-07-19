@@ -112,22 +112,6 @@ export const products: Product[] = [
     tags: ["冷萃", "Sidra", "厌氧日晒"]
   },
   {
-    slug: "yunnan-lincang-cold-brew",
-    name: "云南临沧",
-    category: "COFFEE",
-    layer: "Cold Brew（冷萃）",
-    subtitle: "浅烘｜白桃荔枝浸渍处理",
-    price: 45,
-    currency: "¥",
-    available: true,
-    unit: "杯",
-    availability: "Available",
-    description: "荔枝｜桃子｜白茶｜野花蜜",
-    details: ["荔枝", "桃子", "白茶", "野花蜜"],
-    image: "/assets/云南临沧.png",
-    tags: ["冷萃", "云南", "浸渍处理"]
-  },
-  {
     slug: "fruit-lemon-tea",
     name: "季节水果柠檬茶",
     category: "COFFEE",
@@ -156,8 +140,8 @@ export const products: Product[] = [
     tags: ["冷萃", "轻食", "鸡肉卷"]
   },
   {
-    slug: "mustard-chicken-wrap",
-    name: "芥酱鸡肉卷",
+    slug: "tomato-curry-chicken-wrap",
+    name: "番茄咖喱鸡肉卷",
     category: "COFFEE",
     layer: "Chicken Wrap（鸡肉卷）",
     price: 22,
@@ -165,25 +149,10 @@ export const products: Product[] = [
     available: true,
     unit: "份",
     availability: "Available（可售）",
-    description: "芥末酸奶蜂蜜蛋黄酱（Mustard）｜生菜｜鸡腿肉｜坚果",
-    details: ["芥末酸奶蜂蜜蛋黄酱（Mustard）", "生菜", "鸡腿肉","黄油炒蛋", "坚果"],
-    image: "/assets/芥末蛋黄酱鸡肉卷.png",
-    tags: ["冷萃", "轻食", "鸡肉卷"]
-  },
-  {
-    slug: "tomato-cheese-chicken-wrap",
-    name: "番茄芝士鸡肉卷",
-    category: "COFFEE",
-    layer: "Chicken Wrap（鸡肉卷）",
-    price: 22,
-    currency: "¥",
-    available: true,
-    unit: "份",
-    availability: "Available（可售）",
-    description: "番茄芝士酱｜黄油炒蛋｜牛奶｜生菜",
-    details: ["番茄芝士酱", "黄油炒蛋", "牛奶", "生菜"],
+    description: "番茄｜咖喱｜生菜｜黄油炒蛋",
+    details: ["番茄", "咖喱", "生菜", "黄油炒蛋"],
     image: "/assets/番茄鸡肉卷.png",
-    tags: ["轻食", "鸡肉卷", "番茄芝士"]
+    tags: ["轻食", "鸡肉卷", "番茄咖喱"]
   },
   {
     slug: "low-cal-wrap-fruit-tea-lunch-combo",
@@ -195,8 +164,8 @@ export const products: Product[] = [
     available: true,
     unit: "份",
     availability: "Available（可售）",
-    description: "鸡肉卷三选一｜水果茶",
-    details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 芥酱鸡肉卷 / 番茄芝士鸡肉卷", "水果茶"],
+    description: "鸡肉卷二选一｜水果茶",
+    details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 番茄咖喱鸡肉卷", "水果茶"],
     image: "/assets/Combo.png",
     tags: ["午餐套餐", "鸡肉卷", "水果茶"],
     inventoryItems: [
@@ -222,21 +191,11 @@ export const products: Product[] = [
             ]
           },
           {
-            value: "mustard-chicken-wrap",
-            label: "芥酱鸡肉卷",
+            value: "tomato-curry-chicken-wrap",
+            label: "番茄咖喱鸡肉卷",
             inventoryItems: [
               {
-                slug: "mustard-chicken-wrap",
-                quantity: 1
-              }
-            ]
-          },
-          {
-            value: "tomato-cheese-chicken-wrap",
-            label: "番茄芝士鸡肉卷",
-            inventoryItems: [
-              {
-                slug: "tomato-cheese-chicken-wrap",
+                slug: "tomato-curry-chicken-wrap",
                 quantity: 1
               }
             ]
