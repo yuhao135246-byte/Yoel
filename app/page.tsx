@@ -99,7 +99,7 @@ export default async function HomePage() {
           Order Coffee
         </Link>
         <Link href="/objects" className="border border-ink/20 px-4 py-3 text-sm uppercase tracking-[0.18em] md:px-5 md:py-4">
-          View Unit Series
+          进入设计档案
         </Link>
       </section>
     </main>

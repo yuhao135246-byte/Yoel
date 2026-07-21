@@ -1,19 +1,23 @@
 import Image from "next/image";
-import { ProductCard } from "@/components/brand/product-card";
+import { ArchiveListSection } from "@/components/brand/archive-list-section";
 import { RevealOnView } from "@/components/brand/reveal-on-view";
-import { products } from "@/lib/data";
 
 export default function ObjectsPage() {
-  const objects = products.filter((product) => product.category === "OBJECT");
-  const splitIndex = Math.ceil(objects.length / 2);
-  const unit1Products = objects.slice(0, splitIndex);
-  const unit2Products = objects.slice(splitIndex);
-
   return (
     <main className="bg-paper text-ink">
+      <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Cadence</p>
+        <h1 className="mt-6 max-w-5xl text-6xl leading-none tracking-[-0.02em] md:mt-8 md:text-8xl">数字设计年鉴</h1>
+        <p className="mt-6 max-w-2xl text-base leading-8 text-graphite md:mt-8 md:text-[17px]">
+          一本持续更新的数字设计年鉴，
+          记录设计、研究、物件与日常实践。
+        </p>
+      </section>
+
       <RevealOnView className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
         <section className="mx-auto max-w-[760px]">
-          <h2 className="text-5xl leading-none tracking-[-0.02em] md:text-7xl">Parametric Design</h2>
+          <h2 className="text-5xl leading-none tracking-[-0.02em] md:text-7xl">设计理念</h2>
+          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-graphite">Parametric Design</p>
           <div className="mt-10 grid gap-6 text-[15px] leading-[1.9] text-ink/75 md:mt-12 md:gap-8 md:text-[17px]">
             <p>设计对我来说，从来不是为了追求复杂的形式，而是一种重新理解设计的方法。</p>
             <figure className="overflow-hidden rounded-[24px] border border-ink/8 bg-bone/35">
@@ -87,76 +91,7 @@ export default function ObjectsPage() {
         <div className="mx-auto mt-12 max-w-7xl border-b border-ink/10 md:mt-16" />
       </RevealOnView>
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:grid-cols-[0.85fr_1.15fr] md:px-8 md:py-16">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">UNIT 系列</p>
-          <h1 className="mt-4 text-6xl leading-none md:mt-6 md:text-8xl">UNIT 系列</h1>
-          <p className="mt-4 max-w-md text-base leading-7 text-graphite md:mt-8">
-            以参数化表达为基底，呈现可订制的工艺对象与练习性家具。
-          </p>
-        </div>
-        <div className="overflow-hidden rounded-[18px] bg-bone/60">
-          <Image
-            src="/assets/unit01-hero.png"
-            alt="Unit series editorial cover"
-            width={1600}
-            height={1200}
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-out md:aspect-auto"
-          />
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 pb-10 md:px-8 md:pb-16">
-        <article className="grid gap-5 md:gap-6">
-          <div className="grid gap-3">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Collection Cover</p>
-            <h2 className="text-4xl leading-none md:text-6xl">Unit 1</h2>
-          </div>
-          <figure className="overflow-hidden rounded-[18px] bg-bone/60">
-            <Image
-              src="/assets/unit01-detail.png"
-              alt="Unit 1 collection cover"
-              width={1600}
-              height={1200}
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 80vw"
-              className="aspect-[4/5] w-full object-cover md:aspect-[16/10]"
-            />
-          </figure>
-          <div className="grid gap-6 md:grid-cols-2">
-            {unit1Products.map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 pb-10 md:px-8 md:pb-16">
-        <article className="grid gap-5 md:gap-6">
-          <div className="grid gap-3">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Collection Cover</p>
-            <h2 className="text-4xl leading-none md:text-6xl">Unit 2</h2>
-          </div>
-          <figure className="overflow-hidden rounded-[18px] bg-bone/60">
-            <Image
-              src="/assets/unit01-context.png"
-              alt="Unit 2 collection cover"
-              width={1600}
-              height={1200}
-              loading="lazy"
-              sizes="(max-width: 768px) 100vw, 80vw"
-              className="aspect-[4/5] w-full object-cover md:aspect-[16/10]"
-            />
-          </figure>
-          <div className="grid gap-6 md:grid-cols-2">
-            {unit2Products.map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </div>
-        </article>
-      </section>
+      <ArchiveListSection />
     </main>
   );
 }

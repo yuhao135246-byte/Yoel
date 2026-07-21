@@ -3,7 +3,7 @@ import Link from "next/link";
 
 const nav = [
   ["本周冷萃", "/coffee"],
-  ["UNIT 系列", "/objects"],
+  ["设计档案", "/objects"],
   ["研究日志", "/journal"],
   ["关于", "/about"]
 ];
