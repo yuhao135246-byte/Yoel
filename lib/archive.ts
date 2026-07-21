@@ -54,12 +54,12 @@ export const archiveEntries: ArchiveEntry[] = [
       "而是一种不断扩散的关系。"
     ],
     objectInfoRows: [
-      { label: "发布日期", value: "2026" },
-      { label: "设计地点", value: "Melbourne / Shanghai" },
+      { label: "发布时间", value: "2026" },
+      { label: "地点", value: "郑州" },
       { label: "材质", value: "树脂 / 矿物复合基座" },
       { label: "工艺", value: "参数化建模 / 数字制造" },
       { label: "光源", value: "暖白 LED" },
-      { label: "Edition", value: "Edition 01" }
+      { label: "版本", value: "Edition 01" }
     ],
     designStatement: [
       "UNIT 01 源于水面被轻触时产生的涟漪。",

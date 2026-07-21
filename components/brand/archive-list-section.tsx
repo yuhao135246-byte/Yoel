@@ -6,8 +6,7 @@ export function ArchiveListSection() {
   return (
     <RevealOnView className="mx-auto max-w-7xl px-5 pb-20 pt-10 md:px-8 md:pb-32 md:pt-16">
       <section className="border-t border-ink/10 pt-10 md:pt-14">
-        <div className="grid gap-5 md:max-w-3xl md:gap-8">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">设计档案</p>
+        <div className="grid gap-4 md:max-w-3xl md:gap-6">
           <h2 className="text-5xl leading-none tracking-[-0.02em] md:text-7xl">设计档案</h2>
           <p className="text-base leading-8 text-graphite md:text-[17px]">
             一本持续记录设计研究、
