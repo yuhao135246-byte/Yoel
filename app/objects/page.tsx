@@ -20,15 +20,15 @@ export default function ObjectsPage() {
             设计对我来说，从来不是为了追求复杂的形式，而是一种重新理解空间、人与环境关系的方法。在 RMIT 的学习与实践中，我逐渐将参数化设计视为一种思维方式，而非一种风格。Cadence 以数字设计年鉴的形式，记录研究、实验与作品的持续演进。
           </p>
 
-          <figure className="mt-12 overflow-hidden rounded-[24px] border border-ink/8 bg-bone/35 md:mt-14">
+          <figure className="mt-12 overflow-hidden border border-ink/8 bg-bone/20 md:mt-14">
             <Image
-              src="/assets/啊啊啊.jpg"
-              alt="Voronoi editorial image"
+              src="/assets/Unit%2001%20(7).png"
+              alt="UNIT 01 opening visual"
               width={1600}
               height={1200}
               loading="lazy"
               sizes="(max-width: 768px) 100vw, 760px"
-              className="h-[220px] w-full object-cover opacity-70 mix-blend-multiply md:h-[300px]"
+              className="h-auto w-full"
             />
           </figure>
         </section>

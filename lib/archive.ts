@@ -5,6 +5,25 @@ export type ArchiveInfoRow = {
   value: string;
 };
 
+export type ArchiveEditorialImageLayout = "full" | "pair" | "detail";
+
+export type ArchiveEditorialImage = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  layout?: ArchiveEditorialImageLayout;
+  caption?: string;
+};
+
+export type ArchiveEditorialSection = {
+  id: string;
+  sectionLabel: string;
+  heading: string;
+  paragraphs: string[];
+  images: ArchiveEditorialImage[];
+};
+
 export type ArchiveEntry = {
   slug: string;
   issueNumber: string;
@@ -26,6 +45,8 @@ export type ArchiveEntry = {
   openingQuote: string[];
   objectInfoRows: ArchiveInfoRow[];
   designStatement: string[];
+  coverImage?: ArchiveEditorialImage;
+  editorialSections?: ArchiveEditorialSection[];
   plannedChapters: string[];
 };
 
@@ -56,7 +77,7 @@ export const archiveEntries: ArchiveEntry[] = [
     objectInfoRows: [
       { label: "发布时间", value: "2026" },
       { label: "地点", value: "郑州" },
-      { label: "材质", value: "树脂 / 矿物复合基座" },
+      { label: "材质", value: "树脂 / PETG" },
       { label: "工艺", value: "参数化建模 / 数字制造" },
       { label: "光源", value: "暖白 LED" },
       { label: "版本", value: "Edition 01" }
@@ -65,6 +86,70 @@ export const archiveEntries: ArchiveEntry[] = [
       "UNIT 01 源于水面被轻触时产生的涟漪。",
       "它不再直接描摹水的形态，而是将自然生长规律转译为参数化几何与光。",
       "光线如涟漪般缓慢扩散，在自然、计算与空间之间形成安静的对话。"
+    ],
+    coverImage: {
+      src: "/assets/Unit%2001%20cover.png",
+      alt: "UNIT 01 封面主视觉",
+      width: 1800,
+      height: 1400,
+      layout: "full",
+      caption: "Cover"
+    },
+    editorialSections: [
+      {
+        id: "prototype",
+        sectionLabel: "Prototype",
+        heading: "原型",
+        paragraphs: [
+          "经过两周的真实使用与场景测试，UNIT 01 不断调整比例、光线与材质之间的关系。",
+          "最终验证了作品在不同空间中的稳定表现，也为后续制作建立了可靠的基础。"
+        ],
+        images: [
+          {
+            src: "/assets/Unit%2001%20(5).png",
+            alt: "UNIT 01 Studio photograph with Safari Chair and brown backdrop",
+            width: 1800,
+            height: 1200,
+            layout: "full"
+          }
+        ]
+      },
+      {
+        id: "space",
+        sectionLabel: "Space",
+        heading: "空间",
+        paragraphs: [
+          "作品并非独立存在，而是在空间中建立尺度、光影与日常生活之间的关系。",
+          "不同材质、光线与环境的变化，让同一件作品呈现出不同的空间体验。"
+        ],
+        images: [
+          {
+            src: "/assets/Unit%2001%20(7).png",
+            alt: "UNIT 01 interior photograph with grey wall, perforated cabinet, and flowers",
+            width: 1800,
+            height: 1200,
+            layout: "full"
+          }
+        ]
+      },
+      {
+        id: "final-work",
+        sectionLabel: "Work",
+        heading: "作品",
+        paragraphs: [
+          "UNIT 01 采用 PETG 灯罩与矿物复合基座制作，经过两周持续测试，具备良好的耐磨性与稳定性，适合长期日常使用。",
+          "内置电池可连续续航约 18 小时；PETG 材料可耐约 70°C 高温，属于食品接触级材料，对人体无害，在兼顾安全性的同时保留温润的光线质感。"
+        ],
+        images: [
+          {
+            src: "/assets/Unit%2001%20(2).jpg",
+            alt: "UNIT 01 final work red background product photograph",
+            width: 1800,
+            height: 1200,
+            layout: "full"
+          }
+        ]
+      }
     ],
     plannedChapters: [
       "封面",
@@ -76,7 +161,7 @@ export const archiveEntries: ArchiveEntry[] = [
       "原型",
       "材料",
       "灯光实验",
-      "摄影",
+      "空间",
       "规格",
       "作品"
     ]
