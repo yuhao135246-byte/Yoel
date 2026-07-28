@@ -40,17 +40,41 @@ export type Product = {
 
 export const products: Product[] = [
   {
-    slug: "HYDRANGEA-cold-brew",
-    name: "EL Sendero 黑莓冷萃",
+    slug: "yunnan-catimor-cold-batch-brew",
+    name: "云南卡蒂姆 Cold Batch Brew",
     category: "COFFEE",
-    layer: "冷萃系列",
-    price: 53,
-    unit: "杯",
+    layer: "限时供应",
+    price: 28,
+    currency: "¥",
+    unit: "400 ml",
     availability: "周一至周日上午配送",
-    description: "哥伦比亚 艾尔森德罗 庄园，Caturra ，黑莓发酵蜜处理。",
-    details: ["黑莓酱", "青柠", "红茶"],
-    image: "/assets/HYDRANGEA-cold-brew.png",
-    tags: ["冷萃", "冰滴", "哥伦比亚"]
+    description:
+      "采用云南卡蒂姆咖啡豆进行批次冷萃（Cold Batch Brew），呈现坚果、可可与谷物风味，口感平衡、干净，甜感自然，是一款适合每天饮用的日常冷萃。700 ml 大容量，适合分享，也适合全天慢慢饮用。",
+    details: ["产地：云南", "处理法：日晒", "规格：400 ml", "风味：坚果、可可、谷物"],
+    image: "/assets/云南卡蒂姆.png",
+    tags: ["Cold Batch Brew", "限时供应", "云南", "日晒"]
+  },
+  {
+    slug: "the-naughty-dog-special-edition-cold-batch-brew",
+    name: "哥伦比亚 Finca Las Flores Cold Batch Brew",
+    category: "COFFEE",
+    layer: "限时供应",
+    price: 53,
+    currency: "¥",
+    unit: "400 ml",
+    availability: "周一至周日上午配送",
+    description:
+      "来自捷克 The Naughty Dog 的特别批次 Cold Batch Brew。选用哥伦比亚 Finca Las Flores 厌氧水洗咖啡豆，呈现橙子与柠檬的明亮果香，伴随 PEZ 糖般的甜感，以及牛奶巧克力和香料茶尾韵，层次丰富，风味鲜明。400 ml 规格，更适合细致体验不同温度下的风味变化。",
+    details: [
+      "规格：400 ml",
+      "烘焙：The Naughty Dog（捷克）",
+      "产地：哥伦比亚",
+      "庄园：Finca Las Flores",
+      "处理法：厌氧水洗",
+      "风味：橙子、柠檬、PEZ 糖、牛奶巧克力、香料茶"
+    ],
+    image: "/assets/TND.png",
+    tags: ["Cold Batch Brew", "限时供应", "The Naughty Dog", "哥伦比亚"]
   },
   {
     slug: "costa-rica-violet-black-honey-cold-brew",
@@ -59,7 +83,7 @@ export const products: Product[] = [
     layer: "冷萃系列",
     subtitle: "哥斯达黎加｜中央山谷｜圣伊西德罗48区（San Isidro 48）｜卡杜拉 / 卡杜艾｜黑蜜处理｜1700m+",
     price: 50,
-    currency: "RMB",
+    currency: "¥",
     available: true,
     unit: "杯",
     availability: "周一至周日上午配送",
@@ -76,6 +100,7 @@ export const products: Product[] = [
     subtitle: "巴拿马·波奎特｜艾力达 Falda｜瑰夏｜CRD 水洗｜92分",
     price: 102,
     unit: "杯",
+    currency: "¥",
     availability: "周一至周日上午配送",
     description: "Lamastus 家族艾力达庄园 Falda 微地块，1800m+。",
     details: ["茉莉花", "白葡萄干", "香橼", "蔓越莓"],
@@ -89,6 +114,7 @@ export const products: Product[] = [
     layer: "冷萃系列",
     price: 43,
     unit: "杯",
+    currency: "¥",
     availability: "周一至周日上午配送",
     description: "哥伦比亚 El Diviso，（大肚脐）稀有品种。",
     details: ["草莓", "覆盆子", "桃子果酱"],
@@ -102,7 +128,7 @@ export const products: Product[] = [
     layer: "冷萃系列",
     subtitle: "哥伦比亚｜皮塔利托｜Nestor Lasso 89分",
     price: 48,
-    currency: "RMB",
+    currency: "¥",
     available: true,
     unit: "杯",
     availability: "周一至周日上午配送",
@@ -117,6 +143,7 @@ export const products: Product[] = [
     category: "COFFEE",
     layer: "季节饮品",
     price: 18,
+    currency: "¥",
     unit: "杯",
     availability: "周一至周日上午配送",
     description: "季节水果与手工冷泡茶。",

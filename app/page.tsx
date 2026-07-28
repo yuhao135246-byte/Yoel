@@ -36,7 +36,7 @@ async function loadStockMap() {
 }
 
 export default async function HomePage() {
-  const coffee = products.find((product) => product.slug === "stitch-cold-brew");
+  const coffee = products.find((product) => product.category === "COFFEE");
   const unit = products.find((product) => product.category === "OBJECT");
   const stock = await loadStockMap();
 
