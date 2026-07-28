@@ -49,7 +49,7 @@ export const products: Product[] = [
     unit: "400 ml",
     availability: "周一至周日上午配送",
     description:
-      "采用云南卡蒂姆咖啡豆进行批次冷萃（Cold Batch Brew），呈现坚果、可可与谷物风味，口感平衡、干净，甜感自然，是一款适合每天饮用的日常冷萃。700 ml 大容量，适合分享，也适合全天慢慢饮用。",
+      "采用云南卡蒂姆咖啡豆进行批次冷萃（Cold Batch Brew），呈现坚果、可可与谷物风味，口感平衡、干净，甜感自然，是一款适合每天饮用的日常冷萃。",
     details: ["产地：云南", "处理法：日晒", "规格：400 ml", "风味：坚果、可可、谷物"],
     image: "/assets/云南卡蒂姆.png",
     tags: ["Cold Batch Brew", "限时供应", "云南", "日晒"]
