@@ -1,5 +1,5 @@
 import { formatOrderNumber } from "@/lib/order-number";
-import { supabaseAdmin } from "@/lib/supabase";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
   getChinaNow,
@@ -19,9 +19,11 @@ import {
 import {
   ensureInventoryForNextDays,
   getInventoryByDate,
+  getInventoryByDateReadonly,
   reserveInventoryForOrder
 } from "@/lib/inventory";
 import { products } from "@/lib/data";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -89,6 +91,8 @@ type DeliveryAvailabilityResponse = DeliveryAvailability & {
   defaultDeliveryDate: string;
 };
 
+type DbClient = SupabaseClient;
+
 function buildProductSummary(items: ApiOrderItem[]) {
   const lineItems = items.map((item) => {
     const optionText = (item.selectedOptions ?? [])
@@ -140,14 +144,10 @@ function buildInventoryReservationItems(items: ApiOrderItem[]) {
   return Array.from(quantityBySlug.entries()).map(([slug, quantity]) => ({ slug, quantity }));
 }
 
-async function createOrderNumber() {
-  if (!supabaseAdmin) {
-    throw new Error("Supabase 服务未配置");
-  }
-
+async function createOrderNumber(client: DbClient) {
   const today = getChinaNow();
   const prefix = `CD-${today.toISOString().slice(0, 10).replaceAll("-", "")}-`;
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await client
     .from("orders")
     .select("order_number")
     .ilike("order_number", `${prefix}%`)
@@ -217,8 +217,8 @@ function canRetryWithoutPricingFields(error: unknown) {
   );
 }
 
-async function insertOrder(record: InsertOrderRecord) {
-  const fullInsert = await supabaseAdmin!
+async function insertOrder(client: DbClient, record: InsertOrderRecord) {
+  const fullInsert = await client
     .from("orders")
     .insert([record])
     .select("id")
@@ -235,11 +235,36 @@ async function insertOrder(record: InsertOrderRecord) {
     ...legacyRecord
   } = record;
 
-  return supabaseAdmin!
+  return client
     .from("orders")
     .insert([legacyRecord])
     .select("id")
     .single();
+}
+
+function getSupabaseErrorText(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const maybeCode = "code" in error ? String((error as Record<string, unknown>).code ?? "") : "";
+    const maybeMessage = "message" in error ? String((error as Record<string, unknown>).message ?? "") : "";
+    const maybeHint = "hint" in error ? String((error as Record<string, unknown>).hint ?? "") : "";
+    return [maybeCode, maybeMessage, maybeHint].filter((part) => part.length > 0).join(" | ");
+  }
+
+  return String(error);
+}
+
+function isUnregisteredApiKeyError(error: unknown) {
+  const text = getSupabaseErrorText(error).toLowerCase();
+  return text.includes("unregistered api key") || text.includes("unauthorized_unregistered_api_key");
+}
+
+function isInventoryConflictError(error: unknown) {
+  const text = getSupabaseErrorText(error);
+  return text.includes("库存不足") || text.includes("库存不存在");
 }
 
 export async function GET(request: Request) {
@@ -366,17 +391,71 @@ export async function POST(request: Request) {
   const total = calculateOrderTotal(subtotal);
   const deliverySlot = getDeliverySlotForArea(deliveryArea);
 
-  if (!supabaseAdmin) {
+  const clients = [supabaseAdmin, supabase].filter((client): client is DbClient => Boolean(client));
+
+  if (clients.length === 0) {
     return new Response(JSON.stringify({ error: "Supabase 服务未配置，无法保存订单。" }), { status: 500 });
   }
 
   try {
+    const getClientLabel = (client: DbClient) => (client === supabaseAdmin ? "service-role" : "anon");
+    let activeClient: DbClient | null = null;
+
+    async function runStepWithFallback<T>(
+      stepName: string,
+      operation: (client: DbClient) => Promise<T>
+    ): Promise<T> {
+      const primaryClient = activeClient ?? clients[0];
+
+      try {
+        const result = await operation(primaryClient);
+        activeClient = primaryClient;
+        return result;
+      } catch (primaryError) {
+        const primaryText = getSupabaseErrorText(primaryError);
+        console.error(`[order POST] ${stepName} failed on ${getClientLabel(primaryClient)}`, primaryText, primaryError);
+        if (primaryError instanceof Error && primaryError.stack) {
+          console.error(primaryError.stack);
+        }
+
+        const fallbackClient = clients.find((client) => client !== primaryClient);
+        const shouldFallback = Boolean(
+          fallbackClient &&
+            primaryClient === supabaseAdmin &&
+            fallbackClient === supabase &&
+            isUnregisteredApiKeyError(primaryError)
+        );
+
+        if (!shouldFallback || !fallbackClient) {
+          throw primaryError;
+        }
+
+        console.error(
+          `[order POST] ${stepName} retrying with anon client because SUPABASE_SERVICE_ROLE_KEY is invalid.`
+        );
+
+        const result = await operation(fallbackClient);
+        activeClient = fallbackClient;
+        return result;
+      }
+    }
+
     console.log("Step 1 ensureInventory");
-    await ensureInventoryForNextDays(supabaseAdmin, 2);
+    await runStepWithFallback("ensureInventoryForNextDays", async (client) => {
+      if (client === supabaseAdmin) {
+        await ensureInventoryForNextDays(client, 2);
+      }
+    });
     console.log("Step 1 OK");
 
     console.log("Step 2 getInventory");
-    const inventoryForDate = await getInventoryByDate(supabaseAdmin, deliveryDate);
+    const inventoryForDate = await runStepWithFallback("getInventoryByDate", async (client) => {
+      if (client === supabaseAdmin) {
+        return getInventoryByDate(client, deliveryDate);
+      }
+
+      return getInventoryByDateReadonly(client, deliveryDate);
+    });
     console.log("Step 2 OK");
     const inventoryMap = new Map(inventoryForDate.map((item) => [item.productId, item]));
     const requestedItems = buildInventoryReservationItems(items);
@@ -396,31 +475,33 @@ export async function POST(request: Request) {
     }
 
     console.log("Step 3 createOrderNumber");
-    const orderNumber = await createOrderNumber();
+    const orderNumber = await runStepWithFallback("createOrderNumber", (client) => createOrderNumber(client));
     console.log("Step 3 OK");
     const productName = buildProductSummary(items);
     const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
     console.log("Step 4 insertOrder");
-    const { data: order, error } = await insertOrder({
-      order_number: orderNumber,
-      customer_name: name,
-      phone,
-      address,
-      product_name: productName,
-      quantity,
-      amount: total,
-      status: "PENDING",
-      notes,
-      items,
-      created_at: getChinaNow().toISOString(),
-      delivery_date: deliveryDate,
-      delivery_area: deliveryArea,
-      delivery_slot: deliverySlot,
-      subtotal,
-      delivery_fee: deliveryFee,
-      total
-    });
+    const { data: order, error } = await runStepWithFallback("insertOrder", (client) =>
+      insertOrder(client, {
+        order_number: orderNumber,
+        customer_name: name,
+        phone,
+        address,
+        product_name: productName,
+        quantity,
+        amount: total,
+        status: "PENDING",
+        notes,
+        items,
+        created_at: getChinaNow().toISOString(),
+        delivery_date: deliveryDate,
+        delivery_area: deliveryArea,
+        delivery_slot: deliverySlot,
+        subtotal,
+        delivery_fee: deliveryFee,
+        total
+      })
+    );
 
     if (error || !order) {
       console.error("Supabase Error:", error);
@@ -441,21 +522,34 @@ export async function POST(request: Request) {
 
     try {
       console.log("Step 5 reserveInventory");
-      await reserveInventoryForOrder({
-        supabase: supabaseAdmin,
-        deliveryDate,
-        orderId: order.id,
-        items: requestedItems.map((item) => ({
-          slug: item.slug,
-          name: item.slug,
-          quantity: item.quantity
-        }))
-      });
+      await runStepWithFallback("reserveInventoryForOrder", (client) =>
+        reserveInventoryForOrder({
+          supabase: client,
+          deliveryDate,
+          orderId: order.id,
+          items: requestedItems.map((item) => ({
+            slug: item.slug,
+            name: item.slug,
+            quantity: item.quantity
+          }))
+        })
+      );
       console.log("Step 5 OK");
     } catch (stockError) {
-      await supabaseAdmin.from("orders").delete().eq("id", order.id);
-      const stockMessage = stockError instanceof Error ? stockError.message : "库存不足";
-      return new Response(JSON.stringify({ error: stockMessage }), { status: 409 });
+      try {
+        if (activeClient) {
+          await activeClient.from("orders").delete().eq("id", order.id);
+        }
+      } catch (rollbackError) {
+        console.error("[order POST] rollback order failed", rollbackError);
+      }
+
+      if (isInventoryConflictError(stockError)) {
+        const stockMessage = getSupabaseErrorText(stockError);
+        return new Response(JSON.stringify({ error: stockMessage || "库存不足" }), { status: 409 });
+      }
+
+      throw stockError;
     }
 
     try {
@@ -508,8 +602,13 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("订单保存失败", error);
+    if (error instanceof Error && error.stack) {
+      console.error(error.stack);
+    }
 
-    const message = error instanceof Error ? error.message : JSON.stringify(error);
+    const message = isUnregisteredApiKeyError(error)
+      ? "SUPABASE_SERVICE_ROLE_KEY 无效（Unregistered API key）"
+      : getSupabaseErrorText(error);
     const stack =
       process.env.NODE_ENV === "development"
         ? error instanceof Error
