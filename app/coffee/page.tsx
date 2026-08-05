@@ -3,8 +3,8 @@ import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
 import { products } from "@/lib/data";
 import { getDefaultBookingDate } from "@/lib/delivery";
-import { ensureInventoryForNextDays, getInventoryByDate } from "@/lib/inventory";
-import { supabaseAdmin } from "@/lib/supabase";
+import { ensureInventoryForNextDays, getInventoryByDate, getInventoryByDateReadonly } from "@/lib/inventory";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -13,6 +13,21 @@ async function loadStockMap() {
   const deliveryDate = getDefaultBookingDate();
 
   if (!supabaseAdmin) {
+    if (supabase) {
+      try {
+        const records = await getInventoryByDateReadonly(supabase, deliveryDate);
+        return {
+          deliveryDate,
+          map: new Map(records.map((item) => [item.productId, item.remainingStock]))
+        };
+      } catch {
+        return {
+          deliveryDate,
+          map: new Map<string, number>()
+        };
+      }
+    }
+
     return {
       deliveryDate,
       map: new Map<string, number>()
@@ -27,6 +42,21 @@ async function loadStockMap() {
       map: new Map(records.map((item) => [item.productId, item.remainingStock]))
     };
   } catch {
+    if (supabase) {
+      try {
+        const records = await getInventoryByDateReadonly(supabase, deliveryDate);
+        return {
+          deliveryDate,
+          map: new Map(records.map((item) => [item.productId, item.remainingStock]))
+        };
+      } catch {
+        return {
+          deliveryDate,
+          map: new Map<string, number>()
+        };
+      }
+    }
+
     return {
       deliveryDate,
       map: new Map<string, number>()

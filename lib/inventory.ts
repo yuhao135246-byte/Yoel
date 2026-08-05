@@ -42,6 +42,45 @@ function normalizeStatus(remainingStock: number): InventoryStatus {
   return remainingStock > 0 ? "Available" : "Sold Out";
 }
 
+type InventoryRowShape = {
+  product_id: string;
+  total_stock: number | null;
+  sold_quantity: number | null;
+  remaining_stock: number | null;
+  status: string | null;
+};
+
+function buildInventorySummaries(rows: InventoryRowShape[]) {
+  const inventoryMap = new Map(
+    rows.map((row) => [
+      row.product_id,
+      {
+        totalStock: Number(row.total_stock ?? 0),
+        soldQuantity: Number(row.sold_quantity ?? 0),
+        remainingStock: Number(row.remaining_stock ?? 0),
+        status: (row.status as InventoryStatus | null) ?? normalizeStatus(Number(row.remaining_stock ?? 0))
+      }
+    ])
+  );
+
+  return products
+    .filter((product) => product.category === "COFFEE")
+    .map((product) => {
+      const record = inventoryMap.get(product.slug);
+      const totalStock = record?.totalStock ?? getDefaultStockForProduct(product.slug);
+      const soldQuantity = record?.soldQuantity ?? 0;
+      const remainingStock = record?.remainingStock ?? Math.max(totalStock - soldQuantity, 0);
+      return {
+        productId: product.slug,
+        productName: product.name,
+        totalStock,
+        soldQuantity,
+        remainingStock,
+        status: record?.status ?? normalizeStatus(remainingStock)
+      };
+    });
+}
+
 async function ensureInventoryForDate(supabase: SupabaseClient, deliveryDate: string) {
   const coffeeProducts = products.filter((product) => product.category === "COFFEE");
   const rows = coffeeProducts.map((product) => {
@@ -150,34 +189,23 @@ export async function getInventoryByDate(
     throw error;
   }
 
-  const inventoryMap = new Map(
-    (data ?? []).map((row) => [
-      row.product_id,
-      {
-        totalStock: Number(row.total_stock ?? 0),
-        soldQuantity: Number(row.sold_quantity ?? 0),
-        remainingStock: Number(row.remaining_stock ?? 0),
-        status: (row.status as InventoryStatus | null) ?? normalizeStatus(Number(row.remaining_stock ?? 0))
-      }
-    ])
-  );
+  return buildInventorySummaries((data ?? []) as InventoryRowShape[]);
+}
 
-  return products
-    .filter((product) => product.category === "COFFEE")
-    .map((product) => {
-      const record = inventoryMap.get(product.slug);
-      const totalStock = record?.totalStock ?? getDefaultStockForProduct(product.slug);
-      const soldQuantity = record?.soldQuantity ?? 0;
-      const remainingStock = record?.remainingStock ?? Math.max(totalStock - soldQuantity, 0);
-      return {
-        productId: product.slug,
-        productName: product.name,
-        totalStock,
-        soldQuantity,
-        remainingStock,
-        status: record?.status ?? normalizeStatus(remainingStock)
-      };
-    });
+export async function getInventoryByDateReadonly(
+  supabase: SupabaseClient,
+  deliveryDate: string
+): Promise<InventorySummary[]> {
+  const { data, error } = await supabase
+    .from("inventory")
+    .select("product_id, delivery_date, total_stock, sold_quantity, remaining_stock, status")
+    .eq("delivery_date", deliveryDate);
+
+  if (error) {
+    throw error;
+  }
+
+  return buildInventorySummaries((data ?? []) as InventoryRowShape[]);
 }
 
 export async function updateInventoryTotalStock(params: {

@@ -1,5 +1,10 @@
-import { getDefaultInventoryDeliveryDate, getInventoryByDate, updateInventoryTotalStock } from "@/lib/inventory";
-import { supabaseAdmin } from "@/lib/supabase";
+import {
+  getDefaultInventoryDeliveryDate,
+  getInventoryByDate,
+  getInventoryByDateReadonly,
+  updateInventoryTotalStock
+} from "@/lib/inventory";
+import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -10,6 +15,21 @@ type UpdateInventoryPayload = {
   totalStock?: number;
 };
 
+function getErrorText(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const maybeMessage = "message" in error ? String((error as Record<string, unknown>).message) : "";
+    const maybeHint = "hint" in error ? String((error as Record<string, unknown>).hint) : "";
+    const maybeCode = "code" in error ? String((error as Record<string, unknown>).code) : "";
+    return [maybeCode, maybeMessage, maybeHint].filter((item) => item.length > 0).join(" | ");
+  }
+
+  return String(error);
+}
+
 function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
@@ -19,18 +39,38 @@ export async function GET(request: Request) {
   const queryDate = url.searchParams.get("deliveryDate") ?? "";
   const deliveryDate = isValidDateKey(queryDate) ? queryDate : getDefaultInventoryDeliveryDate();
 
-  if (!supabaseAdmin) {
+  if (!supabaseAdmin && !supabase) {
     return new Response(JSON.stringify({ error: "Supabase 服务未配置" }), { status: 503 });
   }
 
   try {
-    const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
+    if (supabaseAdmin) {
+      const records = await getInventoryByDate(supabaseAdmin, deliveryDate);
+      return Response.json({ deliveryDate, records });
+    }
+
+    const records = await getInventoryByDateReadonly(supabase!, deliveryDate);
     return Response.json({ deliveryDate, records });
   } catch (error) {
-    console.error("读取库存失败", error);
-    return new Response(JSON.stringify({ error: "读取库存失败，请先执行 supabase/inventory-v1.sql" }), {
-      status: 500
-    });
+    const message = getErrorText(error);
+    console.error("[admin inventory GET] 读取库存失败", message, error);
+
+    if (supabase) {
+      try {
+        const records = await getInventoryByDateReadonly(supabase, deliveryDate);
+        return Response.json({ deliveryDate, records, warning: message || "管理端已回退只读库存" });
+      } catch (fallbackError) {
+        const fallbackMessage = getErrorText(fallbackError);
+        console.error("[admin inventory GET] 只读回退失败", fallbackMessage, fallbackError);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ error: message || "读取库存失败，请先执行 supabase/inventory-v1.sql" }),
+      {
+        status: 500
+      }
+    );
   }
 }
 
