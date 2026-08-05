@@ -2,6 +2,7 @@ import { formatOrderNumber } from "@/lib/order-number";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
+  toDateKey,
   getChinaNow,
   getBookingDateOptions,
   getDefaultBookingDate,
@@ -93,6 +94,10 @@ type DeliveryAvailabilityResponse = DeliveryAvailability & {
 
 type DbClient = SupabaseClient;
 
+const LEGACY_TO_CANONICAL_PRODUCT_ID: Record<string, string> = {
+  "stitch-cold-brew": "the-naughty-dog-special-edition-cold-batch-brew"
+};
+
 function buildProductSummary(items: ApiOrderItem[]) {
   const lineItems = items.map((item) => {
     const optionText = (item.selectedOptions ?? [])
@@ -106,6 +111,16 @@ function buildProductSummary(items: ApiOrderItem[]) {
   }
 
   return lineItems.join("、");
+}
+
+function toCanonicalProductId(productId: string) {
+  return LEGACY_TO_CANONICAL_PRODUCT_ID[productId] ?? productId;
+}
+
+function getLegacyProductIds(canonicalProductId: string) {
+  return Object.entries(LEGACY_TO_CANONICAL_PRODUCT_ID)
+    .filter(([, canonical]) => canonical === canonicalProductId)
+    .map(([legacy]) => legacy);
 }
 
 function buildInventoryReservationItems(items: ApiOrderItem[]) {
@@ -267,6 +282,185 @@ function isInventoryConflictError(error: unknown) {
   return text.includes("库存不足") || text.includes("库存不存在");
 }
 
+function isInventoryMissingError(error: unknown) {
+  const text = getSupabaseErrorText(error);
+  return text.includes("库存不存在") || text.includes("Inventory not found") || text.includes("P0001");
+}
+
+function getDateAtChinaMidnight(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map((part) => Number(part));
+  if (!year || !month || !day) {
+    return null;
+  }
+
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
+async function ensureInventoryForDeliveryDate(client: DbClient, deliveryDate: string) {
+  const date = getDateAtChinaMidnight(deliveryDate);
+  if (!date) {
+    return;
+  }
+
+  const todayDate = getDateAtChinaMidnight(toDateKey(getChinaNow()));
+  if (!todayDate) {
+    return;
+  }
+
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const dayDiff = Math.round((date.getTime() - todayDate.getTime()) / msPerDay);
+
+  if (dayDiff < 0) {
+    return;
+  }
+
+  await ensureInventoryForNextDays(client, dayDiff + 1);
+}
+
+async function ensureInventoryRowsForRequestedItems(params: {
+  client: DbClient;
+  deliveryDate: string;
+  requestedItems: { slug: string; quantity: number }[];
+  inventoryMap: Map<string, { totalStock: number; remainingStock: number }>;
+}) {
+  const requestedSlugs = Array.from(new Set(params.requestedItems.map((item) => item.slug)));
+  if (requestedSlugs.length === 0) {
+    return;
+  }
+
+  const { data, error } = await params.client
+    .from("inventory")
+    .select("product_id")
+    .eq("delivery_date", params.deliveryDate)
+    .in("product_id", requestedSlugs);
+
+  if (error) {
+    throw error;
+  }
+
+  const existing = new Set((data ?? []).map((row) => String(row.product_id)));
+  const rowsToInsert = requestedSlugs
+    .filter((slug) => !existing.has(slug))
+    .map((slug) => {
+      const totalStock = Math.max(0, Number(params.inventoryMap.get(slug)?.totalStock ?? 10));
+      return {
+        product_id: slug,
+        delivery_date: params.deliveryDate,
+        total_stock: totalStock,
+        sold_quantity: 0,
+        remaining_stock: totalStock,
+        status: totalStock > 0 ? "Available" : "Sold Out"
+      };
+    });
+
+  if (rowsToInsert.length === 0) {
+    return;
+  }
+
+  const { error: upsertError } = await params.client
+    .from("inventory")
+    .upsert(rowsToInsert, { onConflict: "product_id,delivery_date", ignoreDuplicates: true });
+
+  if (upsertError) {
+    throw upsertError;
+  }
+}
+
+async function migrateLegacyInventoryRowsForRequestedItems(params: {
+  client: DbClient;
+  deliveryDate: string;
+  requestedItems: { slug: string; quantity: number }[];
+}) {
+  const requestedCanonicalSlugs = Array.from(
+    new Set(params.requestedItems.map((item) => toCanonicalProductId(item.slug)))
+  );
+
+  for (const canonicalSlug of requestedCanonicalSlugs) {
+    const legacyIds = getLegacyProductIds(canonicalSlug);
+    if (legacyIds.length === 0) {
+      continue;
+    }
+
+    const candidateIds = [canonicalSlug, ...legacyIds];
+    const { data, error } = await params.client
+      .from("inventory")
+      .select("id, product_id")
+      .eq("delivery_date", params.deliveryDate)
+      .in("product_id", candidateIds);
+
+    if (error) {
+      throw error;
+    }
+
+    const rows = data ?? [];
+    const canonicalRow = rows.find((row) => String(row.product_id) === canonicalSlug);
+    const legacyRows = rows.filter((row) => legacyIds.includes(String(row.product_id)));
+
+    if (legacyRows.length === 0) {
+      continue;
+    }
+
+    if (!canonicalRow) {
+      const [firstLegacy, ...extraLegacy] = legacyRows;
+      const { error: renameError } = await params.client
+        .from("inventory")
+        .update({ product_id: canonicalSlug })
+        .eq("id", firstLegacy.id);
+
+      if (renameError) {
+        throw renameError;
+      }
+
+      if (extraLegacy.length > 0) {
+        const { error: deleteExtrasError } = await params.client
+          .from("inventory")
+          .delete()
+          .in(
+            "id",
+            extraLegacy.map((row) => row.id)
+          );
+
+        if (deleteExtrasError) {
+          throw deleteExtrasError;
+        }
+      }
+
+      continue;
+    }
+
+    const { error: deleteLegacyError } = await params.client
+      .from("inventory")
+      .delete()
+      .eq("delivery_date", params.deliveryDate)
+      .in("product_id", legacyIds);
+
+    if (deleteLegacyError) {
+      throw deleteLegacyError;
+    }
+  }
+}
+
+function logReserveInventoryDebug(params: {
+  client: DbClient;
+  deliveryDate: string;
+  requestedItems: { slug: string; quantity: number }[];
+}) {
+  const rpcPayload = params.requestedItems.map((item) => ({
+    product_id: item.slug,
+    quantity: item.quantity
+  }));
+
+  console.log("[order POST] reserveInventoryForOrder debug", {
+    deliveryDate: params.deliveryDate,
+    requestedItems: params.requestedItems,
+    rpcPayload,
+    client: params.client === supabaseAdmin ? "supabaseAdmin" : "supabase",
+    projectUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseActive: Boolean(supabase),
+    supabaseAdminActive: Boolean(supabaseAdmin)
+  });
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const selectedDate = url.searchParams.get("deliveryDate") ?? undefined;
@@ -311,7 +505,7 @@ export async function POST(request: Request) {
   const deliveryArea = body.deliveryArea?.trim();
   const items = Array.isArray(body.items)
     ? body.items.map((item) => ({
-        slug: item.slug,
+        slug: item.slug ? toCanonicalProductId(String(item.slug)) : undefined,
         name: item.name,
         price: Number(item.price),
         quantity: Math.max(1, Number(item.quantity)),
@@ -443,10 +637,22 @@ export async function POST(request: Request) {
     console.log("Step 1 ensureInventory");
     await runStepWithFallback("ensureInventoryForNextDays", async (client) => {
       if (client === supabaseAdmin) {
-        await ensureInventoryForNextDays(client, 2);
+        await ensureInventoryForDeliveryDate(client, deliveryDate);
       }
     });
     console.log("Step 1 OK");
+
+    const migrationClient = activeClient ?? clients[0];
+    if (migrationClient === supabaseAdmin) {
+      console.log("Step 1.5 migrateLegacyInventoryRowsForRequestedItems");
+      const requestedItemsForMigration = buildInventoryReservationItems(items);
+      await migrateLegacyInventoryRowsForRequestedItems({
+        client: migrationClient,
+        deliveryDate,
+        requestedItems: requestedItemsForMigration
+      });
+      console.log("Step 1.5 OK");
+    }
 
     console.log("Step 2 getInventory");
     const inventoryForDate = await runStepWithFallback("getInventoryByDate", async (client) => {
@@ -472,6 +678,18 @@ export async function POST(request: Request) {
           { status: 409 }
         );
       }
+    }
+
+    const seedClient = activeClient ?? clients[0];
+    if (seedClient === supabaseAdmin) {
+      console.log("Step 2.5 ensureInventoryRowsForRequestedItems");
+      await ensureInventoryRowsForRequestedItems({
+        client: seedClient,
+        deliveryDate,
+        requestedItems,
+        inventoryMap
+      });
+      console.log("Step 2.5 OK");
     }
 
     console.log("Step 3 createOrderNumber");
@@ -520,25 +738,80 @@ export async function POST(request: Request) {
 
     console.log("Step 4 OK");
 
+    let reservedWithLegacyAlias = false;
+
     try {
       console.log("Step 5 reserveInventory");
       await runStepWithFallback("reserveInventoryForOrder", (client) =>
-        reserveInventoryForOrder({
-          supabase: client,
-          deliveryDate,
-          orderId: order.id,
-          items: requestedItems.map((item) => ({
-            slug: item.slug,
-            name: item.slug,
-            quantity: item.quantity
-          }))
-        })
+        ((() => {
+          logReserveInventoryDebug({
+            client,
+            deliveryDate,
+            requestedItems
+          });
+
+          return reserveInventoryForOrder({
+            supabase: client,
+            deliveryDate,
+            orderId: order.id,
+            items: requestedItems.map((item) => ({
+              slug: item.slug,
+              name: item.slug,
+              quantity: item.quantity
+            }))
+          });
+        })())
       );
       console.log("Step 5 OK");
     } catch (stockError) {
+      if (isInventoryMissingError(stockError)) {
+        const legacyRequestedItems = requestedItems.map((item) => {
+          const legacyIds = getLegacyProductIds(item.slug);
+          return {
+            ...item,
+            slug: legacyIds[0] ?? item.slug
+          };
+        });
+
+        const hasAliasFallback = legacyRequestedItems.some((item, index) => item.slug !== requestedItems[index]?.slug);
+        if (hasAliasFallback) {
+          try {
+            console.log("Step 5 retry reserveInventoryForOrder with legacy aliases");
+            await runStepWithFallback("reserveInventoryForOrderLegacyAlias", (client) =>
+              ((() => {
+                logReserveInventoryDebug({
+                  client,
+                  deliveryDate,
+                  requestedItems: legacyRequestedItems
+                });
+
+                return reserveInventoryForOrder({
+                  supabase: client,
+                  deliveryDate,
+                  orderId: order.id,
+                  items: legacyRequestedItems.map((item) => ({
+                    slug: item.slug,
+                    name: item.slug,
+                    quantity: item.quantity
+                  }))
+                });
+              })())
+            );
+            reservedWithLegacyAlias = true;
+            console.log("Step 5 legacy alias reserve OK");
+          } catch (legacyReserveError) {
+            console.error("[order POST] legacy alias reserve failed", legacyReserveError);
+          }
+        }
+      }
+
+      if (reservedWithLegacyAlias) {
+        // Continue normal response flow after successful alias fallback reservation.
+      } else {
       try {
-        if (activeClient) {
-          await activeClient.from("orders").delete().eq("id", order.id);
+        const rollbackClient = activeClient as DbClient | null;
+        if (rollbackClient) {
+          await rollbackClient.from("orders").delete().eq("id", order.id);
         }
       } catch (rollbackError) {
         console.error("[order POST] rollback order failed", rollbackError);
@@ -550,6 +823,7 @@ export async function POST(request: Request) {
       }
 
       throw stockError;
+      }
     }
 
     try {
