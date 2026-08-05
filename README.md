@@ -49,9 +49,16 @@ When booked orders reach daily capacity, that date becomes unavailable.
 
 The Unit01 images in `public/assets` are generated from the provided STL direction and latest references:
 
-- `unit01-hero.png`
-- `unit01-detail.png`
-- `unit01-context.png`
+- `Unit0100.png`
+- `Unit0101.png`
+- `Unit0102.png`
+- `Unit0103.png`
+- `Unit0105.png`
+- `Unit0106.png`
+- `Unit0107.png`
+- `Unit0108.png`
+- `Unit0109.png`
+- `Unit0110.png`
 
 Material intent:
 

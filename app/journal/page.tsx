@@ -22,7 +22,7 @@ export default function JournalPage() {
           ))}
         </div>
         <Image
-          src="/assets/unit01-detail.png"
+          src="/assets/Unit0109.png"
           alt="Object study detail"
           width={1200}
           height={1200}

@@ -88,7 +88,7 @@ export const archiveEntries: ArchiveEntry[] = [
       "光线如涟漪般缓慢扩散，在自然、计算与空间之间形成安静的对话。"
     ],
     coverImage: {
-      src: "/assets/Unit%2001%20cover.png",
+      src: "/assets/Unit0100.png",
       alt: "UNIT 01 封面主视觉",
       width: 1800,
       height: 1400,
@@ -106,7 +106,7 @@ export const archiveEntries: ArchiveEntry[] = [
         ],
         images: [
           {
-            src: "/assets/Unit%2001%20(5).png",
+            src: "/assets/Unit0106.png",
             alt: "UNIT 01 Studio photograph with Safari Chair and brown backdrop",
             width: 1800,
             height: 1200,
@@ -124,7 +124,7 @@ export const archiveEntries: ArchiveEntry[] = [
         ],
         images: [
           {
-            src: "/assets/Unit%2001%20(7).png",
+            src: "/assets/Unit0108.png",
             alt: "UNIT 01 interior photograph with grey wall, perforated cabinet, and flowers",
             width: 1800,
             height: 1200,
@@ -142,7 +142,7 @@ export const archiveEntries: ArchiveEntry[] = [
         ],
         images: [
           {
-            src: "/assets/Unit%2001%20(2).jpg",
+            src: "/assets/Unit0110.png",
             alt: "UNIT 01 final work red background product photograph",
             width: 1800,
             height: 1200,
