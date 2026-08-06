@@ -25,7 +25,7 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
   const pageClassName = "mx-auto flex min-h-[96svh] w-full max-w-5xl flex-col justify-between px-5 py-10 md:min-h-[820px] md:px-8 md:py-14";
   const contentClassName = "mx-auto w-full max-w-[430px] md:max-w-[560px]";
   const projectInfoRows = entry.objectInfoRows.slice(0, 6);
-  const shouldShowPhotoCredit = entry.slug === "unit-01";
+  const isUnit01 = entry.slug === "unit-01";
 
   const renderEditorialImage = (
     image: NonNullable<typeof entry.editorialSections>[number]["images"][number],
@@ -33,7 +33,7 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
   ) => {
     if (image.layout === "detail") {
       return (
-        <figure key={`${entry.slug}-${image.src}-${imageIndex}`} className="relative mx-auto w-full max-w-3xl">
+        <figure key={`${entry.slug}-${image.src}-${imageIndex}`} className="mx-auto w-full max-w-3xl">
           <Image
             src={image.src}
             alt={image.alt}
@@ -43,13 +43,12 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
             sizes="(max-width: 768px) 100vw, 720px"
             className="h-auto w-full"
           />
-          {shouldShowPhotoCredit ? <PhotoCredit /> : null}
         </figure>
       );
     }
 
     return (
-      <figure key={`${entry.slug}-${image.src}-${imageIndex}`} className="relative w-full">
+      <figure key={`${entry.slug}-${image.src}-${imageIndex}`} className="w-full">
         <Image
           src={image.src}
           alt={image.alt}
@@ -59,7 +58,6 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
           sizes="100vw"
           className="h-auto w-full"
         />
-        {shouldShowPhotoCredit ? <PhotoCredit /> : null}
       </figure>
     );
   };
@@ -95,7 +93,7 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
               sizes="100vw"
               className="h-auto w-full"
             />
-            {shouldShowPhotoCredit ? <PhotoCredit /> : null}
+            {isUnit01 ? <PhotoCredit /> : null}
           </figure>
         ) : null}
         <p className="mt-10 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">01</p>
@@ -154,7 +152,7 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
               {pairImages.length === 2 ? (
                 <div className="grid gap-6 md:grid-cols-2 md:gap-10">
                   {pairImages.map((image, imageIndex) => (
-                    <figure key={`${entry.slug}-${section.id}-${image.src}-${imageIndex}`} className="relative w-full">
+                    <figure key={`${entry.slug}-${section.id}-${image.src}-${imageIndex}`} className="w-full">
                       <Image
                         src={image.src}
                         alt={image.alt}
@@ -164,7 +162,6 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
                         sizes="(max-width: 768px) 100vw, 50vw"
                         className="h-auto w-full"
                       />
-                      {shouldShowPhotoCredit ? <PhotoCredit /> : null}
                     </figure>
                   ))}
                 </div>
