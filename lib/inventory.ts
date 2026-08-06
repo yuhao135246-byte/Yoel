@@ -27,8 +27,13 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
   "tanat-peach": 15,
   "tanat-ombligon": 15,
   "tanat-sidra": 15,
-  "fruit-lemon-tea": 30
+  "fruit-lemon-tea": 30,
+  "unit-01": 10
 };
+
+function isTrackedInventoryProduct(category: string) {
+  return category === "COFFEE" || category === "OBJECT";
+}
 
 function getDefaultStockForProduct(productId: string) {
   return INVENTORY_DEFAULT_STOCK[productId] ?? 10;
@@ -64,7 +69,7 @@ function buildInventorySummaries(rows: InventoryRowShape[]) {
   );
 
   return products
-    .filter((product) => product.category === "COFFEE")
+    .filter((product) => isTrackedInventoryProduct(product.category))
     .map((product) => {
       const record = inventoryMap.get(product.slug);
       const totalStock = record?.totalStock ?? getDefaultStockForProduct(product.slug);
@@ -82,8 +87,8 @@ function buildInventorySummaries(rows: InventoryRowShape[]) {
 }
 
 async function ensureInventoryForDate(supabase: SupabaseClient, deliveryDate: string) {
-  const coffeeProducts = products.filter((product) => product.category === "COFFEE");
-  const rows = coffeeProducts.map((product) => {
+  const trackedProducts = products.filter((product) => isTrackedInventoryProduct(product.category));
+  const rows = trackedProducts.map((product) => {
     const totalStock = getDefaultStockForProduct(product.slug);
     return {
       product_id: product.slug,

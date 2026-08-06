@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { journalNotes } from "@/lib/data";
 
 export default function JournalPage() {
@@ -21,13 +22,27 @@ export default function JournalPage() {
             </article>
           ))}
         </div>
-        <Image
-          src="/assets/Unit0109.png"
-          alt="Object study detail"
-          width={1200}
-          height={1200}
-          className="aspect-square w-full object-cover"
-        />
+        <div className="relative">
+          <Image
+            src="/assets/Unit0109.png"
+            alt="Object study detail"
+            width={1200}
+            height={1200}
+            className="aspect-square w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
+            <div className="pointer-events-auto flex max-w-[420px] flex-col items-center gap-4 text-center text-paper/90">
+              <p className="font-mono text-xs uppercase tracking-[0.2em]">UNIT 01</p>
+              <p className="text-2xl leading-tight md:text-3xl">第一件来自 Cadence 的设计作品</p>
+              <Link
+                href="/objects/unit01/preorder"
+                className="inline-flex border border-paper/90 px-5 py-2.5 font-mono text-xs uppercase tracking-[0.16em] text-paper/90 transition-colors duration-200 hover:border-[#E2C44E] hover:text-[#E2C44E]"
+              >
+                立即预售
+              </Link>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );

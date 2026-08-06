@@ -34,6 +34,9 @@ type ApiOrderItem = {
   name: string;
   price: number;
   quantity: number;
+  variant?: {
+    baseColor?: string;
+  };
   selectedOptions?: {
     groupKey: string;
     groupLabel: string;
@@ -509,6 +512,13 @@ export async function POST(request: Request) {
         name: item.name,
         price: Number(item.price),
         quantity: Math.max(1, Number(item.quantity)),
+        variant:
+          item.variant && typeof item.variant === "object"
+            ? {
+                baseColor:
+                  typeof item.variant.baseColor === "string" ? item.variant.baseColor : undefined
+              }
+            : undefined,
         selectedOptions: Array.isArray(item.selectedOptions)
           ? item.selectedOptions
               .map((option) => ({

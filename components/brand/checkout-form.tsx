@@ -270,6 +270,7 @@ export function CheckoutForm() {
           {items.map((item, index) => (
             <div key={`${item.slug}-${index}`}>
               <p className="leading-6">{item.name} x {item.quantity}</p>
+              <p className="text-xs text-graphite">单价：￥{item.price}</p>
               {item.selectedOptions?.map((option) => (
                 <p key={`${item.slug}-${index}-${option.groupKey}`} className="text-xs text-graphite">
                   {option.groupLabel}：{option.label}

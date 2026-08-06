@@ -215,6 +215,51 @@ export const products: Product[] = [
         ]
       }
     ]
+  },
+  {
+    slug: "unit-01",
+    name: "Unit 01",
+    category: "OBJECT",
+    layer: "预售",
+    subtitle: "参数化环境灯",
+    price: 290,
+    currency: "¥",
+    available: true,
+    unit: "件",
+    availability: "预售中",
+    description: "Cadence 首件参数化环境灯作品。",
+    details: ["底座颜色可选", "支持预售", "沿用现有配送与库存体系"],
+    image: "/assets/Unit0100.png",
+    tags: ["Unit 01", "Object", "Preorder"],
+    optionGroups: [
+      {
+        key: "baseColor",
+        label: "底座颜色",
+        required: true,
+        options: [
+          {
+            value: "yellow",
+            label: "明黄"
+          },
+          {
+            value: "bordeaux",
+            label: "波尔多红"
+          },
+          {
+            value: "crimson",
+            label: "绯红"
+          },
+          {
+            value: "sand",
+            label: "哑光沙黄"
+          },
+          {
+            value: "white",
+            label: "沙白"
+          }
+        ]
+      }
+    ]
   }
 ];
 

@@ -17,7 +17,7 @@ function isValidDateKey(value: string) {
 
 function buildDefaultRecords() {
   return products
-    .filter((product) => product.category === "COFFEE")
+    .filter((product) => product.category === "COFFEE" || product.category === "OBJECT")
     .map((product) => {
       const totalStock = INVENTORY_DEFAULT_STOCK[product.slug] ?? 10;
       return {
