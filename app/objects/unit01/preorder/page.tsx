@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { notifyCartChanged } from "@/components/brand/floating-cart-button";
@@ -88,6 +89,7 @@ export default function Unit01PreorderPage() {
   const [selectedFinish, setSelectedFinish] = useState<FinishOption>(defaultFinish);
   const [isCustomSelected, setIsCustomSelected] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [heroImageSrc, setHeroImageSrc] = useState(HERO_IMAGE_SRC);
   const [remainingStock, setRemainingStock] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
 
@@ -238,13 +240,17 @@ export default function Unit01PreorderPage() {
       <section className="mx-auto grid min-h-[calc(100svh-96px)] max-w-7xl gap-12 px-5 py-12 md:grid-cols-[1.08fr_0.92fr] md:gap-14 md:px-8 md:py-16">
         <div className="flex flex-col justify-center">
           <div className="overflow-hidden border border-ink/10 bg-bone/25">
-            <img
-              src={HERO_IMAGE_SRC}
+            <Image
+              src={heroImageSrc}
               alt="Unit 01 hero image"
+              width={1800}
+              height={1200}
+              priority
+              sizes="(max-width: 768px) 100vw, 58vw"
               className="aspect-[4/3] h-auto w-full object-cover"
               onError={(event) => {
                 if (event.currentTarget.src.includes("Unit0108.jpeg")) {
-                  event.currentTarget.src = "/assets/Unit0108.jpg";
+                  setHeroImageSrc("/assets/Unit0108.jpg");
                 }
               }}
             />
@@ -273,13 +279,16 @@ export default function Unit01PreorderPage() {
                       className="grid gap-2.5 text-left"
                     >
                       <span
-                        className="relative block overflow-hidden border bg-bone/20 transition-colors duration-200"
+                        className="relative block aspect-[4/3] overflow-hidden border bg-bone/20 transition-colors duration-200"
                         style={{ borderColor: isSelected ? CADENCE_YELLOW : "rgba(11,11,10,0.18)" }}
                       >
-                        <img
+                        <Image
                           src={option.image}
                           alt={option.label}
-                          className="aspect-[4/3] h-auto w-full object-contain"
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
+                          loading="eager"
+                          className="h-full w-full object-cover object-[center_42%]"
                         />
                         {isSelected ? (
                           <span className="absolute bottom-3 right-3 font-mono text-[11px] tracking-[0.12em]" style={{ color: CADENCE_YELLOW }}>
