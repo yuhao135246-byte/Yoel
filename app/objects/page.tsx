@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArchiveListSection } from "@/components/brand/archive-list-section";
+import { PhotoCredit } from "@/components/brand/photo-credit";
 import { RevealOnView } from "@/components/brand/reveal-on-view";
 import { UnitGallerySlideshow } from "@/components/brand/unit-gallery-slideshow";
 
@@ -73,9 +74,7 @@ export default function ObjectsPage() {
           sizes="100vw"
           className="h-auto w-full"
         />
-        <p className="pointer-events-none absolute bottom-4 right-4 text-right text-[11px] font-normal text-[#9A9A9A] md:bottom-5 md:right-5 md:text-[12px]">
-          由 观照工作室提供
-        </p>
+        <PhotoCredit />
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">

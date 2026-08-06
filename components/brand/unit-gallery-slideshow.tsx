@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { PhotoCredit } from "@/components/brand/photo-credit";
 import { useEffect, useMemo, useState } from "react";
 
 type UnitGallerySlideshowProps = {
@@ -54,7 +55,7 @@ export function UnitGallerySlideshow({
             return (
               <figure
                 key={`${image.src}-${index}`}
-                className={`absolute inset-0 transition-opacity duration-900 ease-in-out ${
+                className={`absolute inset-0 relative transition-opacity duration-900 ease-in-out ${
                   isActive ? "opacity-100" : "pointer-events-none opacity-0"
                 }`}
                 aria-hidden={!isActive}
@@ -68,6 +69,7 @@ export function UnitGallerySlideshow({
                   sizes="100vw"
                   className="h-full w-full object-contain"
                 />
+                <PhotoCredit />
               </figure>
             );
           })}
