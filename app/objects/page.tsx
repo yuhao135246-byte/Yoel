@@ -63,7 +63,7 @@ const unit01GalleryImages = [
 export default function ObjectsPage() {
   return (
     <main className="bg-paper text-ink">
-      <section className="w-full">
+      <section className="relative w-full">
         <Image
           src="/assets/Unit0100.png"
           alt="UNIT 01 hero image"
@@ -73,6 +73,9 @@ export default function ObjectsPage() {
           sizes="100vw"
           className="h-auto w-full"
         />
+        <p className="pointer-events-none absolute bottom-4 right-4 text-right text-[11px] font-normal text-[#9A9A9A] md:bottom-5 md:right-5 md:text-[12px]">
+          由 观照工作室提供
+        </p>
       </section>
 
       <section className="mx-auto max-w-7xl px-5 py-16 md:px-8 md:py-24">
