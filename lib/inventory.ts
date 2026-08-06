@@ -151,17 +151,20 @@ async function rolloverInventoryToTomorrow(params: {
     return;
   }
 
-  const { error: insertError } = await params.supabase
+  const { error: upsertError } = await params.supabase
     .from("inventory")
-    .upsert(rowsToInsert, { onConflict: "product_id,delivery_date", ignoreDuplicates: true });
+    .upsert(rowsToInsert, {
+      onConflict: "product_id,delivery_date",
+      ignoreDuplicates: true
+    });
 
-  if (insertError) {
-    throw insertError;
+  if (upsertError) {
+    throw upsertError;
   }
 }
 
-export async function ensureInventoryForNextDays(supabase: SupabaseClient, _days = 2) {
-  void _days;
+export async function ensureInventoryForNextDays(supabase: SupabaseClient, days = 2) {
+  const safeDays = Math.max(1, Math.floor(days));
   const now = getChinaNow();
   const todayKey = toDateKey(now);
   const tomorrowKey = toDateKey(addDays(now, 1));
@@ -169,6 +172,11 @@ export async function ensureInventoryForNextDays(supabase: SupabaseClient, _days
   // Ensure today always has baseline rows for first-time bootstrap.
   await ensureInventoryForDate(supabase, todayKey);
 
+  if (safeDays === 1) {
+    return;
+  }
+
+  // Tomorrow should always exist when callers ask for 2+ days.
   // After cutoff, tomorrow starts from today's remaining stock once (no overwrite if already set).
   if (now.getHours() >= DELIVERY_CUTOFF_HOUR) {
     await rolloverInventoryToTomorrow({
@@ -176,6 +184,13 @@ export async function ensureInventoryForNextDays(supabase: SupabaseClient, _days
       sourceDate: todayKey,
       targetDate: tomorrowKey
     });
+  } else {
+    await ensureInventoryForDate(supabase, tomorrowKey);
+  }
+
+  // Seed additional future dates requested by caller.
+  for (let offset = 2; offset < safeDays; offset += 1) {
+    await ensureInventoryForDate(supabase, toDateKey(addDays(now, offset)));
   }
 }
 
