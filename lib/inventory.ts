@@ -277,24 +277,30 @@ export async function reserveInventoryForOrder(params: {
     throw new Error("订单缺少有效商品，无法扣减库存");
   }
 
+  console.log("=== RPC DEBUG START ===");
+  console.log("[reserveInventoryForOrder] deliveryDate:", params.deliveryDate);
+  console.log("[reserveInventoryForOrder] orderId:", params.orderId);
+  console.log("[reserveInventoryForOrder] payload:", payload);
+  console.log(
+    "[reserveInventoryForOrder] payload items:",
+    payload.map((item) => ({
+      product_id: item.product_id,
+      quantity: item.quantity,
+      product_id_length: typeof item.product_id === "string" ? item.product_id.length : 0
+    }))
+  );
+
   const { data, error } = await params.supabase.rpc("reserve_inventory_items", {
-    p_order_id: params.orderId,
     p_delivery_date: params.deliveryDate,
     p_items: payload
   });
 
+  console.log("[reserveInventoryForOrder] rpc data:", data);
+  console.log("[reserveInventoryForOrder] rpc error:", error);
+  console.log("=== RPC DEBUG END ===");
+
   if (error) {
-    // Backward compatibility for older SQL function signatures.
-    const fallback = await params.supabase.rpc("reserve_inventory_items", {
-      p_delivery_date: params.deliveryDate,
-      p_items: payload
-    });
-
-    if (fallback.error) {
-      throw fallback.error;
-    }
-
-    return Array.isArray(fallback.data) ? fallback.data : [];
+    throw error;
   }
 
   return Array.isArray(data) ? data : [];
