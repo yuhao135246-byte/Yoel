@@ -78,7 +78,7 @@ export const products: Product[] = [
     tags: ["冷萃", "哥斯达黎加", "黑蜜处理"]
   },
   {
-    slug: "tanat-peach",
+    slug: "panama-elida-falda",
     name: "Panama Elida Falda CRD GW0403",
     category: "COFFEE",
     layer: "冷萃系列",
