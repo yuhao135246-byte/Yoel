@@ -277,19 +277,6 @@ export async function reserveInventoryForOrder(params: {
     throw new Error("订单缺少有效商品，无法扣减库存");
   }
 
-  const { data: debugInventory, error: debugInventoryError } = await params.supabase
-    .from("inventory")
-    .select("product_id, delivery_date, total_stock, sold_quantity, remaining_stock, status")
-    .eq("product_id", "panama-elida-falda")
-    .eq("delivery_date", params.deliveryDate);
-
-  console.log("[inventory DIRECT DEBUG]", {
-    projectUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    deliveryDate: params.deliveryDate,
-    debugInventory,
-    debugInventoryError
-  });
-
   const { data, error } = await params.supabase.rpc("reserve_inventory_items", {
     p_delivery_date: params.deliveryDate,
     p_items: payload

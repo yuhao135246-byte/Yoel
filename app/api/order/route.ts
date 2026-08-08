@@ -97,18 +97,6 @@ type DeliveryAvailabilityResponse = DeliveryAvailability & {
 
 type DbClient = SupabaseClient;
 
-function getProjectRefFromUrl(projectUrl?: string) {
-  if (!projectUrl) {
-    return null;
-  }
-
-  try {
-    return new URL(projectUrl).hostname.split(".")[0] ?? null;
-  } catch {
-    return null;
-  }
-}
-
 const LEGACY_TO_CANONICAL_PRODUCT_ID: Record<string, string> = {
   "stitch-cold-brew": "the-naughty-dog-special-edition-cold-batch-brew"
 };
@@ -477,15 +465,6 @@ function logReserveInventoryDebug(params: {
 }
 
 export async function GET(request: Request) {
-  const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  console.log("[order API env debug]", {
-    projectUrl,
-    projectRef: getProjectRefFromUrl(projectUrl),
-    supabaseActive: Boolean(supabase),
-    supabaseAdminActive: Boolean(supabaseAdmin),
-    serviceRoleKeyConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
-  });
-
   const url = new URL(request.url);
   const selectedDate = url.searchParams.get("deliveryDate") ?? undefined;
 
@@ -520,15 +499,6 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  console.log("[order API env debug]", {
-    projectUrl,
-    projectRef: getProjectRefFromUrl(projectUrl),
-    supabaseActive: Boolean(supabase),
-    supabaseAdminActive: Boolean(supabaseAdmin),
-    serviceRoleKeyConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
-  });
-
   const body = (await request.json()) as ApiOrderPayload;
   const name = body.name?.trim();
   const phone = body.phone?.trim();
