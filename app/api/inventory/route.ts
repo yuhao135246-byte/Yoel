@@ -11,6 +11,18 @@ import { supabase, supabaseAdmin } from "@/lib/supabase";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+function getProjectRefFromUrl(projectUrl?: string) {
+  if (!projectUrl) {
+    return null;
+  }
+
+  try {
+    return new URL(projectUrl).hostname.split(".")[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
@@ -47,6 +59,15 @@ function getErrorText(error: unknown) {
 }
 
 export async function GET(request: Request) {
+  const projectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  console.log("[inventory API env debug]", {
+    projectUrl,
+    projectRef: getProjectRefFromUrl(projectUrl),
+    supabaseActive: Boolean(supabase),
+    supabaseAdminActive: Boolean(supabaseAdmin),
+    serviceRoleKeyConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+  });
+
   const url = new URL(request.url);
   const queryDate = url.searchParams.get("deliveryDate") ?? "";
   const defaultDeliveryDate = getDefaultBookingDate();
