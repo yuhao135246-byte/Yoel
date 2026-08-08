@@ -265,6 +265,19 @@ export default function Unit01PreorderPage() {
               <p className="font-mono text-xl">￥{unitPrice}</p>
             </header>
 
+            <section className="grid gap-3">
+              <div className="overflow-hidden border border-ink/12 bg-bone/15">
+                <Image
+                  src="/assets/Unit01 产品参数.png"
+                  alt="Unit 01 产品参数"
+                  width={1600}
+                  height={1200}
+                  sizes="(max-width: 768px) 100vw, 42vw"
+                  className="h-auto w-full object-contain"
+                />
+              </div>
+            </section>
+
             <section className="grid gap-5">
               <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-graphite">Base Finish</h2>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-6">
