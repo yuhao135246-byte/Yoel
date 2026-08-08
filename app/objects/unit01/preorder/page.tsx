@@ -30,7 +30,6 @@ type CartItem = {
   };
 };
 
-const UNIT_PRICE = 290;
 const CADENCE_YELLOW = "#E2C44E";
 const HERO_IMAGE_SRC = "/assets/Unit0108.jpeg";
 
@@ -72,6 +71,7 @@ function hasSameSelectedOptions(a?: SelectedOption[], b?: SelectedOption[]) {
 export default function Unit01PreorderPage() {
   const router = useRouter();
   const unitProduct = useMemo(() => products.find((product) => product.slug === "unit-01"), []);
+  const unitPrice = unitProduct?.price ?? 330;
   const availableFinishOptions = useMemo(() => {
     const group = unitProduct?.optionGroups?.find((item) => item.key === "baseColor");
     if (!group) {
@@ -122,7 +122,7 @@ export default function Unit01PreorderPage() {
     };
   }, []);
 
-  const totalPrice = useMemo(() => UNIT_PRICE * quantity, [quantity]);
+  const totalPrice = useMemo(() => unitPrice * quantity, [quantity, unitPrice]);
   const selectedOption = useMemo<SelectedOption>(() => {
     const baseColorGroup = unitProduct?.optionGroups?.find((group) => group.key === "baseColor");
     return {
@@ -262,7 +262,7 @@ export default function Unit01PreorderPage() {
             <header className="grid gap-3 border-b border-ink/12 pb-8">
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Unit 01</p>
               <h1 className="text-5xl leading-none md:text-6xl">户外照明装置</h1>
-              <p className="font-mono text-xl">￥290</p>
+              <p className="font-mono text-xl">￥{unitPrice}</p>
             </header>
 
             <section className="grid gap-5">
@@ -333,7 +333,7 @@ export default function Unit01PreorderPage() {
                 </div>
                 <div className="grid gap-1">
                   <p className="text-graphite">单价</p>
-                  <p>￥{UNIT_PRICE}</p>
+                  <p>￥{unitPrice}</p>
                 </div>
                 <div className="grid gap-1">
                   <p className="text-graphite">合计</p>

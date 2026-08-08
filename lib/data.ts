@@ -222,7 +222,7 @@ export const products: Product[] = [
     category: "OBJECT",
     layer: "预售",
     subtitle: "参数化环境灯",
-    price: 290,
+    price: 330,
     currency: "¥",
     available: true,
     unit: "件",
