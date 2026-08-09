@@ -152,39 +152,44 @@ export default async function OrdersPage() {
   const orders = await getOrders();
 
   return (
-    <main className="min-h-screen bg-paper px-5 py-12 text-ink md:px-8">
+    <main
+      className="min-h-screen bg-paper px-5 py-12 text-ink md:px-8"
+      style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "Microsoft YaHei", sans-serif' }}
+    >
       <section className="mx-auto max-w-7xl">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-warm">Admin / Orders</p>
         <h1 className="mt-6 text-5xl leading-none md:text-7xl">订单管理</h1>
-        <div className="mt-10 overflow-hidden border border-ink/15">
-          <div className="grid grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/15 bg-bone px-4 py-3 font-mono text-[11px] uppercase tracking-[0.16em] text-graphite">
-            <span>订单号</span>
-            <span>配送日期</span>
-            <span>姓名</span>
-            <span>电话</span>
-            <span>地址</span>
-            <span>商品</span>
-            <span>数量</span>
-            <span>金额</span>
-            <span>状态</span>
+        <div className="mt-10 overflow-x-auto border border-ink/15">
+          <div className="min-w-[980px]">
+            <div className="grid grid-cols-[170px_120px_110px_140px_180px_minmax(320px,1fr)_72px_96px_96px] border-b border-ink/15 bg-bone px-4 py-3 text-[12px] font-medium tracking-[0.08em] text-graphite/90">
+              <span className="whitespace-nowrap">订单号</span>
+              <span className="whitespace-nowrap">配送日期</span>
+              <span className="whitespace-nowrap">姓名</span>
+              <span className="whitespace-nowrap">电话</span>
+              <span>地址</span>
+              <span>商品</span>
+              <span className="whitespace-nowrap">数量</span>
+              <span className="whitespace-nowrap">金额</span>
+              <span className="whitespace-nowrap">状态</span>
+            </div>
+            {orders.map((order) => (
+              <Link
+                key={order.id}
+                href={`/admin/orders/${order.id}`}
+                className="grid grid-cols-[170px_120px_110px_140px_180px_minmax(320px,1fr)_72px_96px_96px] border-b border-ink/10 px-4 py-4 text-[13.5px] font-normal leading-[1.6] text-left text-ink hover:bg-bone"
+              >
+                <span className="font-mono text-[13px] font-medium tracking-[0.02em] whitespace-nowrap">{order.number}</span>
+                <span className="whitespace-nowrap">{order.deliveryDate ?? "-"}</span>
+                <span className="break-words">{order.customer}</span>
+                <span className="whitespace-nowrap">{order.phone}</span>
+                <span className="break-words">{order.address}</span>
+                <span className="break-words">{order.product}</span>
+                <span className="whitespace-nowrap">{order.quantity}</span>
+                <span className="whitespace-nowrap">RMB {order.amount}</span>
+                <span className="whitespace-nowrap">{order.status}</span>
+              </Link>
+            ))}
           </div>
-          {orders.map((order) => (
-            <Link
-              key={order.id}
-              href={`/admin/orders/${order.id}`}
-              className="grid grid-cols-[1.2fr_0.9fr_0.9fr_0.9fr_1.3fr_1fr_0.6fr_0.8fr_0.9fr] border-b border-ink/10 px-4 py-4 text-sm text-left hover:bg-bone"
-            >
-              <span className="font-mono">{order.number}</span>
-              <span className="font-mono">{order.deliveryDate ?? "-"}</span>
-              <span>{order.customer}</span>
-              <span>{order.phone}</span>
-              <span>{order.address}</span>
-              <span>{order.product}</span>
-              <span>{order.quantity}</span>
-              <span>RMB {order.amount}</span>
-              <span>{order.status}</span>
-            </Link>
-          ))}
         </div>
       </section>
     </main>
