@@ -1,5 +1,5 @@
-import { products } from "@/lib/data";
 import { addDays, DELIVERY_CUTOFF_HOUR, getChinaNow, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
+import { getCatalogProductsForInventory } from "@/lib/product-catalog";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type InventoryStatus = "Available" | "Sold Out";
@@ -55,7 +55,8 @@ type InventoryRowShape = {
   status: string | null;
 };
 
-function buildInventorySummaries(rows: InventoryRowShape[]) {
+async function buildInventorySummaries(rows: InventoryRowShape[]) {
+  const catalogProducts = await getCatalogProductsForInventory();
   const inventoryMap = new Map(
     rows.map((row) => [
       row.product_id,
@@ -68,11 +69,11 @@ function buildInventorySummaries(rows: InventoryRowShape[]) {
     ])
   );
 
-  return products
+  return catalogProducts
     .filter((product) => isTrackedInventoryProduct(product.category))
     .map((product) => {
       const record = inventoryMap.get(product.slug);
-      const totalStock = record?.totalStock ?? getDefaultStockForProduct(product.slug);
+      const totalStock = record?.totalStock ?? getDefaultStockForProduct(product.slug) ?? (Number(product.initial_stock ?? 0) || 10);
       const soldQuantity = record?.soldQuantity ?? 0;
       const remainingStock = record?.remainingStock ?? Math.max(totalStock - soldQuantity, 0);
       return {
@@ -87,7 +88,7 @@ function buildInventorySummaries(rows: InventoryRowShape[]) {
 }
 
 async function ensureInventoryForDate(supabase: SupabaseClient, deliveryDate: string) {
-  const trackedProducts = products.filter((product) => isTrackedInventoryProduct(product.category));
+  const trackedProducts = (await getCatalogProductsForInventory()).filter((product) => isTrackedInventoryProduct(product.category));
   const rows = trackedProducts.map((product) => {
     const totalStock = getDefaultStockForProduct(product.slug);
     return {

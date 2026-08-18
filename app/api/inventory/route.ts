@@ -1,4 +1,3 @@
-import { products } from "@/lib/data";
 import { getBookingDateOptions, getDefaultBookingDate } from "@/lib/delivery";
 import {
   getInventoryByDate,
@@ -6,6 +5,7 @@ import {
   getInventoryDateRange,
   INVENTORY_DEFAULT_STOCK
 } from "@/lib/inventory";
+import { getCatalogProductsForInventory } from "@/lib/product-catalog";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +15,12 @@ function isValidDateKey(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
-function buildDefaultRecords() {
-  return products
+async function buildDefaultRecords() {
+  const catalogProducts = await getCatalogProductsForInventory();
+  return catalogProducts
     .filter((product) => product.category === "COFFEE" || product.category === "OBJECT")
     .map((product) => {
-      const totalStock = INVENTORY_DEFAULT_STOCK[product.slug] ?? 10;
+      const totalStock = INVENTORY_DEFAULT_STOCK[product.slug] ?? (Number(product.initial_stock ?? 0) || 10);
       return {
         productId: product.slug,
         productName: product.name,
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
   const deliveryDate = isValidDateKey(queryDate) && availableDates.has(queryDate) ? queryDate : defaultDeliveryDate;
 
   if (!supabaseAdmin && !supabase) {
-    const records = buildDefaultRecords();
+    const records = await buildDefaultRecords();
 
     return Response.json({
       deliveryDate,
@@ -117,7 +118,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const records = buildDefaultRecords();
+    const records = await buildDefaultRecords();
     return Response.json({
       deliveryDate,
       defaultDeliveryDate,

@@ -1,9 +1,9 @@
 import { AddToCartButton } from "@/components/brand/add-to-cart-button";
 import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
-import { products } from "@/lib/data";
 import { getDefaultBookingDate } from "@/lib/delivery";
 import { ensureInventoryForNextDays, getInventoryByDate, getInventoryByDateReadonly } from "@/lib/inventory";
+import { getActiveCatalogProducts } from "@/lib/product-catalog";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -65,6 +65,7 @@ async function loadStockMap() {
 }
 
 export default async function CoffeePage() {
+  const products = await getActiveCatalogProducts();
   const coffee = products.filter((product) => product.category === "COFFEE");
   const stock = await loadStockMap();
 
