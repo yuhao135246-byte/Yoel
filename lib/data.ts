@@ -62,20 +62,20 @@ export const products: Product[] = [
     tags: ["Cold Batch Brew", "限时供应", "The Naughty Dog", "哥伦比亚"]
   },
   {
-    slug: "costa-rica-violet-black-honey-cold-brew",
-    name: "哥斯达黎加 · 紫罗兰 · 黑蜜处理",
+    slug: "拉索一号",
+    name: "哥伦比亚 拉索一号#热门回归",
     category: "COFFEE",
     layer: "冷萃系列",
-    subtitle: "哥斯达黎加｜中央山谷｜圣伊西德罗48区（San Isidro 48）｜卡杜拉 / 卡杜艾｜黑蜜处理｜1700m+",
-    price: 50,
+    subtitle: "品种：Caturra（卡杜拉）与 Castillo（卡斯蒂略） → 产区：哥伦比亚 Huila（惠兰省） 海拔：1750 米以上",
+    price: 46,
     currency: "¥",
     available: true,
     unit: "杯",
     availability: "周一至周日上午配送",
-    description: "紫罗兰 · 玫瑰 · 樱桃 · 桃子杏脯 · 浆果果酱 · 香草甜浓巧",
-    details: ["紫罗兰", "玫瑰", "樱桃", "桃子杏脯", "浆果果酱", "香草甜浓巧"],
-    image: "/assets/紫罗兰.png",
-    tags: ["冷萃", "哥斯达黎加", "黑蜜处理"]
+    description: "榛子、杏干、桃子 （中烘）",
+    details: ["榛子、杏干、桃子 （中烘）"],
+    image: "/assets/拉索一号.png",
+    tags: ["冷萃", "哥伦比亚", "拉索一号"]
   },
   {
     slug: "panama-elida-falda",
