@@ -148,8 +148,8 @@ export const products: Product[] = [
     unit: "杯",
     availability: "Available（可售）",
     description: "丝滑奶泡与浓郁咖啡的经典组合，热或冰两种口感可选。",
-    details: ["温度可选：热拿铁 / 冰拿铁", "热拿铁：/assets/latte.jpg", "冰拿铁：/assets/Ice latte.png"],
-    image: "/assets/latte.jpg",
+    details: ["温度可选：热拿铁 / 冰拿铁", "热拿铁：/assets/Latte.png", "冰拿铁：/assets/Ice latte.png"],
+    image: "/assets/Latte.png",
     tags: ["拿铁", "Latte", "奶咖"],
     optionGroups: [
       {
@@ -160,7 +160,7 @@ export const products: Product[] = [
           {
             value: "hot-latte",
             label: "热拿铁 / Hot Latte · ¥18",
-            image: "/assets/latte.png"
+            image: "/assets/Latte.png"
           },
           {
             value: "ice-latte",
