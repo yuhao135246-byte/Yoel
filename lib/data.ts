@@ -8,6 +8,7 @@ export type ProductInventoryItem = {
 export type ProductOption = {
   value: string;
   label: string;
+  image?: string;
   inventoryItems?: ProductInventoryItem[];
 };
 
@@ -135,6 +136,40 @@ export const products: Product[] = [
     details: ["柠檬", "西瓜 & 甜橙", "茉莉花茶"],
     image: "/assets/季节水果柠檬茶.png",
     tags: ["水果茶", "柠檬", "季节饮品"]
+  },
+  {
+    slug: "latte",
+    name: "Latte / 拿铁",
+    category: "COFFEE",
+    layer: "奶咖系列",
+    price: 18,
+    currency: "¥",
+    available: true,
+    unit: "杯",
+    availability: "Available（可售）",
+    description: "丝滑奶泡与浓郁咖啡的经典组合，热或冰两种口感可选。",
+    details: ["温度可选：热拿铁 / 冰拿铁", "热拿铁：/assets/latte.jpg", "冰拿铁：/assets/Ice latte.png"],
+    image: "/assets/latte.jpg",
+    tags: ["拿铁", "Latte", "奶咖"],
+    optionGroups: [
+      {
+        key: "temperature",
+        label: "温度 / Temperature",
+        required: true,
+        options: [
+          {
+            value: "hot-latte",
+            label: "热拿铁 / Hot Latte · ¥18",
+            image: "/assets/latte.jpg"
+          },
+          {
+            value: "ice-latte",
+            label: "冰拿铁 / Ice Latte · ¥18",
+            image: "/assets/Ice latte.png"
+          }
+        ]
+      }
+    ]
   },
   {
     slug: "sweet-pepper-chicken-wrap",

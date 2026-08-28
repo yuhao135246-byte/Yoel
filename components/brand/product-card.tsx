@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/data";
 
 type ProductCardProps = {
@@ -20,11 +23,47 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
         ? "售罄"
       : null;
 
+  const initialOptionValues = useMemo(
+    () => Object.fromEntries((product.optionGroups ?? []).map((group) => [group.key, group.options[0]?.value ?? ""])),
+    [product.optionGroups]
+  );
+
+  const [selectedValues, setSelectedValues] = useState<Record<string, string>>(initialOptionValues);
+
+  useEffect(() => {
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<{ slug?: string; values?: Record<string, string> }>).detail;
+      if (!detail || detail.slug !== product.slug) {
+        return;
+      }
+      setSelectedValues(detail.values ?? initialOptionValues);
+    };
+
+    window.addEventListener("product-option-change", listener as EventListener);
+    return () => {
+      window.removeEventListener("product-option-change", listener as EventListener);
+    };
+  }, [initialOptionValues, product.slug]);
+
+  const selectedImage = useMemo(() => {
+    for (const group of product.optionGroups ?? []) {
+      const optionValue = selectedValues[group.key];
+      if (!optionValue) {
+        continue;
+      }
+      const option = group.options.find((item) => item.value === optionValue);
+      if (option?.image) {
+        return option.image;
+      }
+    }
+    return product.image;
+  }, [product.image, product.optionGroups, selectedValues]);
+
   return (
     <article className="grid gap-4 border-t border-ink/15 pt-4 md:gap-5 md:pt-5">
       <Link href={product.category === "COFFEE" ? "/coffee" : "/objects"} className="block overflow-hidden bg-bone">
         <Image
-          src={product.image}
+          src={selectedImage}
           alt={product.name}
           width={1200}
           height={900}

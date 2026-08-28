@@ -28,7 +28,7 @@ type AddToCartButtonProps = {
 export function AddToCartButton({ product, remainingStock, deliveryDate }: AddToCartButtonProps) {
   const isSoldOut = typeof remainingStock === "number" && remainingStock <= 0;
   const [optionValues, setOptionValues] = useState<Record<string, string>>(() =>
-    Object.fromEntries((product.optionGroups ?? []).map((group) => [group.key, ""]))
+    Object.fromEntries((product.optionGroups ?? []).map((group) => [group.key, group.options[0]?.value ?? ""]))
   );
   const [selectionError, setSelectionError] = useState("");
   const [isAdded, setIsAdded] = useState(false);
@@ -117,6 +117,21 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
   }
 
   useEffect(() => {
+    const listener = (event: Event) => {
+      const detail = (event as CustomEvent<{ slug?: string; values?: Record<string, string> }>).detail;
+      if (!detail || detail.slug !== product.slug) {
+        return;
+      }
+      setOptionValues(detail.values ?? optionValues);
+    };
+
+    window.addEventListener("product-option-change", listener as EventListener);
+    return () => {
+      window.removeEventListener("product-option-change", listener as EventListener);
+    };
+  }, [optionValues, product.slug]);
+
+  useEffect(() => {
     if (!isAdded) {
       return;
     }
@@ -142,7 +157,11 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
             value={optionValues[group.key] ?? ""}
             onChange={(event) => {
               const value = event.target.value;
-              setOptionValues((prev) => ({ ...prev, [group.key]: value }));
+              setOptionValues((prev) => {
+                const next = { ...prev, [group.key]: value };
+                window.dispatchEvent(new CustomEvent("product-option-change", { detail: { slug: product.slug, values: next } }));
+                return next;
+              });
               setSelectionError("");
             }}
             className="h-12 border border-ink/20 bg-paper px-3 text-sm"
