@@ -160,7 +160,7 @@ export const products: Product[] = [
           {
             value: "hot-latte",
             label: "热拿铁 / Hot Latte · ¥18",
-            image: "/assets/latte.jpg"
+            image: "/assets/latte.png"
           },
           {
             value: "ice-latte",
