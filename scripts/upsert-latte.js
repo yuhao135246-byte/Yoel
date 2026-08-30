@@ -31,7 +31,7 @@ const supabase = createClient(values.NEXT_PUBLIC_SUPABASE_URL, values.SUPABASE_S
     unit: '杯',
     availability: 'Available（可售）',
     description: '丝滑奶泡与浓郁咖啡的经典组合，热或冰两种口感可选。',
-    image: '/assets/latte.jpg',
+    image: '/assets/Latte.png',
     is_active: true,
     is_available: true,
     sort_order: 5,
@@ -47,7 +47,7 @@ const supabase = createClient(values.NEXT_PUBLIC_SUPABASE_URL, values.SUPABASE_S
           {
             value: 'hot-latte',
             label: '热拿铁 / Hot Latte · ¥18',
-            image: '/assets/latte.jpg'
+            image: '/assets/Latte.png'
           },
           {
             value: 'ice-latte',
