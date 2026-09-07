@@ -44,6 +44,74 @@ type DeliveryAvailability = {
   }[];
 };
 
+type CheckoutMemory = {
+  name: string;
+  phone: string;
+  address: string;
+  notes: string;
+  deliveryDate: string;
+  deliveryArea: string;
+};
+
+const CHECKOUT_MEMORY_KEY = "cadence_checkout_memory_v1";
+
+function readCheckoutMemory(): Partial<CheckoutMemory> | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(CHECKOUT_MEMORY_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") {
+      return null;
+    }
+
+    const candidate: Partial<CheckoutMemory> = {
+      name: typeof parsed.name === "string" ? parsed.name : "",
+      phone: typeof parsed.phone === "string" ? parsed.phone : "",
+      address: typeof parsed.address === "string" ? parsed.address : "",
+      notes: typeof parsed.notes === "string" ? parsed.notes : "",
+      deliveryDate: typeof parsed.deliveryDate === "string" ? parsed.deliveryDate : "",
+      deliveryArea: typeof parsed.deliveryArea === "string" ? parsed.deliveryArea : ""
+    };
+
+    const hasAnyValue = Object.values(candidate).some((value) => typeof value === "string" && value.trim().length > 0);
+    if (!hasAnyValue) {
+      return null;
+    }
+
+    return candidate;
+  } catch {
+    return null;
+  }
+}
+
+function saveCheckoutMemory(payload: Partial<CheckoutMemory>) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  try {
+    const next: Partial<CheckoutMemory> = {
+      name: typeof payload.name === "string" ? payload.name.trim() : "",
+      phone: typeof payload.phone === "string" ? payload.phone.trim() : "",
+      address: typeof payload.address === "string" ? payload.address.trim() : "",
+      notes: typeof payload.notes === "string" ? payload.notes.trim() : "",
+      deliveryDate: typeof payload.deliveryDate === "string" ? payload.deliveryDate : "",
+      deliveryArea: typeof payload.deliveryArea === "string" ? payload.deliveryArea : ""
+    };
+
+    window.localStorage.setItem(CHECKOUT_MEMORY_KEY, JSON.stringify(next));
+  } catch {
+    // Ignore storage quota or browser privacy restrictions.
+  }
+}
+
 export function CheckoutForm() {
   const router = useRouter();
   const [items, setItems] = useState<CartItem[]>([]);
@@ -56,10 +124,26 @@ export function CheckoutForm() {
   const [availability, setAvailability] = useState<DeliveryAvailability | null>(null);
   const [isLoadingAvailability, setLoadingAvailability] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
+  const [hasAutoFilledMemory, setHasAutoFilledMemory] = useState(false);
 
   useEffect(() => {
     const raw = window.localStorage.getItem("cadence-cart");
     setItems(raw ? JSON.parse(raw) : []);
+  }, []);
+
+  useEffect(() => {
+    const savedMemory = readCheckoutMemory();
+    if (!savedMemory) {
+      return;
+    }
+
+    setName(savedMemory.name ?? "");
+    setPhone(savedMemory.phone ?? "");
+    setAddress(savedMemory.address ?? "");
+    setNotes(savedMemory.notes ?? "");
+    setDeliveryDate(savedMemory.deliveryDate ?? "");
+    setDeliveryArea((savedMemory.deliveryArea as DeliveryArea | "") ?? "");
+    setHasAutoFilledMemory(true);
   }, []);
 
   useEffect(() => {
@@ -80,10 +164,23 @@ export function CheckoutForm() {
           return;
         }
 
+        const savedMemory = readCheckoutMemory();
         setAvailability(result);
-        setDeliveryDate(result.date);
-        const firstAvailableArea = result.areas[0]?.area ?? "";
-        setDeliveryArea(firstAvailableArea);
+
+        const rememberedDate =
+          savedMemory?.deliveryDate &&
+          result.dateOptions.some((option) => option.date === savedMemory.deliveryDate && option.isAvailable)
+            ? savedMemory.deliveryDate
+            : result.date;
+
+        const rememberedArea =
+          savedMemory?.deliveryArea &&
+          result.areas.some((area) => area.area === savedMemory.deliveryArea)
+            ? savedMemory.deliveryArea
+            : result.areas[0]?.area ?? "";
+
+        setDeliveryDate(rememberedDate);
+        setDeliveryArea(rememberedArea as DeliveryArea | "");
       } catch (fetchError) {
         if (!isActive) {
           return;
@@ -183,6 +280,15 @@ export function CheckoutForm() {
       return;
     }
 
+    saveCheckoutMemory({
+      name,
+      phone,
+      address,
+      notes,
+      deliveryDate,
+      deliveryArea
+    });
+
     window.localStorage.removeItem("cadence-cart");
     router.push(
       `/order-confirmation?orderNumber=${encodeURIComponent(result.orderNumber)}&deliveryDate=${encodeURIComponent(result.deliveryDate ?? deliveryDate)}&deliveryArea=${encodeURIComponent(result.deliveryArea ?? deliveryArea)}&deliverySlot=${encodeURIComponent(result.deliverySlot ?? selectedSlot)}&subtotal=${encodeURIComponent(String(result.subtotal ?? subtotal))}&deliveryFee=${encodeURIComponent(String(result.deliveryFee ?? deliveryFee))}&total=${encodeURIComponent(String(result.total ?? total))}`
@@ -199,6 +305,9 @@ export function CheckoutForm() {
         </p>
       </div>
       <form className="grid gap-4 border border-ink/15 p-4 md:gap-5 md:p-5" onSubmit={submitOrder}>
+        {hasAutoFilledMemory ? (
+          <p className="text-xs uppercase tracking-[0.18em] text-graphite">已自动填写上次信息</p>
+        ) : null}
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <input
             aria-label="姓名"
