@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   getDeliverySlotForArea,
-  type DeliveryArea
+  type DeliveryArea,
+  type DeliveryDateOption
 } from "@/lib/delivery";
 import {
   calculateDeliveryFee,
@@ -29,12 +30,7 @@ type CartItem = {
 type DeliveryAvailability = {
   date: string;
   defaultDeliveryDate: string;
-  dateOptions: {
-    date: string;
-    label: string;
-    isToday: boolean;
-    isAvailable: boolean;
-  }[];
+  dateOptions: DeliveryDateOption[];
   areas: {
     area: DeliveryArea;
     slot: string;
@@ -154,7 +150,7 @@ export function CheckoutForm() {
         setLoadingAvailability(true);
         const query = date ? `?deliveryDate=${encodeURIComponent(date)}` : "";
         const response = await fetch(`/api/order${query}`, { cache: "no-store" });
-        const result = await response.json();
+        const result = (await response.json()) as DeliveryAvailability & { error?: string };
 
         if (!response.ok) {
           throw new Error(result.error || "读取配送容量失败");
@@ -169,7 +165,9 @@ export function CheckoutForm() {
 
         const rememberedDate =
           savedMemory?.deliveryDate &&
-          result.dateOptions.some((option) => option.date === savedMemory.deliveryDate && option.isAvailable)
+          result.dateOptions.some(
+            (option: DeliveryDateOption) => option.date === savedMemory.deliveryDate && option.isAvailable
+          )
             ? savedMemory.deliveryDate
             : result.date;
 
@@ -210,7 +208,7 @@ export function CheckoutForm() {
       const response = await fetch(`/api/order?deliveryDate=${encodeURIComponent(nextDate)}`, {
         cache: "no-store"
       });
-      const result = await response.json();
+      const result = (await response.json()) as DeliveryAvailability & { error?: string };
 
       if (!response.ok) {
         throw new Error(result.error || "读取配送容量失败");
@@ -343,7 +341,7 @@ export function CheckoutForm() {
             className="h-12 border border-ink/20 bg-paper px-3"
           >
             <option value="">请选择配送日期</option>
-            {(availability?.dateOptions ?? []).map((option) => (
+            {(availability?.dateOptions ?? []).map((option: DeliveryDateOption) => (
               <option key={option.date} value={option.date} disabled={!option.isAvailable}>
                 {option.label}
               </option>
