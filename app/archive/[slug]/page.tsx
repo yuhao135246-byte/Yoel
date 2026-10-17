@@ -82,23 +82,8 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
           </div>
         </section>
 
-        {entry.heroVideo ? (
+        {entry.coverImage ? (
           <figure className="relative mt-12 w-full overflow-hidden bg-bone/30 md:mt-16">
-            <video
-              src={entry.heroVideo.src}
-              poster={entry.heroVideo.poster ?? entry.coverImage?.src}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              className="h-auto w-full object-cover"
-              style={{ aspectRatio: entry.coverImage ? `${entry.coverImage.width} / ${entry.coverImage.height}` : undefined }}
-            />
-            {isUnit01 ? <PhotoCredit /> : null}
-          </figure>
-        ) : entry.coverImage ? (
-          <figure className="relative mt-12 w-full md:mt-16">
             <Image
               src={entry.coverImage.src}
               alt={entry.coverImage.alt}
@@ -106,7 +91,8 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
               height={entry.coverImage.height}
               priority
               sizes="100vw"
-              className="h-auto w-full"
+              className="h-auto w-full object-cover"
+              style={{ aspectRatio: `${entry.coverImage.width} / ${entry.coverImage.height}` }}
             />
             {isUnit01 ? <PhotoCredit /> : null}
           </figure>

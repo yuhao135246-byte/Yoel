@@ -208,17 +208,12 @@ export const archiveEntries: ArchiveEntry[] = [
       "在参数化建模的研究过程中，设计会反复调整弧线、坡度与腔体之间的关系，以让最终形态在功能和材料表达之间保持克制、稳重的节奏。"
     ],
     coverImage: {
-      src: "/assets/Unit2- (1).jpg",
+      src: "/assets/Unit2- (2).jpg",
       alt: "UNIT 02 hero product photograph",
       width: 4032,
       height: 3024,
       layout: "full",
       caption: "Cover"
-    },
-    heroVideo: {
-      src: "/assets/Unit2Mp4.mp4",
-      poster: "/assets/Unit2- (1).jpg",
-      alt: "UNIT 02 hero video"
     },
     editorialSections: [
       {
