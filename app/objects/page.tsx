@@ -110,6 +110,26 @@ export default function ObjectsPage() {
         <div className="mx-auto mt-16 max-w-7xl border-b border-ink/10 md:mt-20" />
       </RevealOnView>
 
+      <div className="mx-auto max-w-7xl px-5 py-10 md:px-8 md:py-12">
+        <div className="border-t border-ink/10 pt-8 md:pt-10">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-warm">UNIT 02</p>
+            <Link href="/archive/unit-02" className="font-mono text-[10px] uppercase tracking-[0.2em] text-ink transition-colors hover:text-warm">
+              进入档案
+            </Link>
+          </div>
+          <div className="grid gap-5 md:grid-cols-[1.25fr_0.75fr] md:items-end">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-graphite">宠物慢食碗</p>
+              <h2 className="mt-3 text-4xl leading-none tracking-[-0.03em] md:text-6xl">Slow Feeder</h2>
+            </div>
+            <p className="max-w-md text-base leading-7 text-graphite md:text-[17px]">
+              记录外形、内曲面组织与参数化设计研究，作为 UNIT 02 的设计档案入口。
+            </p>
+          </div>
+        </div>
+      </div>
+
       <ArchiveListSection />
     </main>
   );
