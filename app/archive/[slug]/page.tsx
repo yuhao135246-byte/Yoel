@@ -26,6 +26,7 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
   const contentClassName = "mx-auto w-full max-w-[430px] md:max-w-[560px]";
   const projectInfoRows = entry.objectInfoRows.slice(0, 6);
   const isUnit01 = entry.slug === "unit-01";
+  const isUnit02 = entry.slug === "unit-02";
 
   const renderEditorialImage = (
     image: NonNullable<typeof entry.editorialSections>[number]["images"][number],
@@ -83,7 +84,12 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
         </section>
 
         {entry.coverImage ? (
-          <figure className="relative mt-12 w-full overflow-hidden bg-bone/30 md:mt-16">
+          <figure
+            className={[
+              "relative mt-12 w-full overflow-hidden bg-bone/30 md:mt-16",
+              isUnit02 ? "h-[70vh] min-h-[420px] md:h-[80vh]" : ""
+            ].join(" ")}
+          >
             <Image
               src={entry.coverImage.src}
               alt={entry.coverImage.alt}
@@ -91,8 +97,11 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
               height={entry.coverImage.height}
               priority
               sizes="100vw"
-              className="h-auto w-full object-cover"
-              style={{ aspectRatio: `${entry.coverImage.width} / ${entry.coverImage.height}` }}
+              className={[
+                "block h-full w-full object-cover",
+                isUnit02 ? "object-center" : ""
+              ].join(" ")}
+              style={isUnit02 ? { objectPosition: "center 58%" } : undefined}
             />
             {isUnit01 ? <PhotoCredit /> : null}
           </figure>
