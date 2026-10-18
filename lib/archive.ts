@@ -226,7 +226,7 @@ export const archiveEntries: ArchiveEntry[] = [
         ],
         images: [
           {
-            src: "/assets/Unit2- (2).jpg",
+            src: "/assets/Unit2-(1).png",
             alt: "UNIT 02 design study from the side",
             width: 4032,
             height: 3024,

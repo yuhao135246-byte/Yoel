@@ -97,11 +97,12 @@ export default async function ArchivePage({ params }: ArchivePageProps) {
               height={entry.coverImage.height}
               priority
               sizes="100vw"
-              className={[
-                "block h-full w-full object-cover",
-                isUnit02 ? "object-center" : ""
-              ].join(" ")}
-              style={isUnit02 ? { objectPosition: "center 58%" } : undefined}
+              className="block h-full w-full object-cover"
+              style={
+                isUnit02
+                  ? { objectFit: "cover", objectPosition: "center bottom" }
+                  : undefined
+              }
             />
             {isUnit01 ? <PhotoCredit /> : null}
           </figure>
