@@ -118,14 +118,24 @@ export default function ObjectsPage() {
               进入档案
             </Link>
           </div>
-          <div className="grid gap-5 md:grid-cols-[1.25fr_0.75fr] md:items-end">
+          <div className="grid gap-5 md:grid-cols-[1.15fr_0.85fr] md:items-end">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-graphite">宠物慢食碗</p>
               <h2 className="mt-3 text-4xl leading-none tracking-[-0.03em] md:text-6xl">Slow Feeder</h2>
+              <p className="mt-4 max-w-md text-base leading-7 text-graphite md:mt-5 md:text-[17px]">
+                记录外形、内曲面组织与参数化设计研究，作为 UNIT 02 的设计档案入口。
+              </p>
             </div>
-            <p className="max-w-md text-base leading-7 text-graphite md:text-[17px]">
-              记录外形、内曲面组织与参数化设计研究，作为 UNIT 02 的设计档案入口。
-            </p>
+            <div className="relative overflow-hidden border border-ink/10 bg-bone/30">
+              <Image
+                src="/assets/Unit2- (2).jpg"
+                alt="UNIT 02 Slow Feeder product overview"
+                width={1200}
+                height={900}
+                sizes="(max-width: 768px) 100vw, 42vw"
+                className="aspect-[4/3] w-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </div>
