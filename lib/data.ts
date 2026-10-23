@@ -188,7 +188,7 @@ export const products: Product[] = [
   },
   {
     slug: "tomato-curry-chicken-wrap",
-    name: "番茄咖喱鸡肉卷",
+    name: "番茄辣酱鸡肉卷",
     category: "COFFEE",
     layer: "Chicken Wrap（鸡肉卷）",
     price: 22,
@@ -196,10 +196,10 @@ export const products: Product[] = [
     available: true,
     unit: "份",
     availability: "Available（可售）",
-    description: "番茄｜咖喱｜生菜｜黄油炒蛋",
-    details: ["番茄", "咖喱", "生菜", "黄油炒蛋"],
-    image: "/assets/番茄鸡肉卷.png",
-    tags: ["轻食", "鸡肉卷", "番茄咖喱"]
+    description: "番茄｜韩式辣酱｜生菜｜黄油炒蛋 | 芝士",
+    details: ["番茄", "韩式辣酱", "生菜", "黄油炒蛋", "芝士"],
+    image: "/assets/辣酱鸡肉卷.png",
+    tags: ["轻食", "鸡肉卷", "番茄辣酱"]
   },
   {
     slug: "low-cal-wrap-fruit-tea-lunch-combo",
@@ -212,7 +212,7 @@ export const products: Product[] = [
     unit: "份",
     availability: "Available（可售）",
     description: "鸡肉卷二选一｜水果茶",
-    details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 番茄咖喱鸡肉卷", "水果茶"],
+    details: ["鸡肉卷选择（必选）：甜椒鸡肉卷 / 番茄辣酱鸡肉卷", "水果茶"],
     image: "/assets/Combo.png",
     tags: ["午餐套餐", "鸡肉卷", "水果茶"],
     inventoryItems: [
@@ -239,7 +239,7 @@ export const products: Product[] = [
           },
           {
             value: "tomato-curry-chicken-wrap",
-            label: "番茄咖喱鸡肉卷",
+            label: "番茄辣酱鸡肉卷",
             inventoryItems: [
               {
                 slug: "tomato-curry-chicken-wrap",
