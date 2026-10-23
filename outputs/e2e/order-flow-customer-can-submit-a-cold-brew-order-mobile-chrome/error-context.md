@@ -124,7 +124,7 @@ Call log:
             - option "TANAT Sidra 希爪 厌氧日晒 / RMB 48"
             - option "季节水果柠檬茶 / RMB 18"
             - option "甜椒鸡肉卷 / RMB 22"
-            - option "番茄咖喱鸡肉卷 / RMB 22"
+            - option "番茄辣酱鸡肉卷 / RMB 22"
             - option "低卡鸡肉卷水果茶午餐 / RMB 35"
         - generic [ref=e81]:
           - text: 数量

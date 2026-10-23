@@ -198,17 +198,18 @@ Call log:
     - paragraph: 仅剩 10
   - button "加入购物车"
   - article:
-    - link "番茄咖喱鸡肉卷":
+    - link "番茄辣酱鸡肉卷":
       - /url: /coffee
-      - img "番茄咖喱鸡肉卷"
+      - img "番茄辣酱鸡肉卷"
     - paragraph: Chicken Wrap（鸡肉卷）
-    - heading "番茄咖喱鸡肉卷" [level=3]
+    - heading "番茄辣酱鸡肉卷" [level=3]
     - paragraph: ¥22
-    - paragraph: 番茄｜咖喱｜生菜｜黄油炒蛋
+    - paragraph: 番茄｜韩式辣酱｜生菜｜黄油炒蛋 | 芝士
     - paragraph: • 番茄
-    - paragraph: • 咖喱
+    - paragraph: • 韩式辣酱
     - paragraph: • 生菜
     - paragraph: • 黄油炒蛋
+    - paragraph: • 芝士
     - paragraph: Available（可售）
     - paragraph: 仅剩 10
   - button "加入购物车"
@@ -220,7 +221,7 @@ Call log:
     - heading "低卡鸡肉卷水果茶午餐" [level=3]
     - paragraph: ¥35
     - paragraph: 鸡肉卷二选一｜水果茶
-    - paragraph: • 鸡肉卷选择（必选）：甜椒鸡肉卷 / 番茄咖喱鸡肉卷
+    - paragraph: • 鸡肉卷选择（必选）：甜椒鸡肉卷 / 番茄辣酱鸡肉卷
     - paragraph: • 水果茶
     - paragraph: Available（可售）
     - paragraph: 仅剩 10
@@ -228,7 +229,7 @@ Call log:
   - combobox "low-cal-wrap-fruit-tea-lunch-combo-wrapChoice":
     - option "请选择"
     - option "甜椒鸡肉卷" [selected]
-    - option "番茄咖喱鸡肉卷"
+    - option "番茄辣酱鸡肉卷"
   - button "加入购物车"
   - paragraph: 配送预订
   - heading "简洁的产品预订" [level=2]
@@ -243,7 +244,7 @@ Call log:
     - option "TANAT Sidra 希爪 厌氧日晒 / RMB 48"
     - option "季节水果柠檬茶 / RMB 18"
     - option "甜椒鸡肉卷 / RMB 22"
-    - option "番茄咖喱鸡肉卷 / RMB 22"
+    - option "番茄辣酱鸡肉卷 / RMB 22"
     - option "低卡鸡肉卷水果茶午餐 / RMB 35"
   - text: 数量
   - spinbutton "数量": "1"
