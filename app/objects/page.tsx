@@ -301,7 +301,7 @@ export default function ObjectsPage() {
           </div>
 
           <div className="border border-ink/10 bg-bone/20 p-5 sm:p-6 md:p-8">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-graphite">Product Positioning</p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-graphite">UNIT 05 / OBJECT STUDY</p>
             <p className="mt-4 text-[1.5rem] leading-tight tracking-[-0.04em] text-ink sm:text-2xl md:text-3xl">
               专业拉花级 · 流体分析拿铁杯
             </p>
@@ -309,7 +309,10 @@ export default function ObjectsPage() {
               Fluid Dynamics / Latte Art / Light &amp; Shadow / Parametric Design
             </p>
             <p className="mt-6 text-[14px] leading-7 text-graphite sm:text-[15px] sm:leading-8 md:text-[17px]">
-              当前仓库中未发现已确认的 UNIT 05 真实渲染图，因此本节保持为研究式叙述，避免虚构产品图像、性能数据或实验结论。
+              以杯体内部曲线与流体运动为研究起点，探索杯型、曲面与咖啡注入轨迹之间的关系。
+            </p>
+            <p className="mt-4 text-[14px] leading-7 text-graphite sm:text-[15px] sm:leading-8 md:text-[17px]">
+              将参数化设计融入日常器物，在功能、形态与使用体验之间寻找新的可能。
             </p>
           </div>
         </div>
