@@ -18,18 +18,34 @@ export type CatalogProduct = Product & {
   option_groups?: unknown[];
 };
 
+function sanitizeDetail(entry: string): string | null {
+  const trimmed = entry.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/\/assets\//i.test(trimmed)) {
+    const labelMatch = trimmed.match(/^(.*?)(?:[:：]\s*)?(?:\/assets\/[^\s,;]+)$/i);
+    return labelMatch && labelMatch[1]?.trim() ? labelMatch[1].trim() : null;
+  }
+
+  return trimmed;
+}
+
 function readStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value
       .map((entry) => (typeof entry === "string" ? entry : String(entry ?? "")))
-      .filter((entry) => entry.trim().length > 0);
+      .map((entry) => sanitizeDetail(entry))
+      .filter((entry): entry is string => Boolean(entry));
   }
 
   if (typeof value === "string") {
     return value
       .split("|")
       .map((entry) => entry.trim())
-      .filter(Boolean);
+      .map((entry) => sanitizeDetail(entry))
+      .filter((entry): entry is string => Boolean(entry));
   }
 
   return [];

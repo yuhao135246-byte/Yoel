@@ -59,6 +59,26 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
     return product.image;
   }, [product.image, product.optionGroups, selectedValues]);
 
+  const visibleDetails = useMemo(
+    () =>
+      (product.details ?? [])
+        .map((detail) => {
+          const trimmed = detail.trim();
+          if (!trimmed) {
+            return null;
+          }
+
+          if (/\/assets\//i.test(trimmed)) {
+            const labelMatch = trimmed.match(/^(.*?)(?:[:：]\s*)?(?:\/assets\/[^\s,;]+)$/i);
+            return labelMatch && labelMatch[1]?.trim() ? labelMatch[1].trim() : null;
+          }
+
+          return trimmed;
+        })
+        .filter((detail): detail is string => Boolean(detail)),
+    [product.details]
+  );
+
   return (
     <article className="grid gap-4 border-t border-ink/15 pt-4 md:gap-5 md:pt-5">
       <Link href={product.category === "COFFEE" ? "/coffee" : "/objects"} className="block overflow-hidden bg-bone">
@@ -83,7 +103,7 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
         </div>
         <p className="text-base leading-6 text-graphite">{product.description}</p>
         <div className="grid gap-0.5 text-sm text-graphite">
-          {product.details.map((detail) => (
+          {visibleDetails.map((detail) => (
             <p key={detail}>• {detail}</p>
           ))}
         </div>

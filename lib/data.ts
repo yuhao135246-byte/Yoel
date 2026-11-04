@@ -39,6 +39,24 @@ export type Product = {
   optionGroups?: ProductOptionGroup[];
 };
 
+function formatProductDetail(detail: string): string | null {
+  const trimmed = detail.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  if (/\/assets\//i.test(trimmed)) {
+    const labelMatch = trimmed.match(/^(.*?)(?:[:：]\s*)?(?:\/assets\/[^\s,;]+)$/i);
+    if (labelMatch && labelMatch[1]?.trim()) {
+      return labelMatch[1].trim();
+    }
+
+    return null;
+  }
+
+  return trimmed;
+}
+
 export const products: Product[] = [
   {
     slug: "latte",
@@ -51,7 +69,7 @@ export const products: Product[] = [
     unit: "杯",
     availability: "Available（可售）",
     description: "丝滑奶泡与浓郁咖啡的经典组合，热或冰两种口感可选。",
-    details: ["温度可选：热拿铁 / 冰拿铁", "热拿铁：/assets/Latte.png", "冰拿铁：/assets/Ice latte.png"],
+    details: ["温度可选：热拿铁 / 冰拿铁", "热拿铁", "冰拿铁"],
     image: "/assets/Latte.png",
     tags: ["拿铁", "Latte", "奶咖"],
     optionGroups: [
