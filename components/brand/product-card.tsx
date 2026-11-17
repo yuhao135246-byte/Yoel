@@ -81,7 +81,7 @@ export function ProductCard({ product, priority = false, remainingStock }: Produ
 
   return (
     <article className="grid gap-4 border-t border-ink/15 pt-4 md:gap-5 md:pt-5">
-      <Link href={product.category === "COFFEE" ? "/coffee" : "/objects"} className="block overflow-hidden bg-bone">
+      <Link href={product.category === "OBJECT" ? "/objects" : "/coffee"} className="block overflow-hidden bg-bone">
         <Image
           src={selectedImage}
           alt={product.name}

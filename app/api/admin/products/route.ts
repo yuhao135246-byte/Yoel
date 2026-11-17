@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "slug 必须为 a-z0-9- 形式" }, { status: 400 });
     }
 
-    if (!['COFFEE', 'OBJECT', 'RESEARCH'].includes(category)) {
+    if (!['COFFEE', 'SANDWICH', 'OBJECT', 'RESEARCH'].includes(category)) {
       return Response.json({ error: "category 不合法" }, { status: 400 });
     }
 

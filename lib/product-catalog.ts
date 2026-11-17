@@ -180,7 +180,7 @@ export async function getCatalogProductBySlug(slug: string): Promise<CatalogProd
 
 export async function getCatalogProductsForInventory(): Promise<CatalogProduct[]> {
   const catalog = await getCatalogProducts();
-  return catalog.filter((product) => product.category === "COFFEE" || product.category === "OBJECT");
+  return catalog.filter((product) => product.category === "COFFEE" || product.category === "SANDWICH" || product.category === "OBJECT");
 }
 
 export async function getProductCatalogCount(): Promise<number> {

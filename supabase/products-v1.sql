@@ -20,7 +20,7 @@ create table if not exists public.products (
   name text not null,
 
   category text not null
-    check (category in ('COFFEE', 'OBJECT', 'RESEARCH')),
+    check (category in ('COFFEE', 'SANDWICH', 'OBJECT', 'RESEARCH')),
 
   layer text,
 

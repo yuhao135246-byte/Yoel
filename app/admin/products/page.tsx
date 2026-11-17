@@ -34,7 +34,7 @@ const EMPTY_FORM = {
 type ProductRecord = {
   slug: string;
   name: string;
-  category: "COFFEE" | "OBJECT" | "RESEARCH";
+  category: "COFFEE" | "SANDWICH" | "OBJECT" | "RESEARCH";
   layer?: string | null;
   subtitle?: string | null;
   price: number;
@@ -206,7 +206,7 @@ export default function ProductsPage() {
         throw new Error("价格必须是大于等于 0 的数字");
       }
 
-      if (!['COFFEE', 'OBJECT', 'RESEARCH'].includes(payload.category)) {
+      if (!['COFFEE', 'SANDWICH', 'OBJECT', 'RESEARCH'].includes(payload.category)) {
         throw new Error("category 不合法");
       }
 

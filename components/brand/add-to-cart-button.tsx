@@ -14,6 +14,7 @@ type SelectedOption = {
 type CartItem = {
   slug: string;
   name: string;
+  image?: string;
   price: number;
   quantity: number;
   selectedOptions?: SelectedOption[];
@@ -85,6 +86,20 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
 
     setSelectionError("");
 
+    const selectedImage = (product.optionGroups ?? []).reduce<string | undefined>((value, group) => {
+      const optionValue = optionValues[group.key];
+      if (!optionValue) {
+        return value;
+      }
+
+      const option = group.options.find((item) => item.value === optionValue);
+      if (option?.image) {
+        return option.image;
+      }
+
+      return value;
+    }, product.image);
+
     const raw = window.localStorage.getItem("cadence-cart");
     const items: CartItem[] = raw ? JSON.parse(raw) : [];
     const existing = items.find(
@@ -105,6 +120,7 @@ export function AddToCartButton({ product, remainingStock, deliveryDate }: AddTo
       items.push({
         slug: product.slug,
         name: product.name,
+        image: selectedImage,
         price: product.price,
         quantity: 1,
         selectedOptions: selectedOptions.length > 0 ? selectedOptions : undefined

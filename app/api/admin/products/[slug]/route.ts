@@ -28,7 +28,7 @@ function normalizeStringArray(value: unknown) {
 }
 
 function isValidCategory(value: unknown) {
-  return value === "COFFEE" || value === "OBJECT" || value === "RESEARCH";
+  return value === "COFFEE" || value === "SANDWICH" || value === "OBJECT" || value === "RESEARCH";
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ slug: string }> }) {

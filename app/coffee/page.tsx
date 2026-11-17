@@ -66,7 +66,7 @@ async function loadStockMap() {
 
 export default async function CoffeePage() {
   const products = await getActiveCatalogProducts();
-  const coffee = products.filter((product) => product.category === "COFFEE");
+  const coffee = products.filter((product) => product.category === "COFFEE" || product.category === "SANDWICH");
   const stock = await loadStockMap();
 
   return (

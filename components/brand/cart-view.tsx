@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -13,6 +14,7 @@ import { products } from "@/lib/data";
 type CartItem = {
   slug: string;
   name: string;
+  image?: string;
   price: number;
   quantity: number;
   selectedOptions?: {
@@ -141,7 +143,16 @@ export function CartView() {
           <p className="text-sm text-graphite">购物车为空。</p>
         ) : (
           items.map((item, index) => (
-            <div key={`${item.slug}-${index}`} className="grid gap-3 border-t border-ink/15 py-4 text-base md:grid-cols-[1fr_auto_0.35fr] md:items-center md:gap-4 md:py-5">
+            <div key={`${item.slug}-${index}`} className="grid gap-3 border-t border-ink/15 py-4 text-base md:grid-cols-[auto_1fr_auto_0.35fr] md:items-center md:gap-4 md:py-5">
+              <div className="relative h-20 w-24 overflow-hidden border border-ink/10 bg-bone md:h-20 md:w-28">
+                <Image
+                  src={item.image ?? productBySlug.get(item.slug)?.image ?? "/assets/Latte.png"}
+                  alt={item.name}
+                  fill
+                  sizes="112px"
+                  className="object-cover"
+                />
+              </div>
               <div className="grid gap-1">
                 <p>{item.name}</p>
                 {item.selectedOptions?.map((option) => (

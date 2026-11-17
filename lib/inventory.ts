@@ -28,11 +28,12 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
   "tanat-ombligon": 15,
   "tanat-sidra": 15,
   "fruit-lemon-tea": 30,
+  "pasture-fresh-vegetable-sandwich": 25,
   "unit-01": 10
 };
 
 function isTrackedInventoryProduct(category: string) {
-  return category === "COFFEE" || category === "OBJECT";
+  return category === "COFFEE" || category === "SANDWICH" || category === "OBJECT";
 }
 
 function getDefaultStockForProduct(productId: string) {

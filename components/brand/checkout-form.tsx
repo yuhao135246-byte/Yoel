@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
@@ -17,6 +18,7 @@ import { products } from "@/lib/data";
 type CartItem = {
   slug: string;
   name: string;
+  image?: string;
   price: number;
   quantity: number;
   selectedOptions?: {
@@ -375,26 +377,37 @@ export function CheckoutForm() {
         />
         <div className="border-t border-ink/15 pt-3 font-mono text-sm">
           {items.map((item, index) => (
-            <div key={`${item.slug}-${index}`}>
-              <p className="leading-6">{item.name} x {item.quantity}</p>
-              <p className="text-xs text-graphite">单价：￥{item.price}</p>
-              {item.selectedOptions?.map((option) => (
-                <p key={`${item.slug}-${index}-${option.groupKey}`} className="text-xs text-graphite">
-                  {option.groupLabel}：{option.label}
-                </p>
-              ))}
-              {(productBySlug.get(item.slug)?.inventoryItems ?? []).map((included, includedIndex) => {
-                const includedProduct = productBySlug.get(included.slug);
-                if (!includedProduct) {
-                  return null;
-                }
-
-                return (
-                  <p key={`${item.slug}-${index}-included-${includedIndex}`} className="text-xs text-graphite">
-                    {includedProduct.name} x {included.quantity * item.quantity}
+            <div key={`${item.slug}-${index}`} className="grid grid-cols-[52px_1fr] gap-3 py-1">
+              <div className="relative h-14 w-14 overflow-hidden border border-ink/10 bg-bone">
+                <Image
+                  src={item.image ?? productBySlug.get(item.slug)?.image ?? "/assets/Latte.png"}
+                  alt={item.name}
+                  fill
+                  sizes="56px"
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <p className="leading-6">{item.name} x {item.quantity}</p>
+                <p className="text-xs text-graphite">单价：￥{item.price}</p>
+                {item.selectedOptions?.map((option) => (
+                  <p key={`${item.slug}-${index}-${option.groupKey}`} className="text-xs text-graphite">
+                    {option.groupLabel}：{option.label}
                   </p>
-                );
-              })}
+                ))}
+                {(productBySlug.get(item.slug)?.inventoryItems ?? []).map((included, includedIndex) => {
+                  const includedProduct = productBySlug.get(included.slug);
+                  if (!includedProduct) {
+                    return null;
+                  }
+
+                  return (
+                    <p key={`${item.slug}-${index}-included-${includedIndex}`} className="text-xs text-graphite">
+                      {includedProduct.name} x {included.quantity * item.quantity}
+                    </p>
+                  );
+                })}
+              </div>
             </div>
           ))}
           <div className="mt-2 grid gap-2 text-sm text-graphite">

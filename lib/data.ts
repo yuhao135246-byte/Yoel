@@ -1,4 +1,4 @@
-export type ProductCategory = "COFFEE" | "OBJECT" | "RESEARCH";
+export type ProductCategory = "COFFEE" | "SANDWICH" | "OBJECT" | "RESEARCH";
 
 export type ProductInventoryItem = {
   slug: string;
@@ -218,6 +218,22 @@ export const products: Product[] = [
     details: ["番茄", "韩式辣酱", "生菜", "黄油炒蛋", "芝士"],
     image: "/assets/辣酱鸡肉卷.png",
     tags: ["轻食", "鸡肉卷", "番茄辣酱"]
+  },
+  {
+    slug: "pasture-fresh-vegetable-sandwich",
+    name: "牧场鲜蔬三明治",
+    category: "SANDWICH",
+    layer: "Sandwich（三明治）",
+    price: 12,
+    currency: "¥",
+    available: true,
+    unit: "份",
+    availability: "Available（可售）",
+    description: "自制牧场酱与新鲜蔬菜的简洁组合，层次清爽、口感丰富。",
+    details: ["自制牧场酱", "黄油", "海盐", "欧芹", "番茄", "生菜", "白吐司"],
+    image: "/assets/Sandwich1.png",
+    tags: ["三明治", "轻食", "鲜蔬"],
+    inventoryItems: []
   },
   {
     slug: "low-cal-wrap-fruit-tea-lunch-combo",
