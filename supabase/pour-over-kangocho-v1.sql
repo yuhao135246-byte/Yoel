@@ -2,23 +2,19 @@
 -- Existing rows and prices are preserved.
 
 do $$
-declare
-  category_check text;
 begin
-  select pg_get_constraintdef(oid)
-  into category_check
-  from pg_constraint
-  where conname = 'products_category_check'
-    and conrelid = 'public.products'::regclass;
-
-  if category_check is not null and position('POUR_OVER' in category_check) = 0 then
+  if exists (
+    select 1
+    from pg_constraint
+    where conname = 'products_category_check'
+      and conrelid = 'public.products'::regclass
+  ) then
     alter table public.products drop constraint products_category_check;
-    execute format(
-      'alter table public.products add constraint products_category_check check ((%s) or category = %L)',
-      category_check,
-      'POUR_OVER'
-    );
   end if;
+
+  alter table public.products
+    add constraint products_category_check
+    check (category in ('COFFEE', 'POUR_OVER', 'SANDWICH', 'OBJECT', 'RESEARCH'));
 end;
 $$;
 
@@ -76,3 +72,8 @@ where not exists (
   from public.products
   where slug = 'kenya-kangocho-iced-pour-over'
 );
+
+-- Verification only: no UPDATE or DELETE is used.
+select slug, name, category, price, is_active, is_available
+from public.products
+where slug = 'kenya-kangocho-iced-pour-over';
