@@ -34,7 +34,7 @@ const EMPTY_FORM = {
 type ProductRecord = {
   slug: string;
   name: string;
-  category: "COFFEE" | "SANDWICH" | "OBJECT" | "RESEARCH";
+  category: "COFFEE" | "POUR_OVER" | "SANDWICH" | "OBJECT" | "RESEARCH";
   layer?: string | null;
   subtitle?: string | null;
   price: number;
@@ -206,7 +206,7 @@ export default function ProductsPage() {
         throw new Error("价格必须是大于等于 0 的数字");
       }
 
-      if (!['COFFEE', 'SANDWICH', 'OBJECT', 'RESEARCH'].includes(payload.category)) {
+      if (!['COFFEE', 'POUR_OVER', 'SANDWICH', 'OBJECT', 'RESEARCH'].includes(payload.category)) {
         throw new Error("category 不合法");
       }
 
@@ -338,6 +338,8 @@ export default function ProductsPage() {
                     className="h-12 border border-ink/20 bg-paper px-3 text-base"
                   >
                     <option value="COFFEE">COFFEE</option>
+                    <option value="POUR_OVER">POUR_OVER / 手冲咖啡</option>
+                    <option value="SANDWICH">SANDWICH</option>
                     <option value="OBJECT">OBJECT</option>
                     <option value="RESEARCH">RESEARCH</option>
                   </select>

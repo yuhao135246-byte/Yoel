@@ -1,4 +1,4 @@
-export type ProductCategory = "COFFEE" | "SANDWICH" | "OBJECT" | "RESEARCH";
+export type ProductCategory = "COFFEE" | "POUR_OVER" | "SANDWICH" | "OBJECT" | "RESEARCH";
 
 export type ProductInventoryItem = {
   slug: string;
@@ -58,6 +58,28 @@ function formatProductDetail(detail: string): string | null {
 }
 
 export const products: Product[] = [
+  {
+    slug: "kenya-kangocho-iced-pour-over",
+    name: "KANGOCHO 肯尼亚冰手冲",
+    category: "POUR_OVER",
+    layer: "冰手冲",
+    price: 36,
+    currency: "¥",
+    available: true,
+    unit: "杯",
+    availability: "Available（可售）",
+    description: "来自肯尼亚 Nyeri 产区，由 Gikanda 咖啡合作社生产，丹麦 Coffee Collective 烘焙。\n\n选用 SL28、SL34、Ruiru 11 与 Batian 品种，采用传统水洗处理，展现肯尼亚咖啡鲜明的浆果调性。\n\n以冰手冲方式呈现，突出黑莓般的深色水果香气、苹果果酱般的甜感，以及柔和的可可尾韵。冰凉清爽，层次干净而明亮。",
+    details: [
+      "烘焙：Coffee Collective（丹麦）",
+      "产地：Nyeri，肯尼亚",
+      "生产者：Gikanda FCS",
+      "品种：SL28、SL34、Ruiru 11、Batian",
+      "处理法：Washed",
+      "风味标签：黑莓 · 苹果果酱 · 可可"
+    ],
+    image: "/assets/Kenya Kangocho.png",
+    tags: ["冰手冲", "肯尼亚", "黑莓", "苹果果酱", "可可"]
+  },
   {
     slug: "latte",
     name: "Latte / 拿铁",

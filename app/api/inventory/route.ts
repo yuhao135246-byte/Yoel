@@ -18,7 +18,7 @@ function isValidDateKey(value: string) {
 async function buildDefaultRecords() {
   const catalogProducts = await getCatalogProductsForInventory();
   return catalogProducts
-    .filter((product) => product.category === "COFFEE" || product.category === "SANDWICH" || product.category === "OBJECT")
+    .filter((product) => product.category === "COFFEE" || product.category === "POUR_OVER" || product.category === "SANDWICH" || product.category === "OBJECT")
     .map((product) => {
       const totalStock = INVENTORY_DEFAULT_STOCK[product.slug] ?? (Number(product.initial_stock ?? 0) || 10);
       return {

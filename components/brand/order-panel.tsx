@@ -20,7 +20,7 @@ type DeliveryDateOption = {
 };
 
 export function OrderPanel() {
-  const coffee = products.filter((product) => product.category === "COFFEE" || product.category === "SANDWICH");
+  const coffee = products.filter((product) => product.category === "COFFEE" || product.category === "POUR_OVER" || product.category === "SANDWICH");
   const [dateOptions, setDateOptions] = useState<DeliveryDateOption[]>(
     getBookingDateOptions()
   );

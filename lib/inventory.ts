@@ -33,7 +33,7 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
 };
 
 function isTrackedInventoryProduct(category: string) {
-  return category === "COFFEE" || category === "SANDWICH" || category === "OBJECT";
+  return category === "COFFEE" || category === "POUR_OVER" || category === "SANDWICH" || category === "OBJECT";
 }
 
 function getDefaultStockForProduct(productId: string) {
