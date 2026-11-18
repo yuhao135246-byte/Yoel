@@ -132,7 +132,7 @@ function normalizeProductRow(row: Record<string, unknown>): CatalogProduct {
 export async function getCatalogProducts(): Promise<CatalogProduct[]> {
   const client = supabaseAdmin ?? supabase;
   if (!client) {
-    return mapLegacyProducts();
+    throw new Error("商品目录数据库未配置");
   }
 
   try {
@@ -147,14 +147,10 @@ export async function getCatalogProducts(): Promise<CatalogProduct[]> {
     }
 
     const rows = Array.isArray(data) ? data : [];
-    if (rows.length === 0) {
-      return mapLegacyProducts();
-    }
-
     return rows.map((row) => normalizeProductRow(row as Record<string, unknown>));
   } catch (error) {
-    console.warn("[product-catalog] Supabase product query failed, using legacy fallback", error);
-    return mapLegacyProducts();
+    console.error("[product-catalog] Supabase product query failed", error);
+    throw error instanceof Error ? error : new Error("商品目录数据库查询失败");
   }
 }
 

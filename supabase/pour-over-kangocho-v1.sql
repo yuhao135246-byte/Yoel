@@ -53,7 +53,7 @@ select
   'POUR_OVER',
   '冰手冲',
   '肯尼亚 Nyeri 产区',
-  36,
+  35,
   '¥',
   '杯',
   'Available（可售）',

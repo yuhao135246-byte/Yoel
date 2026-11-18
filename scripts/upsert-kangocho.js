@@ -1,5 +1,6 @@
 const fs = require('fs');
 const { createClient } = require('@supabase/supabase-js');
+const { ProxyAgent, fetch: proxyFetch } = require('undici');
 
 const envText = fs.readFileSync('.env.local', 'utf8');
 const values = {};
@@ -15,8 +16,13 @@ for (const line of envText.split(/\r?\n/)) {
   values[key] = val;
 }
 
+const proxyUrl = (process.env.HTTPS_PROXY || process.env.HTTP_PROXY || process.env.https_proxy || process.env.http_proxy || "").trim();
+const dispatcher = proxyUrl ? new ProxyAgent(proxyUrl) : undefined;
 const supabase = createClient(values.NEXT_PUBLIC_SUPABASE_URL, values.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false }
+  auth: { persistSession: false },
+  global: {
+    fetch: (input, init) => proxyFetch(input, dispatcher ? { ...init, dispatcher } : init)
+  }
 });
 
 (async () => {
@@ -44,7 +50,7 @@ const supabase = createClient(values.NEXT_PUBLIC_SUPABASE_URL, values.SUPABASE_S
     category: 'POUR_OVER',
     layer: '冰手冲',
     subtitle: '肯尼亚 Nyeri 产区',
-    price: 36,
+    price: 35,
     currency: '¥',
     unit: '杯',
     availability: 'Available（可售）',

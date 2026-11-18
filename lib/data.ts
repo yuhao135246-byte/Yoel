@@ -63,7 +63,7 @@ export const products: Product[] = [
     name: "KANGOCHO 肯尼亚冰手冲",
     category: "POUR_OVER",
     layer: "冰手冲",
-    price: 36,
+    price: 35,
     currency: "¥",
     available: true,
     unit: "杯",
