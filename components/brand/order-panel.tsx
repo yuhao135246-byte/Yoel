@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { products } from "@/lib/data";
+import type { Product } from "@/lib/data";
 import {
   DELIVERY_SLOTS,
   DELIVERY_WINDOW,
@@ -19,7 +19,7 @@ type DeliveryDateOption = {
   isAvailable: boolean;
 };
 
-export function OrderPanel() {
+export function OrderPanel({ products }: { products: Product[] }) {
   const coffee = products.filter((product) => product.category === "COFFEE" || product.category === "POUR_OVER" || product.category === "SANDWICH");
   const [dateOptions, setDateOptions] = useState<DeliveryDateOption[]>(
     getBookingDateOptions()

@@ -2,9 +2,9 @@ import Link from "next/link";
 import { AddToCartButton } from "@/components/brand/add-to-cart-button";
 import { OrderPanel } from "@/components/brand/order-panel";
 import { ProductCard } from "@/components/brand/product-card";
-import { products } from "@/lib/data";
 import { getDefaultBookingDate } from "@/lib/delivery";
 import { ensureInventoryForNextDays, getInventoryByDate, getInventoryByDateReadonly } from "@/lib/inventory";
+import { getActiveCatalogProducts } from "@/lib/product-catalog";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -66,7 +66,17 @@ async function loadStockMap() {
 }
 
 export default async function HomePage() {
-  const coffee = products.find((product) => product.category === "COFFEE");
+  let products: Awaited<ReturnType<typeof getActiveCatalogProducts>> = [];
+  let catalogUnavailable = false;
+
+  try {
+    products = await getActiveCatalogProducts();
+  } catch (error) {
+    catalogUnavailable = true;
+    console.error("[home-page] Product catalog unavailable", error instanceof Error ? error.message : "Unknown catalog error");
+  }
+
+  const coffee = products.find((product) => product.category === "COFFEE" || product.category === "POUR_OVER");
   const unit = products.find((product) => product.category === "OBJECT");
   const stock = await loadStockMap();
 
@@ -123,7 +133,13 @@ export default async function HomePage() {
         {coffee ? <ProductCard product={coffee} priority remainingStock={stock.map.get(coffee.slug)} /> : null}
         {unit ? <ProductCard product={unit} /> : null}
       </section>
-      <OrderPanel />
+      {catalogUnavailable ? (
+        <section className="mx-auto max-w-7xl px-4 pb-8 md:px-8">
+          <p className="border border-ink/15 px-5 py-8 text-center">商品目录暂时无法加载，请稍后刷新页面。</p>
+        </section>
+      ) : products.length > 0 ? (
+        <OrderPanel products={products} />
+      ) : null}
       <section className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 md:flex-row md:px-8 md:py-14">
         <Link href="/coffee" className="border border-ink px-4 py-3 text-sm uppercase tracking-[0.18em] md:px-5 md:py-4">
           Order Coffee

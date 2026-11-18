@@ -65,7 +65,16 @@ async function loadStockMap() {
 }
 
 export default async function CoffeePage() {
-  const products = await getActiveCatalogProducts();
+  let products: Awaited<ReturnType<typeof getActiveCatalogProducts>> = [];
+  let catalogUnavailable = false;
+
+  try {
+    products = await getActiveCatalogProducts();
+  } catch (error) {
+    catalogUnavailable = true;
+    console.error("[coffee-page] Product catalog unavailable", error instanceof Error ? error.message : "Unknown catalog error");
+  }
+
   const coffee = products.filter((product) => product.category === "COFFEE" || product.category === "POUR_OVER" || product.category === "SANDWICH");
   const stock = await loadStockMap();
 
@@ -78,6 +87,13 @@ export default async function CoffeePage() {
           以冷萃为核心，记录不同产地、处理法与发酵实验带来的风味变化。
         </p>
       </section>
+      {catalogUnavailable ? (
+        <section className="mx-auto max-w-7xl px-4 pb-10 md:px-8 md:pb-14">
+          <div className="border border-ink/15 px-5 py-8 text-center md:px-8">
+            <p className="text-lg">商品目录暂时无法加载，请稍后刷新页面。</p>
+          </div>
+        </section>
+      ) : null}
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-10 md:grid-cols-2 md:px-8 md:pb-14">
         {coffee.map((product, index) => (
           <div key={product.slug} className="grid gap-5">
@@ -94,7 +110,7 @@ export default async function CoffeePage() {
           </div>
         ))}
       </section>
-      <OrderPanel />
+      {coffee.length > 0 ? <OrderPanel products={coffee} /> : null}
     </main>
   );
 }

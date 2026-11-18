@@ -1,30 +1,70 @@
-import { execFile } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createClient } from "@supabase/supabase-js";
+import { ProxyAgent, fetch as undiciFetch } from "undici";
 
 const nativeFetch: typeof fetch = globalThis.fetch.bind(globalThis);
 
-function execFileAsync(file: string, args: string[], options: { maxBuffer: number }): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    execFile(file, args, options, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-        return;
-      }
+function getWindowsSystemProxyUrl(): string {
+  if (process.platform !== "win32") {
+    return "";
+  }
 
-      const stdoutValue = stdout as string | Buffer | undefined;
-      const stderrValue = stderr as string | Buffer | undefined;
+  try {
+    const enabled = execFileSync(
+      "reg.exe",
+      ["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "/v", "ProxyEnable"],
+      { encoding: "utf8", windowsHide: true, timeout: 5000 }
+    );
 
-      resolve({
-        stdout: Buffer.isBuffer(stdoutValue) ? stdoutValue.toString("utf-8") : String(stdoutValue ?? ""),
-        stderr: Buffer.isBuffer(stderrValue) ? stderrValue.toString("utf-8") : String(stderrValue ?? "")
-      });
-    });
-  });
+    if (!/\b0x1\b/i.test(enabled)) {
+      return "";
+    }
+
+    const server = execFileSync(
+      "reg.exe",
+      ["query", "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings", "/v", "ProxyServer"],
+      { encoding: "utf8", windowsHide: true, timeout: 5000 }
+    );
+
+    const match = server.match(/ProxyServer\s+REG_\w+\s+(.+)/i);
+    if (!match?.[1]) {
+      return "";
+    }
+
+    const entries = match[1].trim().split(";");
+    let proxy = entries.find((entry) => entry.trim().toLowerCase().startsWith("https="))
+      ?.replace(/^https=/i, "")
+      .trim();
+
+    if (!proxy) {
+      proxy = entries.find((entry) => entry.trim().toLowerCase().startsWith("http="))
+        ?.replace(/^http=/i, "")
+        .trim();
+    }
+
+    if (!proxy) {
+      proxy = entries[0]?.trim();
+    }
+
+    if (!proxy) {
+      return "";
+    }
+
+    return /^https?:\/\//i.test(proxy) ? proxy : `http://${proxy}`;
+  } catch {
+    return "";
+  }
 }
 
 const proxyUrl =
   process.env.NODE_ENV !== "production"
-    ? (process.env.HTTP_PROXY || process.env.HTTPS_PROXY || process.env.http_proxy || process.env.https_proxy || "").trim()
+    ? (
+      process.env.HTTP_PROXY ||
+      process.env.HTTPS_PROXY ||
+      process.env.http_proxy ||
+      process.env.https_proxy ||
+      getWindowsSystemProxyUrl()
+    ).trim()
     : "";
 
 function createProxyAwareFetch(): typeof fetch {
@@ -36,72 +76,21 @@ function createProxyAwareFetch(): typeof fetch {
       });
   }
 
-  return async (input, init) => {
-    const request = input instanceof Request ? input : new Request(String(input), init);
-    const method = (request.method || init?.method || "GET").toUpperCase();
-    const headers = new Headers(request.headers ?? {});
-    const body = method === "GET" || method === "HEAD" ? undefined : await request.clone().text();
+  const dispatcher = new ProxyAgent(proxyUrl);
+  return (input, init) => {
+    const requestUrl =
+      input instanceof Request
+        ? input.url
+        : typeof input === "string"
+          ? input
+          : String(input);
 
-    const args = [
-      "--silent",
-      "--show-error",
-      "--location",
-      "--max-time",
-      "30",
-      "--proxy",
-      proxyUrl,
-      "--request",
-      method,
-      "--output",
-      "-",
-      "--dump-header",
-      "-"
-    ];
-
-    for (const [key, value] of headers.entries()) {
-      args.push("--header", `${key}: ${value}`);
-    }
-
-    if (body !== undefined && body.length > 0) {
-      args.push("--data-binary", body);
-    }
-
-    args.push(request.url);
-
-    try {
-      const { stdout } = await execFileAsync("curl.exe", args, { maxBuffer: 10 * 1024 * 1024 });
-      const raw = stdout;
-      const separatorIndex = raw.search(/\r?\n\r?\n/);
-      const headerBlock = separatorIndex >= 0 ? raw.slice(0, separatorIndex) : raw;
-      const responseBody = separatorIndex >= 0 ? raw.slice(separatorIndex + 4) : "";
-      const statusMatch = headerBlock.match(/^HTTP\/\d+\.\d+\s+(\d{3})/m);
-      const status = statusMatch ? Number(statusMatch[1]) : 200;
-      const responseHeaders = new Headers();
-
-      for (const line of headerBlock.split(/\r?\n/)) {
-        if (!line || /^HTTP\//.test(line)) {
-          continue;
-        }
-
-        const separator = line.indexOf(":");
-        if (separator === -1) {
-          continue;
-        }
-
-        responseHeaders.set(line.slice(0, separator).trim(), line.slice(separator + 1).trim());
-      }
-
-      return new Response(responseBody, {
-        status,
-        headers: responseHeaders
-      });
-    } catch (error) {
-      console.warn("[supabase-proxy] local curl fallback failed, using native fetch", error);
-      return nativeFetch(input, {
-        ...init,
-        cache: "no-store"
-      });
-    }
+    return undiciFetch(requestUrl, {
+      dispatcher,
+      method: init?.method,
+      headers: init?.headers,
+      body: typeof init?.body === "string" ? init.body : undefined
+    }) as unknown as Promise<Response>;
   };
 }
 
