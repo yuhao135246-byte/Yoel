@@ -51,6 +51,15 @@ type CheckoutMemory = {
   deliveryArea: string;
 };
 
+type RecoveredAddressOption = {
+  orderNumber: string;
+  customerName: string;
+  phone: string;
+  address: string;
+  notes: string;
+  createdAt: string;
+};
+
 const CHECKOUT_MEMORY_KEY = "cadence_checkout_memory_v1";
 
 function readCheckoutMemory(): Partial<CheckoutMemory> | null {
@@ -123,6 +132,14 @@ export function CheckoutForm() {
   const [isLoadingAvailability, setLoadingAvailability] = useState(true);
   const [isSubmitting, setSubmitting] = useState(false);
   const [hasAutoFilledMemory, setHasAutoFilledMemory] = useState(false);
+  const [recoveryHintVisible, setRecoveryHintVisible] = useState(false);
+  const [recoveryMessage, setRecoveryMessage] = useState("");
+  const [isSendingOtp, setSendingOtp] = useState(false);
+  const [isVerifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [recoveryAddresses, setRecoveryAddresses] = useState<RecoveredAddressOption[]>([]);
+  const [selectedRecoveryAddress, setSelectedRecoveryAddress] = useState("");
+  const [isRecoveryVerified, setIsRecoveryVerified] = useState(false);
 
   useEffect(() => {
     const raw = window.localStorage.getItem("cadence-cart");
@@ -238,6 +255,114 @@ export function CheckoutForm() {
   const selectedSlot = deliveryArea ? getDeliverySlotForArea(deliveryArea) : "";
   const productBySlug = useMemo(() => new Map(products.map((product) => [product.slug, product])), []);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (name.trim().length >= 2 && phone.trim().length >= 7) {
+        setRecoveryHintVisible(true);
+      } else {
+        setRecoveryHintVisible(false);
+      }
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [name, phone]);
+
+  function applyRecoveredAddress(candidate: RecoveredAddressOption) {
+    setName(candidate.customerName || name);
+    setPhone(candidate.phone || phone);
+    setAddress(candidate.address || "");
+    setNotes(candidate.notes || "");
+    setSelectedRecoveryAddress(candidate.address || "");
+    saveCheckoutMemory({
+      name: candidate.customerName || name,
+      phone: candidate.phone || phone,
+      address: candidate.address || "",
+      notes: candidate.notes || "",
+      deliveryDate,
+      deliveryArea
+    });
+  }
+
+  async function requestCustomerRecoveryOtp() {
+    if (!name.trim() || !phone.trim()) {
+      setError("请先填写姓名和手机号，再尝试快速恢复信息。");
+      return;
+    }
+
+    setRecoveryMessage("");
+    setError("");
+    setSendingOtp(true);
+
+    try {
+      const response = await fetch("/api/customer-history", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "request-otp", name, phone })
+      });
+      const result = (await response.json()) as { error?: string; message?: string };
+
+      if (!response.ok) {
+        throw new Error(result.error || "无法发送验证码。");
+      }
+
+      setRecoveryHintVisible(true);
+      setRecoveryMessage(result.message || "验证码已发送，请输入收到的短信验证码。");
+      setIsRecoveryVerified(false);
+      setOtpCode("");
+    } catch (fetchError) {
+      setRecoveryMessage(fetchError instanceof Error ? fetchError.message : "无法发送验证码。");
+    } finally {
+      setSendingOtp(false);
+    }
+  }
+
+  async function verifyCustomerRecoveryOtp() {
+    if (!name.trim() || !phone.trim() || !otpCode.trim()) {
+      setRecoveryMessage("请输入姓名、手机号和短信验证码后再验证。");
+      return;
+    }
+
+    setRecoveryMessage("");
+    setVerifyingOtp(true);
+
+    try {
+      const response = await fetch("/api/customer-history", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "verify-otp", name, phone, otp: otpCode })
+      });
+      const result = (await response.json()) as {
+        error?: string;
+        addresses?: RecoveredAddressOption[];
+        customerName?: string;
+        phone?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error || "验证码校验失败。");
+      }
+
+      const nextOptions = Array.isArray(result.addresses) ? result.addresses : [];
+      setRecoveryAddresses(nextOptions);
+      setIsRecoveryVerified(true);
+      setRecoveryMessage(nextOptions.length > 0
+        ? "已验证成功，已为您恢复最近使用的配送信息。"
+        : "已验证成功，但未找到可恢复的配送信息。"
+      );
+
+      if (nextOptions.length > 0) {
+        const firstOption = nextOptions[0];
+        applyRecoveredAddress(firstOption);
+        setSelectedRecoveryAddress(firstOption.address);
+      }
+    } catch (fetchError) {
+      setRecoveryMessage(fetchError instanceof Error ? fetchError.message : "验证码校验失败。");
+      setIsRecoveryVerified(false);
+    } finally {
+      setVerifyingOtp(false);
+    }
+  }
+
   const [error, setError] = useState("");
 
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
@@ -316,14 +441,72 @@ export function CheckoutForm() {
             onChange={(event) => setName(event.target.value)}
             className="h-12 border border-ink/20 bg-paper px-3"
           />
-          <input
-            aria-label="电话"
-            placeholder="手机号"
-            value={phone}
-            onChange={(event) => setPhone(event.target.value)}
-            className="h-12 border border-ink/20 bg-paper px-3"
-          />
+          <div className="grid gap-2">
+            <input
+              aria-label="电话"
+              placeholder="手机号"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              className="h-12 border border-ink/20 bg-paper px-3"
+            />
+            {recoveryHintVisible ? (
+              <button
+                type="button"
+                onClick={requestCustomerRecoveryOtp}
+                disabled={isSendingOtp || !name.trim() || !phone.trim()}
+                className="w-fit border border-ink/15 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-graphite disabled:opacity-50"
+              >
+                {isSendingOtp ? "发送中..." : "已有历史订单？快速恢复信息"}
+              </button>
+            ) : null}
+          </div>
         </div>
+        {recoveryMessage ? (
+          <div className="rounded border border-ink/10 bg-bone p-3">
+            <p className="text-xs uppercase tracking-[0.16em] text-graphite">快速恢复</p>
+            <p className="mt-2 text-sm text-ink">{recoveryMessage}</p>
+            {isRecoveryVerified && recoveryAddresses.length > 0 ? (
+              <div className="mt-3 grid gap-2">
+                <label className="text-[10px] uppercase tracking-[0.16em] text-graphite">历史配送地址</label>
+                <select
+                  value={selectedRecoveryAddress}
+                  onChange={(event) => {
+                    const nextSelection = recoveryAddresses.find((option) => option.address === event.target.value);
+                    if (nextSelection) {
+                      applyRecoveredAddress(nextSelection);
+                    }
+                  }}
+                  className="h-12 border border-ink/20 bg-paper px-3"
+                >
+                  {recoveryAddresses.map((option) => (
+                    <option key={`${option.orderNumber}-${option.address}`} value={option.address}>
+                      {option.address}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+            {!isRecoveryVerified ? (
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <input
+                  aria-label="短信验证码"
+                  placeholder="短信验证码"
+                  value={otpCode}
+                  onChange={(event) => setOtpCode(event.target.value.replace(/\D/g, ""))}
+                  className="h-12 flex-1 border border-ink/20 bg-paper px-3"
+                />
+                <button
+                  type="button"
+                  onClick={verifyCustomerRecoveryOtp}
+                  disabled={isVerifyingOtp || !otpCode.trim()}
+                  className="h-12 border border-ink px-4 text-xs uppercase tracking-[0.18em] disabled:opacity-50"
+                >
+                  {isVerifyingOtp ? "验证中..." : "验证并恢复"}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         <input
           aria-label="地址"
           placeholder="收货地址"
