@@ -9,7 +9,7 @@ type PaymentActionsProps = {
 };
 
 const ALIPAY_PAYMENT_URL = PAYMENT_LINKS.alipay;
-const WECHAT_PAYMENT_QR_SRC = "/assets/Wechat pay.jpg";
+const WECHAT_PAYMENT_QR_SRC = "/assets/wechat-pay.jpg";
 
 export function PaymentActions({ orderNumber }: PaymentActionsProps) {
   const [hasOpenedPayment, setHasOpenedPayment] = useState(false);
