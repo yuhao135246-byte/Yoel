@@ -80,9 +80,8 @@ Open `http://localhost:3000`.
 1. Create a Supabase project.
 2. Copy Supabase client values into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. Ensure `SUPABASE_SERVICE_ROLE_KEY` is set for server-side writes.
-4. Enable Phone Auth in Supabase Authentication to support the "历史订单快速恢复" SMS verification flow.
 
-The checkout flow reuses the existing `orders` table and local storage memory, and only restores historical addresses after a verified phone OTP challenge.
+The checkout flow reuses the existing local device memory plus the saved `orders` records for the current browser, without requiring any login or OTP flow.
 
 ## WeChat Pay
 
