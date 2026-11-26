@@ -33,6 +33,10 @@ export default async function DeliveryAdminPage({
     address: String(row.address ?? ""),
     area: String(row.delivery_area ?? "")
   }));
+  const active = supabaseAdmin && selectedDate === today
+    ? await supabaseAdmin.from("delivery_tracking").select("active_order_id")
+      .eq("delivery_date", selectedDate).gt("expires_at", new Date().toISOString()).maybeSingle()
+    : null;
 
   return (
     <main className="min-h-screen bg-paper px-5 py-8 text-ink md:px-8">
@@ -54,7 +58,9 @@ export default async function DeliveryAdminPage({
         ) : orders.length === 0 ? (
           <p>当天没有已付款或待发货的订单。</p>
         ) : (
-          <DeliveryPlanner key={selectedDate} orders={orders} mapConfigured={Boolean(process.env.AMAP_WEB_SERVICE_KEY?.trim())} />
+          <DeliveryPlanner key={selectedDate} orders={orders} date={selectedDate} canDispatch={selectedDate === today}
+            initialActiveOrderId={active?.data?.active_order_id ?? null}
+            mapConfigured={Boolean(process.env.AMAP_WEB_SERVICE_KEY?.trim())} />
         )}
       </section>
     </main>

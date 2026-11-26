@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { CUSTOMER_ORDER_COOKIE, hashCustomerOrderDevice, isCustomerOrderDevice } from "@/lib/customer-order-device";
 import { getDeliverySlotForArea, isDeliveryArea } from "@/lib/delivery";
 import { supabaseAdmin } from "@/lib/supabase";
+import { CustomerOrderTracking } from "@/components/brand/customer-order-tracking";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "我的订单", robots: { index: false, follow: false } };
@@ -60,6 +61,7 @@ export default async function MyOrdersPage() {
                     <dt className="text-graphite">配送日</dt><dd>{order.delivery_date ?? "待安排"}{slot ? ` · ${slot}` : ""}</dd>
                     <dt className="text-graphite">订单金额</dt><dd>{currency.format(Number(order.amount))}</dd>
                   </dl>
+                  <CustomerOrderTracking orderNumber={order.order_number} completed={order.status === "CANCELLED"} />
                 </li>
               );
             })}

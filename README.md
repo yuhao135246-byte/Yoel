@@ -74,6 +74,12 @@ from a phone on HTTPS. Keep that page visible while sharing. The signed-in
 dashboard refreshes the latest position and marks stale readings. Ending delivery
 removes the position. Expired records are hidden and removed on the next start.
 
+Apply `supabase/customer-order-tracking-v1.sql` for per-order tracking. After
+starting the trip, the driver confirms a stop coordinate and selects that order
+for delivery. The matching customer browser can see the latest fresh map and
+remaining driving distance. Marking the active stop delivered clears its location
+and advances its order to the existing completed status.
+
 ## Unit01 Assets
 
 The Unit01 images in `public/assets` are generated from the provided STL direction and latest references:

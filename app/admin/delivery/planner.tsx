@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { locateDeliveryAddresses, planDeliveryRoute } from "./actions";
+import { finishDeliveryStop, locateDeliveryAddresses, planDeliveryRoute, setCurrentDeliveryStop } from "./actions";
 
 export type DeliveryOrder = { id: string; number: string; address: string; area: string };
 type Stop = DeliveryOrder & { point: string; issue?: string; label?: string; review?: boolean };
@@ -16,7 +16,13 @@ function clockLabel(minutes: number) {
 const field = "min-h-11 w-full min-w-0 border border-ink/20 bg-paper px-3 text-base";
 const button = "min-h-11 border border-ink/20 px-3 py-1 text-sm disabled:opacity-40";
 
-export function DeliveryPlanner({ orders, mapConfigured }: { orders: DeliveryOrder[]; mapConfigured: boolean }) {
+export function DeliveryPlanner({ orders, mapConfigured, date, canDispatch, initialActiveOrderId }: {
+  orders: DeliveryOrder[];
+  mapConfigured: boolean;
+  date: string;
+  canDispatch: boolean;
+  initialActiveOrderId: string | null;
+}) {
   const [stops, setStops] = useState<Stop[]>(orders.map((order) => ({ ...order, point: "" })));
   const [startAddress, setStartAddress] = useState("");
   const [origin, setOrigin] = useState("");
@@ -25,6 +31,31 @@ export function DeliveryPlanner({ orders, mapConfigured }: { orders: DeliveryOrd
   const [error, setError] = useState("");
   const [plan, setPlan] = useState<Plan | null>(null);
   const [busy, run] = useTransition();
+  const [activeOrderId, setActiveOrderId] = useState(initialActiveOrderId);
+  const [finished, setFinished] = useState<string[]>([]);
+
+  function dispatch(stop: Stop, finish: boolean) {
+    setError("");
+    run(async () => {
+      try {
+        const result = finish
+          ? await finishDeliveryStop(date, stop.id)
+          : await setCurrentDeliveryStop(date, stop.id, stop.point);
+        if (result.error) {
+          setError(result.error);
+          return;
+        }
+        if (finish) {
+          setFinished((current) => [...current, stop.id]);
+          setStops((current) => current.filter((item) => item.id !== stop.id));
+          if (activeOrderId === stop.id) setActiveOrderId(null);
+          setPlan(null);
+        } else setActiveOrderId(stop.id);
+      } catch {
+        setError("操作失败，请重试。");
+      }
+    });
+  }
 
   function editStop(id: string, patch: Partial<Stop>) {
     setStops((current) => current.map((stop) => stop.id === id ? { ...stop, ...patch } : stop));
@@ -117,7 +148,8 @@ export function DeliveryPlanner({ orders, mapConfigured }: { orders: DeliveryOrd
           stops.length === 0 || stops.length > 20 || stops.some((stop) => !stop.point || stop.review)}
           onClick={calculate}>计算路线和交付时间</button>
         <button type="button" className={button} onClick={() => {
-          setStops(orders.map((order) => ({ ...order, point: "" }))); setPlan(null); setError("");
+          setStops(orders.filter((order) => !finished.includes(order.id)).map((order) => ({ ...order, point: "" })));
+          setPlan(null); setError("");
         }}>恢复订单列表</button>
         <a className={`${button} inline-flex items-center`} href="https://lbs.amap.com/tools/picker" target="_blank" rel="noreferrer">高德坐标拾取</a>
       </div>
@@ -154,7 +186,13 @@ export function DeliveryPlanner({ orders, mapConfigured }: { orders: DeliveryOrd
                 <button type="button" className={button} disabled={index === stops.length - 1} onClick={() => move(index, 1)}>下移</button>
                 <button type="button" className={button} onClick={() => {
                   setStops((current) => current.filter((item) => item.id !== stop.id)); setPlan(null);
-                }}>移出本趟</button>
+                }} disabled={activeOrderId === stop.id}>移出本趟</button>
+                {canDispatch && activeOrderId === stop.id ? (
+                  <button type="button" className={button} onClick={() => dispatch(stop, true)}>标记已送达</button>
+                ) : canDispatch ? (
+                  <button type="button" className={button} disabled={!stop.point || stop.review}
+                    onClick={() => dispatch(stop, false)}>开始送此单</button>
+                ) : null}
               </div>
             </li>
           );
