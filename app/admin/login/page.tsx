@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       }
 
       const next = new URLSearchParams(window.location.search).get("next");
-      router.push(next === "delivery" ? "/admin/delivery" : "/admin/products");
+      router.push(next === "delivery" ? "/admin/delivery" : next === "orders" ? "/admin/orders" : "/admin/products");
       router.refresh();
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "登录失败");

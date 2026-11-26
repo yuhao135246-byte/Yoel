@@ -22,6 +22,7 @@ export function Footer() {
           <Link href="/coffee" className="block text-paper">
             本周菜单
           </Link>
+          <Link href="/my-orders" className="block">我的订单</Link>
           <Link href="/journal" className="block">
             研究日志
           </Link>

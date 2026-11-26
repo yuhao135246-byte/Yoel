@@ -22,6 +22,7 @@ CADENCE is a design studio and lifestyle brand, not a coffee shop. The MVP is or
 - `/objects` Unit Series and Unit01 product visuals
 - `/journal` Coffee Studies, Object Studies, Tokyo Notes
 - `/about` Brand positioning
+- `/my-orders` Order history for the current browser
 - `/admin` Operations dashboard
 - `/admin/orders`
 - `/admin/customers`
@@ -44,6 +45,15 @@ Admin can set:
 - Delivery status
 
 When booked orders reach daily capacity, that date becomes unavailable.
+
+## Customer Order History
+
+Apply `supabase/customer-device-orders-v1.sql` before deploying the order history.
+It makes the orders table server-only, so checkout must use a working
+`SUPABASE_SERVICE_ROLE_KEY`. New orders are linked to an opaque browser cookie.
+The same browser can view order dates and status from `/my-orders`. Existing
+orders, other browsers, and devices that clear the cookie cannot be linked
+automatically.
 
 ## Admin Delivery Planner
 

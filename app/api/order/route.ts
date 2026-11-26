@@ -1,4 +1,13 @@
 import { formatOrderNumber } from "@/lib/order-number";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import {
+  CUSTOMER_ORDER_COOKIE,
+  CUSTOMER_ORDER_COOKIE_AGE,
+  createCustomerOrderDevice,
+  hashCustomerOrderDevice,
+  isCustomerOrderDevice
+} from "@/lib/customer-order-device";
 import { supabase, supabaseAdmin } from "@/lib/supabase";
 import { sendOrderNotification } from "@/lib/mailer";
 import {
@@ -60,6 +69,8 @@ type ApiOrderPayload = {
 };
 
 type InsertOrderRecord = {
+  customer_device_hash: string;
+  customer_order_date: string;
   order_number: string;
   customer_name: string;
   phone: string;
@@ -693,9 +704,13 @@ export async function POST(request: Request) {
     const productName = buildProductSummary(items);
     const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
+    const existingDevice = (await cookies()).get(CUSTOMER_ORDER_COOKIE)?.value;
+    const customerDevice = isCustomerOrderDevice(existingDevice) ? existingDevice : createCustomerOrderDevice();
     console.log("Step 4 insertOrder");
     const { data: order, error } = await runStepWithFallback("insertOrder", (client) =>
       insertOrder(client, {
+        customer_device_hash: hashCustomerOrderDevice(customerDevice),
+        customer_order_date: toDateKey(getChinaNow()),
         order_number: orderNumber,
         customer_name: name,
         phone,
@@ -856,8 +871,8 @@ export async function POST(request: Request) {
       });
     }
 
-    return new Response(
-      JSON.stringify({
+    const response = NextResponse.json(
+      {
         orderNumber,
         orderId: order.id,
         deliveryDate,
@@ -866,9 +881,17 @@ export async function POST(request: Request) {
         subtotal,
         deliveryFee,
         total
-      }),
+      },
       { status: 201 }
     );
+    response.cookies.set(CUSTOMER_ORDER_COOKIE, customerDevice, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: CUSTOMER_ORDER_COOKIE_AGE
+    });
+    return response;
   } catch (error) {
     console.error("订单保存失败", error);
     if (error instanceof Error && error.stack) {

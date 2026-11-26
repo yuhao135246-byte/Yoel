@@ -63,9 +63,10 @@ export default async function OrderConfirmationPage({
           <p className="mt-4 text-sm text-graphite">商品金额：RMB {subtotal} · 配送费：RMB {deliveryFee}</p>
         ) : null}
 
-        <Link href="/coffee" className="mt-10 inline-flex border border-ink px-5 py-4 text-sm uppercase tracking-[0.18em]">
-          返回菜单
-        </Link>
+        <div className="mt-10 flex flex-wrap gap-3">
+          <Link href="/my-orders" className="inline-flex bg-ink px-5 py-4 text-sm text-paper">查看我的订单</Link>
+          <Link href="/coffee" className="inline-flex border border-ink px-5 py-4 text-sm">返回菜单</Link>
+        </div>
       </section>
     </main>
   );

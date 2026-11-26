@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { orders as sampleOrders } from "@/lib/data";
 import { runtimeOrders } from "@/lib/order-store";
 import { supabaseAdmin } from "@/lib/supabase";
@@ -149,6 +151,7 @@ async function getOrders() {
 }
 
 export default async function OrdersPage() {
+  if (!await isAdminAuthenticated()) redirect("/admin/login?next=orders");
   const orders = await getOrders();
 
   return (

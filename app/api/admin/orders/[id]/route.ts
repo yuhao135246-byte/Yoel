@@ -1,4 +1,5 @@
 import { supabaseAdmin } from "@/lib/supabase";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 
 const STATUS_VALUES = [
   "PENDING",
@@ -12,6 +13,7 @@ const STATUS_VALUES = [
 type StatusValue = (typeof STATUS_VALUES)[number];
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!await isAdminAuthenticated()) return Response.json({ error: "请登录后台" }, { status: 401 });
   const resolvedParams = await params;
   const body = await request.json();
   const status = body.status as StatusValue | undefined;

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase";
 import { OrderStatusForm } from "@/components/admin/order-status-form";
 import { products } from "@/lib/data";
@@ -34,6 +35,7 @@ function formatDate(value: string | Date) {
 }
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  if (!await isAdminAuthenticated()) redirect("/admin/login?next=orders");
   const resolvedParams = await params;
 
   if (!supabaseAdmin) {
