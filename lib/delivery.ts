@@ -1,5 +1,7 @@
 export const DELIVERY_WINDOW = "07:00 - 12:00";
-export const DELIVERY_CUTOFF_HOUR = 12;
+export const BOOKING_OPEN_HOUR = 12;
+const BOOKING_CLOSE_HOUR = 22;
+export const BOOKING_CLOSED_MESSAGE = `配送预订暂未开放。每天北京时间 ${BOOKING_OPEN_HOUR}:00 至 ${BOOKING_CLOSE_HOUR}:00 可预订次日上午配送。`;
 export const AREA_DAILY_CAPACITY = 5;
 export const GLOBAL_DAILY_CAPACITY = 15;
 
@@ -52,7 +54,7 @@ export type DeliveryDateOption = {
 export type BookingDateContext = {
   todayKey: string;
   tomorrowKey: string;
-  cutoffPassed: boolean;
+  isBookingOpen: boolean;
   defaultBookingDate: string;
   dateOptions: DeliveryDateOption[];
 };
@@ -109,14 +111,15 @@ export function getChinaNow() {
 export function getBookingDateContext(now = getChinaNow()): BookingDateContext {
   const todayKey = toDateKey(now);
   const tomorrowKey = toDateKey(addDays(now, 1));
-  const cutoffPassed = now.getHours() >= DELIVERY_CUTOFF_HOUR;
+  const hour = now.getHours();
+  const isBookingOpen = hour >= BOOKING_OPEN_HOUR && hour < BOOKING_CLOSE_HOUR;
 
   return {
     todayKey,
     tomorrowKey,
-    cutoffPassed,
-    defaultBookingDate: cutoffPassed ? tomorrowKey : todayKey,
-    dateOptions: cutoffPassed
+    isBookingOpen,
+    defaultBookingDate: tomorrowKey,
+    dateOptions: isBookingOpen
       ? [
           {
             date: tomorrowKey,
@@ -125,14 +128,7 @@ export function getBookingDateContext(now = getChinaNow()): BookingDateContext {
             isAvailable: true
           }
         ]
-      : [
-          {
-            date: todayKey,
-            label: `今天（${todayKey}）`,
-            isToday: true,
-            isAvailable: true
-          }
-        ]
+      : []
   };
 }
 

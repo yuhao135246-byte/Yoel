@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
+  BOOKING_CLOSED_MESSAGE,
   getDeliverySlotForArea,
   type DeliveryArea,
   type DeliveryDateOption
@@ -236,7 +237,6 @@ export function CheckoutForm() {
     setPhone(savedMemory.phone ?? "");
     setAddress(savedMemory.address ?? "");
     setNotes(savedMemory.notes ?? "");
-    setDeliveryDate(savedMemory.deliveryDate ?? "");
     setDeliveryArea((savedMemory.deliveryArea as DeliveryArea | "") ?? "");
     setHasAutoFilledMemory(true);
   }, []);
@@ -314,6 +314,7 @@ export function CheckoutForm() {
       }
 
       setAvailability(result);
+      setDeliveryDate(result.date);
       if (!result.areas.some((area: DeliveryAvailability["areas"][number]) => area.area === deliveryArea)) {
         const firstAvailableArea = result.areas[0]?.area ?? "";
         setDeliveryArea(firstAvailableArea);
@@ -375,13 +376,13 @@ export function CheckoutForm() {
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!deliveryArea) {
-      setError("请选择配送区域。");
+    if (!availability?.dateOptions.some((option) => option.date === deliveryDate && option.isAvailable)) {
+      setError(availability?.dateOptions.length === 0 ? BOOKING_CLOSED_MESSAGE : "请选择配送日期。");
       return;
     }
 
-    if (!deliveryDate) {
-      setError("请选择配送日期。");
+    if (!deliveryArea) {
+      setError("请选择配送区域。");
       return;
     }
 
@@ -407,6 +408,13 @@ export function CheckoutForm() {
 
     const result = await response.json();
     if (!response.ok || !result.orderNumber) {
+      if (response.status === 409 && result.error === BOOKING_CLOSED_MESSAGE) {
+        setDeliveryDate("");
+        setDeliveryArea("");
+        setAvailability({ date: "", defaultDeliveryDate: "", dateOptions: [], areas: [] });
+        setSubmitting(false);
+        return;
+      }
       setError(result.error || "订单提交失败，请稍后重试。");
       setSubmitting(false);
       return;
@@ -502,7 +510,7 @@ export function CheckoutForm() {
             onChange={(event) => {
               void handleDeliveryDateChange(event.target.value);
             }}
-            disabled={isLoadingAvailability}
+            disabled={isLoadingAvailability || !availability?.dateOptions.length}
             className="h-12 border border-ink/20 bg-paper px-3"
           >
             <option value="">请选择配送日期</option>
@@ -512,6 +520,9 @@ export function CheckoutForm() {
               </option>
             ))}
           </select>
+          {availability?.dateOptions.length === 0 ? (
+            <p className="text-sm text-graphite" role="status">{BOOKING_CLOSED_MESSAGE}</p>
+          ) : null}
         </div>
         <div className="grid gap-2">
           <label className="text-xs uppercase tracking-[0.16em] text-graphite">配送区域</label>

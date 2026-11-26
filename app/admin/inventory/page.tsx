@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getBookingDateOptions, getChinaNow, getDefaultBookingDate } from "@/lib/delivery";
+import { getBookingDateContext, getDefaultBookingDate } from "@/lib/delivery";
 
 type InventoryRow = {
   productId: string;
@@ -25,10 +25,13 @@ export default function InventoryPage() {
   const [savingProduct, setSavingProduct] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  const quickDates = useMemo(
-    () => getBookingDateOptions(getChinaNow()).map((item) => ({ label: item.label, value: item.date })),
-    []
-  );
+  const quickDates = useMemo(() => {
+    const { todayKey, tomorrowKey } = getBookingDateContext();
+    return [
+      { label: `今天（${todayKey}）`, value: todayKey },
+      { label: `明天（${tomorrowKey}）`, value: tomorrowKey }
+    ];
+  }, []);
 
   async function loadInventory(date: string) {
     setLoading(true);

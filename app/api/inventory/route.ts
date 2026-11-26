@@ -1,4 +1,4 @@
-import { getBookingDateOptions, getDefaultBookingDate } from "@/lib/delivery";
+import { getBookingDateContext } from "@/lib/delivery";
 import {
   getInventoryByDate,
   getInventoryByDateReadonly,
@@ -50,8 +50,7 @@ function getErrorText(error: unknown) {
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const queryDate = url.searchParams.get("deliveryDate") ?? "";
-  const defaultDeliveryDate = getDefaultBookingDate();
-  const dateOptions = getBookingDateOptions();
+  const { defaultBookingDate: defaultDeliveryDate, dateOptions } = getBookingDateContext();
   const availableDates = new Set(dateOptions.map((option) => option.date));
   const deliveryDate = isValidDateKey(queryDate) && availableDates.has(queryDate) ? queryDate : defaultDeliveryDate;
 

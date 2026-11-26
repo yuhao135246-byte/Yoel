@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/data";
 import {
+  BOOKING_CLOSED_MESSAGE,
   DELIVERY_SLOTS,
   DELIVERY_WINDOW,
   formatDeliveryDate,
-  getBookingDateOptions,
-  getDefaultBookingDate
+  getBookingDateOptions
 } from "@/lib/delivery";
 import { createOrderNumber } from "@/lib/order-number";
 
@@ -26,7 +26,7 @@ export function OrderPanel({ products }: { products: Product[] }) {
   );
   const [selectedSlug, setSelectedSlug] = useState(coffee[0].slug);
   const [quantity, setQuantity] = useState(1);
-  const [deliveryDate, setDeliveryDate] = useState(getDefaultBookingDate());
+  const [deliveryDate, setDeliveryDate] = useState(dateOptions[0]?.date ?? "");
   const [deliverySlot, setDeliverySlot] = useState(DELIVERY_SLOTS[0]);
   const selected = coffee.find((product) => product.slug === selectedSlug) ?? coffee[0];
   const total = useMemo(() => selected.price * quantity, [quantity, selected.price]);
@@ -105,8 +105,10 @@ export function OrderPanel({ products }: { products: Product[] }) {
             <select
               value={deliveryDate}
               onChange={(event) => setDeliveryDate(event.target.value)}
+              disabled={dateOptions.length === 0}
               className="h-12 border border-ink/20 bg-paper px-3 text-base normal-case tracking-normal"
             >
+              {dateOptions.length === 0 ? <option value="">暂未开放</option> : null}
               {dateOptions.map((option) => (
                 <option key={option.date} value={option.date} disabled={!option.isAvailable}>
                   {option.label}
@@ -142,9 +144,13 @@ export function OrderPanel({ products }: { products: Product[] }) {
             <p className="mt-1">配送时段 {deliverySlot} / 时间窗口 {DELIVERY_WINDOW}</p>
             <p className="mt-2 text-xl md:text-2xl">RMB {total}</p>
           </div>
-          <Link href="/checkout" className="flex h-12 items-center justify-center bg-ink px-4 text-sm uppercase tracking-[0.18em] text-paper">
-            前往结算
-          </Link>
+          {dateOptions.length > 0 ? (
+            <Link href="/checkout" className="flex h-12 items-center justify-center bg-ink px-4 text-sm uppercase tracking-[0.18em] text-paper">
+              前往结算
+            </Link>
+          ) : (
+            <p className="text-sm text-graphite" role="status">{BOOKING_CLOSED_MESSAGE}</p>
+          )}
         </form>
       </div>
     </section>

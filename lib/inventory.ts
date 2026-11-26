@@ -1,4 +1,4 @@
-import { addDays, DELIVERY_CUTOFF_HOUR, getChinaNow, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
+import { addDays, getChinaNow, getDefaultBookingDate, toDateKey } from "@/lib/delivery";
 import { getCatalogProductsForInventory } from "@/lib/product-catalog";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -31,6 +31,8 @@ export const INVENTORY_DEFAULT_STOCK: Record<string, number> = {
   "pasture-fresh-vegetable-sandwich": 25,
   "unit-01": 10
 };
+
+const INVENTORY_ROLLOVER_HOUR = 12;
 
 function isTrackedInventoryProduct(category: string) {
   return category === "COFFEE" || category === "POUR_OVER" || category === "SANDWICH" || category === "OBJECT";
@@ -179,8 +181,8 @@ export async function ensureInventoryForNextDays(supabase: SupabaseClient, days 
   }
 
   // Tomorrow should always exist when callers ask for 2+ days.
-  // After cutoff, tomorrow starts from today's remaining stock once (no overwrite if already set).
-  if (now.getHours() >= DELIVERY_CUTOFF_HOUR) {
+  // After noon, tomorrow starts from today's remaining stock once (no overwrite if already set).
+  if (now.getHours() >= INVENTORY_ROLLOVER_HOUR) {
     await rolloverInventoryToTomorrow({
       supabase,
       sourceDate: todayKey,

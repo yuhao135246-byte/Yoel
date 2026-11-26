@@ -4,8 +4,8 @@ import { sendOrderNotification } from "@/lib/mailer";
 import {
   toDateKey,
   getChinaNow,
-  getBookingDateOptions,
-  getDefaultBookingDate,
+  getBookingDateContext,
+  BOOKING_CLOSED_MESSAGE,
   DELIVERY_AREAS,
   getDeliverySlotForArea,
   isDeliveryArea,
@@ -203,8 +203,10 @@ async function getDeliveryAvailability(dateKey: string): Promise<DeliveryAvailab
 }
 
 async function buildDeliveryAvailabilityResponse(selectedDateKey?: string): Promise<DeliveryAvailabilityResponse> {
-  const dateOptions = getBookingDateOptions();
-  const defaultDeliveryDate = getDefaultBookingDate();
+  const { isBookingOpen, dateOptions, defaultBookingDate: defaultDeliveryDate } = getBookingDateContext();
+  if (!isBookingOpen) {
+    return { date: "", isFull: false, areas: [], dateOptions, defaultDeliveryDate: "" };
+  }
   const availableDates = new Set(dateOptions.map((option) => option.date));
 
   const selectedDate =
@@ -469,27 +471,6 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const selectedDate = url.searchParams.get("deliveryDate") ?? undefined;
 
-  if (!supabaseAdmin) {
-    const defaultDeliveryDate = getDefaultBookingDate();
-    const dateOptions = getBookingDateOptions();
-    const availableDates = new Set(dateOptions.map((option) => option.date));
-    const activeDate = selectedDate && availableDates.has(selectedDate) ? selectedDate : defaultDeliveryDate;
-
-    return Response.json({
-      date: activeDate,
-      isFull: false,
-      dateOptions,
-      defaultDeliveryDate,
-      areas: DELIVERY_AREAS.map(({ area, slot }) => ({
-        area,
-        slot,
-        booked: 0,
-        remaining: 9999,
-        isAvailable: true
-      }))
-    });
-  }
-
   try {
     const availability = await buildDeliveryAvailabilityResponse(selectedDate);
     return Response.json(availability);
@@ -584,8 +565,11 @@ export async function POST(request: Request) {
     }
   }
 
-  const activeDateOptions = getBookingDateOptions();
-  if (!activeDateOptions.some((option) => option.date === deliveryDate)) {
+  const booking = getBookingDateContext();
+  if (!booking.isBookingOpen) {
+    return Response.json({ error: BOOKING_CLOSED_MESSAGE }, { status: 409 });
+  }
+  if (!booking.dateOptions.some((option) => option.date === deliveryDate && option.isAvailable)) {
     return new Response(JSON.stringify({ error: "当前时段仅支持可选配送日期，请刷新后重试。" }), {
       status: 409
     });
