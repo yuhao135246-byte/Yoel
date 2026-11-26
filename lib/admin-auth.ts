@@ -1,7 +1,12 @@
 import { cookies } from "next/headers";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const ADMIN_COOKIE_NAME = "cadence_admin_token";
-export const ADMIN_COOKIE_VALUE = "cadence-admin-authenticated";
+const ADMIN_SESSION_SECONDS = 86400;
+
+function signExpiry(expiry: string, secret: string) {
+  return createHmac("sha256", secret).update(`cadence-admin:${expiry}`).digest("hex");
+}
 
 export function getAdminSecret() {
   return process.env.ADMIN_SECRET?.trim();
@@ -15,7 +20,12 @@ export async function isAdminAuthenticated() {
 
   const cookieStore = await cookies();
   const value = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-  return value === ADMIN_COOKIE_VALUE;
+  if (!value || !/^\d+\.[a-f0-9]{64}$/.test(value)) {
+    return false;
+  }
+  const [expiry, signature] = value.split(".");
+  return Number(expiry) > Math.floor(Date.now() / 1000) &&
+    timingSafeEqual(Buffer.from(signature, "hex"), Buffer.from(signExpiry(expiry, secret), "hex"));
 }
 
 export async function requireAdminAuth() {
@@ -25,14 +35,15 @@ export async function requireAdminAuth() {
   }
 }
 
-export function buildAdminCookieHeader() {
+export function buildAdminCookieHeader(secret: string) {
   const secureFlag = process.env.NODE_ENV === "production" ? "Secure" : "";
+  const expiry = String(Math.floor(Date.now() / 1000) + ADMIN_SESSION_SECONDS);
   return [
-    `${ADMIN_COOKIE_NAME}=${ADMIN_COOKIE_VALUE}`,
+    `${ADMIN_COOKIE_NAME}=${expiry}.${signExpiry(expiry, secret)}`,
     "Path=/",
     "HttpOnly",
     "SameSite=Lax",
-    "Max-Age=86400",
+    `Max-Age=${ADMIN_SESSION_SECONDS}`,
     secureFlag
   ]
     .filter(Boolean)

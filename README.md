@@ -45,6 +45,25 @@ Admin can set:
 
 When booked orders reach daily capacity, that date becomes unavailable.
 
+## Admin Delivery Planner
+
+Set `AMAP_WEB_SERVICE_KEY` in `.env.local` (or server-side deployment settings)
+to an Amap Web Service API key. The planner at `/admin/delivery` uses the
+existing admin login and Supabase configuration. After the signed-session update,
+sign in again.
+
+Select a delivery date, enter the departure address or Amap coordinates, and
+locate unmarked addresses. Review approximate matches and adjust coordinates
+before ordering the stops. The calculation uses the driving time for each leg
+and adds 15 minutes on arrival for heating. The map and schedule are working
+drafts on the page and do not update orders or notify customers.
+
+Apply `supabase/delivery-tracking-v1.sql` to the target database before enabling
+vehicle tracking. Today's delivery page lets the driver start and stop sharing
+from a phone on HTTPS. Keep that page visible while sharing. The signed-in
+dashboard refreshes the latest position and marks stale readings. Ending delivery
+removes the position. Expired records are hidden and removed on the next start.
+
 ## Unit01 Assets
 
 The Unit01 images in `public/assets` are generated from the provided STL direction and latest references:

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     status: 200,
     headers: {
       "Content-Type": "application/json",
-      "Set-Cookie": buildAdminCookieHeader()
+      "Set-Cookie": buildAdminCookieHeader(adminSecret)
     }
   });
 }

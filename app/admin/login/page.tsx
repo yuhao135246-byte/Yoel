@@ -29,7 +29,8 @@ export default function AdminLoginPage() {
         throw new Error(result.error || "登录失败");
       }
 
-      router.push("/admin/products");
+      const next = new URLSearchParams(window.location.search).get("next");
+      router.push(next === "delivery" ? "/admin/delivery" : "/admin/products");
       router.refresh();
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "登录失败");
