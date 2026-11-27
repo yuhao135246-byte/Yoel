@@ -6,6 +6,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   BOOKING_CLOSED_MESSAGE,
   getDeliverySlotForArea,
+  normalizeDeliveryArea,
   type DeliveryArea,
   type DeliveryDateOption
 } from "@/lib/delivery";
@@ -237,7 +238,7 @@ export function CheckoutForm() {
     setPhone(savedMemory.phone ?? "");
     setAddress(savedMemory.address ?? "");
     setNotes(savedMemory.notes ?? "");
-    setDeliveryArea((savedMemory.deliveryArea as DeliveryArea | "") ?? "");
+    setDeliveryArea(normalizeDeliveryArea(savedMemory.deliveryArea) ?? "");
     setHasAutoFilledMemory(true);
   }, []);
 
@@ -270,14 +271,13 @@ export function CheckoutForm() {
             ? savedMemory.deliveryDate
             : result.date;
 
-        const rememberedArea =
-          savedMemory?.deliveryArea &&
-          result.areas.some((area) => area.area === savedMemory.deliveryArea)
-            ? savedMemory.deliveryArea
-            : result.areas[0]?.area ?? "";
+        const savedArea = normalizeDeliveryArea(savedMemory?.deliveryArea);
+        const rememberedArea = savedArea && result.areas.some((area) => area.area === savedArea)
+          ? savedArea
+          : "";
 
         setDeliveryDate(rememberedDate);
-        setDeliveryArea(rememberedArea as DeliveryArea | "");
+        setDeliveryArea(rememberedArea);
       } catch (fetchError) {
         if (!isActive) {
           return;
@@ -316,8 +316,7 @@ export function CheckoutForm() {
       setAvailability(result);
       setDeliveryDate(result.date);
       if (!result.areas.some((area: DeliveryAvailability["areas"][number]) => area.area === deliveryArea)) {
-        const firstAvailableArea = result.areas[0]?.area ?? "";
-        setDeliveryArea(firstAvailableArea);
+        setDeliveryArea("");
       }
     } catch (fetchError) {
       setError(fetchError instanceof Error ? fetchError.message : "读取配送容量失败");

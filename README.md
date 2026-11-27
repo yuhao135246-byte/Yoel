@@ -31,20 +31,13 @@ CADENCE is a design studio and lifestyle brand, not a coffee shop. The MVP is or
 
 ## Delivery Logic
 
-CADENCE delivers only inside the morning window `07:30 - 11:00`.
+Bookings open from `12:00` until `22:00` Beijing time for next-day delivery.
+Customers select a date and area. The selected area determines the window:
 
-Customers select:
+- Huiji: `07:00-07:30`
+- Jinshui and Zhengdong: `08:00-12:30`
 
-- Delivery date
-- One of 8 preset delivery batches: `07:30`, `08:00`, `08:30`, `09:00`, `09:30`, `10:00`, `10:30`, `11:00`
-
-Admin can set:
-
-- Available dates
-- Daily capacity
-- Delivery status
-
-When booked orders reach daily capacity, that date becomes unavailable.
+Existing orders retain their recorded delivery windows.
 
 ## Customer Order History
 

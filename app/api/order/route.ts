@@ -17,7 +17,7 @@ import {
   BOOKING_CLOSED_MESSAGE,
   DELIVERY_AREAS,
   getDeliverySlotForArea,
-  isDeliveryArea,
+  normalizeDeliveryArea,
   type DeliveryDateOption,
   type DeliveryArea
 } from "@/lib/delivery";
@@ -498,7 +498,7 @@ export async function POST(request: Request) {
   const address = body.address?.trim();
   const notes = body.notes?.trim();
   const deliveryDate = body.deliveryDate?.trim();
-  const deliveryArea = body.deliveryArea?.trim();
+  const deliveryArea = normalizeDeliveryArea(body.deliveryArea?.trim());
   const items = Array.isArray(body.items)
     ? body.items.map((item) => ({
         slug: item.slug ? toCanonicalProductId(String(item.slug)) : undefined,
@@ -540,7 +540,7 @@ export async function POST(request: Request) {
     });
   }
 
-  if (!deliveryArea || !isDeliveryArea(deliveryArea)) {
+  if (!deliveryArea) {
     return new Response(JSON.stringify({ error: "请选择有效的配送区域。" }), {
       status: 400
     });

@@ -5,8 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { Product } from "@/lib/data";
 import {
   BOOKING_CLOSED_MESSAGE,
-  DELIVERY_SLOTS,
-  DELIVERY_WINDOW,
+  DELIVERY_AREAS,
   formatDeliveryDate,
   getBookingDateOptions
 } from "@/lib/delivery";
@@ -27,7 +26,6 @@ export function OrderPanel({ products }: { products: Product[] }) {
   const [selectedSlug, setSelectedSlug] = useState(coffee[0].slug);
   const [quantity, setQuantity] = useState(1);
   const [deliveryDate, setDeliveryDate] = useState(dateOptions[0]?.date ?? "");
-  const [deliverySlot, setDeliverySlot] = useState(DELIVERY_SLOTS[0]);
   const selected = coffee.find((product) => product.slug === selectedSlug) ?? coffee[0];
   const total = useMemo(() => selected.price * quantity, [quantity, selected.price]);
   const orderNumber = useMemo(() => createOrderNumber(), []);
@@ -72,7 +70,7 @@ export function OrderPanel({ products }: { products: Product[] }) {
             简洁的产品预订
           </h2>
           <p className="mt-4 max-w-xl text-base leading-7 text-paper/70 md:mt-6">
-            选择产品、数量、配送日期与时段，完成配送信息填写。早晨配送窗口为固定时段。
+            配送日期和区域在结算时确认。
           </p>
         </div>
         <form className="grid gap-4 bg-paper p-4 text-ink md:gap-5 md:p-6">
@@ -116,23 +114,14 @@ export function OrderPanel({ products }: { products: Product[] }) {
               ))}
             </select>
           </label>
-          <div className="border border-ink/15 px-3 py-2.5 font-mono text-xs uppercase tracking-[0.14em] text-graphite">
-            配送时间窗口：{DELIVERY_WINDOW}
-          </div>
-          <label className="grid gap-2 text-xs uppercase tracking-[0.16em]">
-            配送时间段
-            <select
-              value={deliverySlot}
-              onChange={(event) => setDeliverySlot(event.target.value)}
-              className="h-12 border border-ink/20 bg-paper px-3 text-base normal-case tracking-normal"
-            >
-              {DELIVERY_SLOTS.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
-          </label>
+          <dl className="grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border border-ink/15 px-3 py-2.5 text-sm text-graphite">
+            {DELIVERY_AREAS.map(({ area, slot }) => (
+              <div key={area} className="contents">
+                <dt>{area}</dt>
+                <dd className="font-mono">{slot}</dd>
+              </div>
+            ))}
+          </dl>
           <div className="grid grid-cols-2 gap-3">
             <input placeholder="姓名" className="h-12 border border-ink/20 bg-paper px-3" />
             <input placeholder="电话" className="h-12 border border-ink/20 bg-paper px-3" />
@@ -141,7 +130,6 @@ export function OrderPanel({ products }: { products: Product[] }) {
           <div className="border-t border-ink/15 pt-3 font-mono text-sm">
             <p>订单编号 {orderNumber}</p>
             <p className="mt-2">配送日期 {deliveryDate ? formatDeliveryDate(deliveryDate) : "暂不可用"}</p>
-            <p className="mt-1">配送时段 {deliverySlot} / 时间窗口 {DELIVERY_WINDOW}</p>
             <p className="mt-2 text-xl md:text-2xl">RMB {total}</p>
           </div>
           {dateOptions.length > 0 ? (

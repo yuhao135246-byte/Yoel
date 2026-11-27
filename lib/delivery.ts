@@ -1,4 +1,3 @@
-export const DELIVERY_WINDOW = "07:00 - 12:00";
 export const BOOKING_OPEN_HOUR = 12;
 const BOOKING_CLOSE_HOUR = 22;
 export const BOOKING_CLOSED_MESSAGE = `配送预订暂未开放。每天北京时间 ${BOOKING_OPEN_HOUR}:00 至 ${BOOKING_CLOSE_HOUR}:00 可预订次日上午配送。`;
@@ -6,9 +5,8 @@ export const AREA_DAILY_CAPACITY = 5;
 export const GLOBAL_DAILY_CAPACITY = 15;
 
 export const DELIVERY_AREA_SLOTS = {
-  "惠济区": "07:00-08:30",
-  "郑东新区": "08:30-10:30",
-  "金水区": "10:30-12:00"
+  "惠济区": "07:00-07:30",
+  "金水及东区": "08:00-12:30"
 } as const;
 
 export type DeliveryArea = keyof typeof DELIVERY_AREA_SLOTS;
@@ -17,17 +15,6 @@ export const DELIVERY_AREAS = Object.entries(DELIVERY_AREA_SLOTS).map(([area, sl
   area: area as DeliveryArea,
   slot
 }));
-
-export const DELIVERY_SLOTS = [
-  "07:30",
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00"
-];
 
 export type DeliveryStatus = "AVAILABLE" | "FULL" | "CLOSED";
 
@@ -164,7 +151,12 @@ export function formatDeliveryDate(value: string) {
 }
 
 export function isDeliveryArea(value: string): value is DeliveryArea {
-  return value in DELIVERY_AREA_SLOTS;
+  return Object.hasOwn(DELIVERY_AREA_SLOTS, value);
+}
+
+export function normalizeDeliveryArea(value?: string): DeliveryArea | undefined {
+  if (value === "金水区" || value === "郑东新区") return "金水及东区";
+  return value && isDeliveryArea(value) ? value : undefined;
 }
 
 export function getDeliverySlotForArea(area: DeliveryArea) {

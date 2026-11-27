@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { CUSTOMER_ORDER_COOKIE, hashCustomerOrderDevice, isCustomerOrderDevice } from "@/lib/customer-order-device";
-import { getDeliverySlotForArea, isDeliveryArea } from "@/lib/delivery";
 import { supabaseAdmin } from "@/lib/supabase";
 import { CustomerOrderTracking } from "@/components/brand/customer-order-tracking";
 
@@ -25,7 +24,7 @@ export default async function MyOrdersPage() {
   const hasDevice = isCustomerOrderDevice(device);
   const result = hasDevice && supabaseAdmin
     ? await supabaseAdmin.from("orders")
-      .select("order_number, customer_order_date, delivery_date, delivery_area, delivery_slot, status, product_name, amount")
+      .select("order_number, customer_order_date, delivery_date, delivery_slot, status, product_name, amount")
       .eq("customer_device_hash", hashCustomerOrderDevice(device))
       .order("created_at", { ascending: false })
       .order("order_number", { ascending: false })
@@ -44,11 +43,7 @@ export default async function MyOrdersPage() {
         ) : (
           <ul className="divide-y divide-ink/15 border-y border-ink/15">
             {orders.slice(0, historyLimit).map((order) => {
-              const slot = order.delivery_slot ?? (
-                order.delivery_area && isDeliveryArea(order.delivery_area)
-                  ? getDeliverySlotForArea(order.delivery_area)
-                  : undefined
-              );
+              const slot = order.delivery_slot;
               return (
                 <li key={order.order_number} className="space-y-3 py-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
